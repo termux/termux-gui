@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+/bindings/Python/src/termux_gui.egg-info/
+/bindings/Python/dist/
+/bindings/Python/src/termuxgui.egg-info/

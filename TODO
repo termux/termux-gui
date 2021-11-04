@@ -1,16 +1,64 @@
 
 
-- test if requireActivity works while the activity is being recreated
+[ ] implement the rest of the already specified methods
+
+
+[ ] Activity lifecycle events
+[ ] support for locking orientation: Activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+[ ] PiP events (enter/exit, onUserLeaveHint)
+[ ] system overlay window support
+[ ] Action Bar with elements
+[ ] App widgets
+    [ ] when the user places a widget, generate a ID and put it in the clipboard. The Widget can then be manipulated with the ID.
+[ ] Notifications with custom Layout
+[ ] method to get the screen resolution, to change layout if needed
+[ ] on screen orientation change event
+[ ] support for divider between elements in LinearLayouts an RecyclerViews
+[ ] Gesture events
+[ ] Multitouch
+[ ] setting visibility to hidden or gone
+[ ] Lockscreen activities: https://stackoverflow.com/questions/60732308/android-displaying-view-over-the-lockscreen-like-google-maps
+    [ ] demo program: Write notes in an EditText, they get placed in a file.
 
 
 
+[ ] finish Python bindings when the plugin is available on f-droid and upload them to pypi
+
+Implement Views:
+[ ] RelativeLayout
+[ ] Button
+[x] ImageView
+[x] Space
+[ ] NestedScrollView
+[ ] RecyclerView
+    [ ] use the paging library to get good performance. When a new page is needed, send an event to the program.
+        Then the program has to send back a list of json layouts to populate the view.
+        To update existing items, the program can send a page unrequested.
+[ ] RadioButton
+[ ] RadioGroup
+[ ] Checkbox
+[ ] ToggleButton
+[ ] ImageButton
+[ ] Spinner
+[ ] SwipeRefreshLayout
+[ ] GridLayout
+[ ] ProgressBar
+[ ] ViewPager2
+[ ] CardLayout
+[ ] TabLayout
+[ ] Tab
+[ ] WebView
 
 
-
-
-
-
-
+Implement Events:
+[ ] Methods to set and unset Listeners
+[ ] Click
+[ ] LongClick
+[ ] FocusChange
+[ ] Key
+[ ] Touch
+[ ] Refresh (SwipeRefreshLayout)
+[ ] 
 
 
 

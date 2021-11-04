@@ -14,12 +14,17 @@
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
     </style>
-    
+
+
+    <style name="Theme.TermuxGUI.NoAnimation" parent="@style/Theme.TermuxGUI">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
 
 
     <style name="TermuxAlertDialogStyle" parent="Theme.AppCompat.Dialog">
         <!-- Seen in buttons on alert dialog: -->
         <item name="android:colorAccent">#212121</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
 </resources>

@@ -2,6 +2,9 @@
 
 If you don't want to implement a custom library for using the protocol, you can skip to the [protocol methods](#methods)<!-- @IGNORE PREVIOUS: anchor -->
 
+### WARNING: The protocol is not yet stable and could change anytime
+
+
 ## Connection
 
 
@@ -40,11 +43,12 @@ Available methods:
   
 Activity and Task control:  
 These methods control Android [Activities](https://developer.android.com/reference/android/app/Activity) and [Tasks](https://developer.android.com/guide/components/activities/tasks-and-back-stack).
-- newActivity: Launches a new Activity and return the activity id.
+- newActivity: Launches a new Activity and returns the activity id. In case of an error, -1 is returned.
   - Parameters:
     - tid: the task in which the Activity should be started. If not specified, a new Task is created and the id is returned after the Activity id.
     - flags: Flags to set when launching the Activity via the Intent.
-    - isDialog: boolean value. If true, the Activity will be launched as a dialog.
+    - dialog: boolean value. If true, the Activity will be launched as a dialog.
+    - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
 - finishActivity: Closes an Activity.
   - Parameters:
      - aid: The id of the Activity to close.
@@ -62,50 +66,90 @@ These methods control Android [Activities](https://developer.android.com/referen
     - windowBackground
     - textColor
     - colorAccent
-- setTaskIcon: Sets the Icon of the Task. The background color of the icon will be the current primary color.
+- setTaskDescription: Sets the Icon of the Task, the label and set the primary color to the one specified with setTheme. The background color of the icon will be the current primary color.
   - Parameters:
     - aid: The id of an Activity in the Task you want to set the icon.
     - img: The image data in PNG or JPEG format.
+    - label: The new Task label.
+- setPiPParams: Sets the PiP parameters for the Activity. PiP parameters are only available on Android 8+, on earlier versions this is a noop.
+  - Parameters:
+    - aid: The id of an Activity in the Task you want to set the icon.
+    - num: Numerator of the desired aspect ration.
+    - den: Denominator of the desired aspect ration.
 
 
 Layout and View control:  
 These methods create and Manipulate [Views](https://developer.android.com/reference/android/view/View), [Layouts](https://developer.android.com/guide/topics/ui/declaring-layout) and the Layout hierarchy.
-- create*: Creates a View and places it in the Layout hierarchy. It returns the View id.
+- create*: Creates a View and places it in the Layout hierarchy. It returns the View id or -1 in case of an error.
   - The following Views and Layouts are supported:
     - [LinearLayout](https://developer.android.com/guide/topics/ui/layout/linear)
     - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
     - [TextView](https://developer.android.com/reference/android/widget/TextView)
     - [EditText](https://developer.android.com/reference/android/widget/EditText)
     - [Button](https://developer.android.com/reference/android/widget/Button)
-    - [Canvas](https://developer.android.com/reference/android/graphics/Canvas)
+    - [ImageView](https://developer.android.com/reference/android/widget/ImageView)
     - [Space](https://developer.android.com/reference/android/widget/Space)
     - [NestedScrollView](https://developer.android.com/reference/androidx/core/widget/NestedScrollView)
     - [RecyclerView](https://developer.android.com/guide/topics/ui/layout/recyclerview)
+    - [AutocompleteTextView](https://developer.android.com/reference/android/widget/AutoCompleteTextView)
+    - [RadioButton](https://developer.android.com/guide/topics/ui/controls/radiobutton)
+    - [RadioGroup](https://developer.android.com/reference/android/widget/RadioGroup)
+    - [Checkbox](https://developer.android.com/guide/topics/ui/controls/checkbox)
+    - [ToggleButton](https://developer.android.com/guide/topics/ui/controls/togglebutton)
+    - [ImageButton](https://developer.android.com/reference/android/widget/ImageButton)
+    - [Spinner](https://developer.android.com/guide/topics/ui/controls/spinner)
+    - [GridLayout](https://developer.android.com/reference/android/widget/GridLayout)
+    - [ProgressBar](https://developer.android.com/reference/android/widget/ProgressBar)
+    - [ViewPager2](https://developer.android.com/guide/navigation/navigation-swipe-view-2)
+    - [TabLayout](https://developer.android.com/reference/com/google/android/material/tabs/TabLayout)
+    - [Tab](https://developer.android.com/reference/com/google/android/material/tabs/TabLayout.Tab)
+    - [WebView](https://developer.android.com/reference/android/webkit/WebView)
   - Parameters:
     - parent: The View id of the parent in the Layout hierarchy. if not specified, this will replace the root of the hierarchy and delete all existing views.
     - aid: The id of the Activity in which to create the View.
     - text: For Button, TextView and EditText, this is the initial Text.
     - vertical: For LinearLayout, this specifies if the Layout is vertical or horizontal. If not specified, vertical is assumed.
-- deleteView: Deletes a View and its children from the Layout hierarchy.
+    - All possible parameters to set the Layout parameters, depending on the parent Layout.
+- setLinearLayoutParams: Sets the LinearLayout parameters for a View in a LinearLayout.
   - Parameters:
-    - id: The id of the View to delete.
-    - aid: The id of the Activity in which the View is in.
-- setMargin: Sets the Margin of a View.
+    - parent: The View id of the parent in the Layout hierarchy.
+    - aid: The id of the Activity the View is in.
+    - weight: Sets the Layout weight.
+- setRelativeLayoutParams: Sets the RelativeLayout parameters for a View in a RelativeLayout.
   - Parameters:
-    - id: The id of the View.
-    - aid: The id of the Activity in which the View is in.
-    - margin: The margin value as an integer in [dp](https://developer.android.com/guide/topics/resources/more-resources.html#Dimension)
-    - dir: can be "top", "bottom", "left", "right" to set the margin for one of those directions. If not specified. the margin is set for all directions.
-- setLayoutWeight: Sets the Layout weight for Layouts that support it.
+    - parent: The View id of the parent in the Layout hierarchy.
+    - aid: The id of the Activity the View is in.
+    - 
+- setVisibility: Sets the visibility of a Vew.
   - Parameters:
     - id: The id of the View.
     - aid: The id of the Activity the View is in.
-    - weight: The Layout weight.
+- deleteView: Deletes a View and its children from the Layout hierarchy.
+  - Parameters:
+    - id: The id of the View to delete.
+    - aid: The id of the Activity the View is in.
+- setMargin: Sets the margin of a View.
+  - Parameters:
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+    - margin: The margin value as an integer in [dp](https://developer.android.com/guide/topics/resources/more-resources.html#Dimension).
+    - dir: can be "top", "bottom", "left", "right" to set the margin for one of those directions. If not specified. the margin is set for all directions.
+- setPadding: Sets the padding of a View.
+  - Parameters:
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+    - padding: The padding value as an integer in [dp](https://developer.android.com/guide/topics/resources/more-resources.html#Dimension)
+    - dir: can be "top", "bottom", "left", "right" to set the padding for one of those directions. If not specified. the padding is set for all directions.
 - setText: Sets the text of the View.
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
     - aid: The id of the Activity the View is in.
     - text: The text.
+- setTextSize: Sets the text size.
+  - Parameters:
+    - id: The View id of a TextView, Button or EditText.
+    - aid: The id of the Activity the View is in.
+    - size: The text size in [sp](https://developer.android.com/guide/topics/resources/more-resources.html#Dimension).
 - getText: gets the text of the View.
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
@@ -114,6 +158,34 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
   - Parameters:
     - aid: The id of the Activity the View is in.
     - parent: The View id of the parent in the Layout hierarchy. if not specified, this will replace the root of the hierarchy and delete all existing views.
+- generateIDs: Generates and reserves View ids. Use them to set the ids for the JSON Layout in inflateJSON.
+  - Parameters:
+    - n: The number of ids to generate
+- setImage: Sets the image for an ImageView.
+  - Parameters:
+    - id: The View id of a ImageView.
+    - aid: The id of the Activity the View is in.
+    - img: The image data in PNG or JPEG format.
+- addBuffer: Adds a buffer to be used for ImageViews. Returns to id of the generated buffer. Returns -1 in case of an error. This should be a file descriptor to a shared memory file. You can then write to the shared memory and use the image in the plugin without having to transmit it. When successful, it transfers a file descriptor via SCM_RIGHTS. That file descriptor can then be mapped. This feature is only supported on Android 8.1+, on earlier versions this always fails.
+  - Parameters:
+    - format: the Image buffer format. Supported: "ARGB888". The order in memory will be rgba with one byte each.
+    - w: The width of the buffer.
+    - h: The height of the buffer.
+- deleteBuffer: Deletes a shared buffer. You have to do this when you aren't using a buffer anymore (eg. it is to small and you want a larger one), because Buffers consume a lot of memory. Only call this once no ImageView uses this buffer anymore, by setting another buffer, an image or removing the ImageView.
+  - Parameters:
+    - bid: id of the buffer.
+- blitBuffer: Copies the content from the Shared memory buffer into the buffer.
+  - Parameters:
+    - bid: id of the buffer.
+- setBuffer: Sets the ImageView to have a buffer as a source.
+  - Parameters:
+    - id: The View id of a ImageView.
+    - aid: The id of the Activity the View is in.
+    - bid: id of the buffer.
+- refreshImageView: This should be called after blitting an ImageView's buffer to show the new contents.
+  - Parameters:
+    - id: The View id of a ImageView.
+    - aid: The id of the Activity the View is in.
 
 
 
@@ -135,30 +207,42 @@ Event control:
 
 Once you have opened an Activity and placed all Views and configured it, like mit GUI applications you have to wait for user input.  
 Events arrive on the event socket.  
-Certain events are send automatically, like Activity lifecycle events and click events for buttons.  
+Events that are enabled by default:
+- click for Buttons
+- 
 
 Event types:  
 - [Input Events](https://developer.android.com/guide/topics/ui/ui-events#EventListeners) :
+  - values for all:
+    - id: The id of the View that fired the event.
+    - aid: The id of the Activity the View is in.
   - click
+    - Additional values for ImageView: x and y position in the view
+    - Additional values for RadioButton and checkbox: set: whether the View is set or not
   - longClick
   - focusChange
+    - Additional value: focus: whether or not the View now has focus.
   - key
+    - Additional value: key: the key that was pressed.
   - touch
+    - Additional values x,y: Coordinates in the View.
+  - refresh: Refresh triggered in a SwipeRefreshLayout
 - [Activity Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) :
+  - values for all:
+    - aid: The id of the Activity.
   - start
-    - value: null
   - resume
-    - value: null
   - pause
-    - value: null
+    - value: whether or not the Activity is finishing
   - stop
-    - value: null
+    - value: whether or not the Activity is finishing
   - destroy
     - value: whether or not the Activity is finishing
 - Custom events:
   - recitem: The plugin needs an item for a RecyclerView
     - value:
       - rec: the RecyclerView View id
+      - The id of the Activity the View is in.
       - it: the index of the item required
 
 

@@ -16,6 +16,7 @@ class App : Application() {
                 t.finishAndRemoveTask()
             }
         }
+        Thread.setDefaultUncaughtExceptionHandler { _, e -> e.printStackTrace() }
     }
     
     

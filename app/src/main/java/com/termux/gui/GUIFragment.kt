@@ -1,23 +1,18 @@
 package com.termux.gui
 
-import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.fragment.app.Fragment
 import java.util.*
 
 class GUIFragment : Fragment() {
 
     val usedIds: TreeSet<Int> = TreeSet()
     
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-    }
 
     private var root: FrameLayout? = null
     

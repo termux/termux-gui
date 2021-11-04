@@ -20,7 +20,14 @@
 
         <activity
             android:name=".GUIActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"/>
+        <activity
+            android:name=".GUIActivityDialog"
+            android:exported="false"
+            android:theme="@style/TermuxAlertDialogStyle"
+            android:excludeFromRecents="true"/>
 
         <service
             android:name=".GUIService"
