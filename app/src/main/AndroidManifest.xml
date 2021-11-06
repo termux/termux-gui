@@ -1,33 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.termux.gui"
     android:sharedUserId="com.termux">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
+        android:name=".App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TermuxGUI"
-        android:name=".App">
+        android:theme="@style/Theme.TermuxGUI">
+        <receiver android:name=".WidgetButtonReceiver"
+            android:exported="false">
+        </receiver>
+        <receiver
+            android:name=".GUIWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget" />
+        </receiver>
         <receiver
             android:name=".ServiceShutdownReceiver"
             android:enabled="true"
             android:exported="false" />
 
         <activity
-            android:name=".GUIActivity"
+            android:name=".GUIWidgetConfigurationActivity"
+            android:excludeFromRecents="true"
             android:exported="false"
+            android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".GUIActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
+            android:supportsPictureInPicture="true" />
+        <activity
+            android:name=".GUIActivityLockscreen"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
             android:supportsPictureInPicture="true"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"/>
+            tools:targetApi="o_mr1" />
         <activity
             android:name=".GUIActivityDialog"
+            android:excludeFromRecents="true"
             android:exported="false"
-            android:theme="@style/TermuxAlertDialogStyle"
-            android:excludeFromRecents="true"/>
+            android:theme="@style/TermuxAlertDialogStyle" />
 
         <service
             android:name=".GUIService"

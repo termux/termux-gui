@@ -5,11 +5,12 @@ import struct
 import time
 import json
 import base64
+import mmap
+import array
+import io
+import subprocess
 
 
-icon = ""
-with open("icon.png","rb") as f:
-    icon = base64.standard_b64encode(f.read()).decode("ascii")
 
 def read_msg(s):
     b = b''
@@ -36,7 +37,6 @@ def return_msg(s, msg):
     return read_msg(s)
 
 
-
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 sock.bind("\0test")
 sock2 = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -56,23 +56,23 @@ ret = b''
 while len(ret) == 0:
     ret = ret + connection.recv(1)
 
-
-send_msg(connection, '{"method":"newActivity"}')
-aid, tid = (read_msg(connection))
-#print(aid)
-#print(tid)
-
-send_msg(connection, f'{{"method":"setTheme","params":{{"aid": "{aid}", "statusBarColor": {0xff003180},"colorPrimary": {0xffd1d1d1},"windowBackground": {0xffdedede},"textColor": {0xff000000},"colorAccent": {0xff003180} }} }}')
-
-send_msg(connection, f'{{"method":"setTaskIcon","params":{{"aid":"{aid}","img":"{icon}" }} }}')
+if len(sys.argv) != 2 or sys.argv[1] == None:
+    sys.exit(1)
 
 
-root = return_msg(connection, f'{{"method":"createLinearLayout","params":{{"aid": "{aid}", "vertical": false}} }}')
-tv1 = return_msg(connection, f'{{"method":"createTextView","params":{{"aid": "{aid}", "parent": {root}, "text":"TextView 1"}} }}')
-tv2 = return_msg(connection, f'{{"method":"createTextView","params":{{"aid": "{aid}", "parent": {root}, "text":"TextView 2"}} }}')
-tv3 = return_msg(connection, f'{{"method":"createTextView","params":{{"aid": "{aid}", "parent": {root}, "text":"TextView 3"}} }}')
 
+send_msg(connection, f'{{"method": "bindWidget", "params": {{"wid": {sys.argv[1]} }} }}')
 
-time.sleep(5)
+send_msg(connection, f'{{"method":"setTheme","params":{{"wid": "{sys.argv[1]}", "statusBarColor": {0xff003180},"colorPrimary": {0xffd1d1d1},"windowBackground": {0x60dedede},"textColor": {0xff000000},"colorAccent": {0xff003180} }} }}')
+
+while True:
+    out = subprocess.check_output(["ps", "-e", "--no-headers", "-o", "%C %x %c"]).decode("ascii")
+    #print(out)
+    tv = return_msg(connection, f'{{"method": "createTextView", "params": {{"wid": {sys.argv[1]}, "text": "{out}" }} }}')
+    
+    
+    send_msg(connection, f'{{"method": "blitWidget", "params": {{"wid": {sys.argv[1]} }} }}')
+    send_msg(connection, f'{{"method": "clearWidget", "params": {{"wid": {sys.argv[1]} }} }}')
+    time.sleep(1)
 
 

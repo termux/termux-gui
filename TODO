@@ -9,7 +9,11 @@
 [ ] system overlay window support
 [ ] Action Bar with elements
 [ ] App widgets
-    [ ] when the user places a widget, generate a ID and put it in the clipboard. The Widget can then be manipulated with the ID.
+    [ ] only 1 depth layouts, because the IDs can't be changed
+        [ ] or have 10 different layout files for each view type with 10 different ids, that allows a bit of nesting
+            [ ] 5 for Layouts, 10 for textview and button, 5 for progress bar
+            [ ] But the main dynamic content should be made with collections: https://developer.android.com/guide/topics/appwidgets/collections
+    [ ] support for using layouts in widgets (if parent != null, use R.id.remoteview as parent)
 [ ] Notifications with custom Layout
 [ ] method to get the screen resolution, to change layout if needed
 [ ] on screen orientation change event
@@ -17,26 +21,41 @@
 [ ] Gesture events
 [ ] Multitouch
 [ ] setting visibility to hidden or gone
-[ ] Lockscreen activities: https://stackoverflow.com/questions/60732308/android-displaying-view-over-the-lockscreen-like-google-maps
-    [ ] demo program: Write notes in an EditText, they get placed in a file.
+[ ] method to check dark mode and other configuration variables
+[ ] register dynamic broadcast receivers for things like language chance, airplane mode and other useful events and relay them to the program
+    - ACTION_AIRPLANE_MODE_CHANGED
+    - ACTION_BATTERY_LOW
+    - ACTION_BATTERY_OKAY
+    - ACTION_DEVICE_STORAGE_LOW
+    - ACTION_DEVICE_STORAGE_OK
+    - ACTION_LOCALE_CHANGED
+    - ACTION_BATTERY_CHANGED
+    - ACTION_SCREEN_OFF
+    - ACTION_SCREEN_ON
+    - ACTION_TIMEZONE_CHANGED
+[ ] settings explicit size for views
+[ ] settings ImageView size in px, so it can be exactly the size of the bitmap buffer 
+[ ] or query the current size of the ImageView to use a new buffer
+[ ] Toasts
 
 
-
+[ ] finish f-droid metadata
 [ ] finish Python bindings when the plugin is available on f-droid and upload them to pypi
 
 Implement Views:
 [ ] RelativeLayout
-[ ] Button
+[x] FrameLayout
+[x] Button
 [x] ImageView
 [x] Space
-[ ] NestedScrollView
+[x] NestedScrollView
 [ ] RecyclerView
     [ ] use the paging library to get good performance. When a new page is needed, send an event to the program.
         Then the program has to send back a list of json layouts to populate the view.
         To update existing items, the program can send a page unrequested.
 [ ] RadioButton
 [ ] RadioGroup
-[ ] Checkbox
+[x] Checkbox
 [ ] ToggleButton
 [ ] ImageButton
 [ ] Spinner

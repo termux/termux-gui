@@ -50,12 +50,8 @@ With these fundamentals you can go ahead and use this plugin.  If you need more 
 
 ## Language Bindings
 
-### Python
-
-
-
-
-### C/C++
+- [Python](https://github.com/tareksander/termux-gui-python-bindings)
+- [C/C++](https://github.com/tareksander/termux-gui-c-bindings)
 
 
 

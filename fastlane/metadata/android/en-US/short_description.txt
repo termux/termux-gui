@@ -1,0 +1,1 @@
+A plugin for Termux to use the Android GUI from terminal applications.

@@ -8,18 +8,14 @@ import base64
 import mmap
 import array
 import io
-
-from PIL import Image
-from PIL import GifImagePlugin
-
-
+#from PIL import Image, ImageDraw, ImageFont
+from ctypes import *
+from sdl2 import *
+import sdl2.ext
 
 icon = ""
 with open("icon.png","rb") as f:
     icon = base64.standard_b64encode(f.read()).decode("ascii")
-
-img = Image.open(sys.argv[1])
-
 
 
 def read_msg(s):
@@ -85,11 +81,9 @@ while len(ret) == 0:
     ret = ret + connection.recv(1)
 
 
-send_msg(connection, '{"method":"newActivity", "params": {"pip": true} }')
+send_msg(connection, '{"method":"newActivity"}')
 aid, tid = (read_msg(connection))
 
-
-send_msg(connection, f'{{"method":"setPiPParams","params":{{"aid":"{aid}","num": {img.width}, "den": {img.height} }} }}')
 
 
 send_msg(connection, f'{{"method":"setTheme","params":{{"aid": "{aid}", "statusBarColor": {0xff003180},"colorPrimary": {0xffd1d1d1},"windowBackground": {0xffdedede},"textColor": {0xff000000},"colorAccent": {0xff003180} }} }}')
@@ -101,27 +95,97 @@ send_msg(connection, f'{{"method":"createImageView","params":{{"aid": "{aid}"}} 
 id = read_msg(connection)
 
 
+send_msg(connection, f'{{"method":"addBuffer","params":{{"format": "ARGB888", w: 500, h: 500}} }}')
+ret = read_msg_fd(connection)
+bid=0
+fd=0
+if len(ret) == 1:
+    sys.exit()
+else:
+    bid = ret[0]
+    fd = ret[1]
 
-b = io.BytesIO()
-for frame in range(0, img.n_frames):
-    b.seek(0)
-    img.seek(frame)
-    f = img.convert('RGB')
-    f.save(b, "jpeg")
-    b.seek(0)
-    imgbase64 = base64.standard_b64encode(b.read()).decode("ascii")
+
+
+mem = mmap.mmap(fd, 500*500*4)
+send_msg(connection, f'{{"method":"setBuffer","params":{{"aid": "{aid}", "id": "{id}","bid": {bid} }} }}')
+
+memp = cast(pointer(c_uint8.from_buffer(mem, 0)), c_void_p)
+
+SDL_init(SDL_INIT_VIDEO)
+
+surf = SDL_CreateRGBSurfaceFrom(memp,c_int(500),  c_int(500), c_int(32), c_int(500*4), c_uint(0xff), c_uint(0xff00), c_uint(0xff0000), c_uint(0xff000000))
+ren = SDL_CreateSoftwareRenderer(surf)
+
+mf = sdl2.ext.FontManager("LiberationSans-Regular.ttf",size=20)
+
+for i in range(0,1000):
+    
+    SDL_SetRenderDrawColor(ren, c_unit8(255), c_unit8(255), c_unit8(255), c_unit8(255))
+    SDL_RenderClear()
+    
+    SDL_SetRenderDrawColor(ren, c_unit8(0), c_unit8(0), c_unit8(0), c_unit8(255))
     
     
-    send_msg(connection, f'{{"method":"setImage","params":{{"aid": "{aid}", "id": "{id}","img": "{imgbase64}" }} }}')
-    if 'duration' in img.info:
-        time.sleep(img.info['duration']/1000)
-    else:
-        time.sleep(5)
+    
+    
+    
+    SDL_RenderPresent(ren)
+    mem.flush()
+    time.sleep(0.01)
+
+
+
+
+
+
+'''
+img = Image.new("RGBA", (500,500))
+
+#img = Image.frombuffer("RGBA", (500,500), mem)
+
+draw = ImageDraw.Draw(img)
+
+font = ImageFont.truetype("LiberationSans-Regular.ttf", 30)
+
+for i in range(0,10):
+    
+    
+    
+    draw.rectangle((0,0,500,500),outline=(255,255,255,255),fill=(255,255,255,255))
+    
+    
+    draw.text((10,10), "Displaying dynamic content\nin a framebuffer", (0,0,0,255), font=font)
+    
+    
+    
+    mem.seek(0)
+    
+    for y in range(0, 500):
+        for x in range(0,500):
+            r, g, b, a = img.getpixel((x, y))
+            mem.write(r.to_bytes(1, sys.byteorder))
+            mem.write(g.to_bytes(1, sys.byteorder))
+            mem.write(b.to_bytes(1, sys.byteorder))
+            mem.write(a.to_bytes(1, sys.byteorder))
+    
+    
+    
+    mem.flush()
+    send_msg(connection, f'{{"method":"blitBuffer","params":{{"bid": {bid}}} }}')
+    send_msg(connection, f'{{"method":"refreshImageView","params":{{"aid": "{aid}", "id": "{id}" }} }}')
+    time.sleep(0.1)
+'''
+
+
+
+
 
 
 
 connection.close()
 connection2.close()
 
+mem.close()
 
 os.system("am start --user 0 -n com.termux/.app.TermuxActivity >/dev/null 2>&1")

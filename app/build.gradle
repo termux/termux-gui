@@ -35,6 +35,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -52,5 +55,6 @@ dependencies {
     implementation 'com.github.flipkart-incubator.proteus:recyclerview-v7:5.0.1'
     implementation 'com.github.flipkart-incubator.proteus:support-v4:5.0.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.4.0'
 
 }

@@ -74,7 +74,7 @@ if w != 0:
 
 send_msg(connection, f'{{"method":"setTheme","params":{{"aid": "{aid}", "statusBarColor": {0xff003180},"colorPrimary": {0xffd1d1d1},"windowBackground": {0xffdedede},"textColor": {0xff000000},"colorAccent": {0xff003180} }} }}')
 
-send_msg(connection, f'{{"method":"setTaskIcon","params":{{"aid":"{aid}","img":"{icon}" }} }}')
+send_msg(connection, f'{{"method":"setTaskDescription","params":{{"aid":"{aid}","img":"{icon}" }} }}')
 
 
 send_msg(connection, f'{{"method":"createImageView","params":{{"aid": "{aid}"}} }}')

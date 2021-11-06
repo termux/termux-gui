@@ -2,7 +2,7 @@
 
 If you don't want to implement a custom library for using the protocol, you can skip to the [protocol methods](#methods)<!-- @IGNORE PREVIOUS: anchor -->
 
-### WARNING: The protocol is not yet stable and could change anytime
+### WARNING: The protocol is not yet stable and could change anytime, and parts are not implemented yet.
 
 
 ## Connection
@@ -47,8 +47,11 @@ These methods control Android [Activities](https://developer.android.com/referen
   - Parameters:
     - tid: the task in which the Activity should be started. If not specified, a new Task is created and the id is returned after the Activity id.
     - flags: Flags to set when launching the Activity via the Intent.
-    - dialog: boolean value. If true, the Activity will be launched as a dialog.
-    - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
+    - One of:
+      - dialog: boolean value. If true, the Activity will be launched as a dialog.
+      - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
+      - lockscreen: displays this Activity on the lockscreen.
+      - overlay: uses a system overlay window to display above everything else.
 - finishActivity: Closes an Activity.
   - Parameters:
      - aid: The id of the Activity to close.
@@ -69,13 +72,18 @@ These methods control Android [Activities](https://developer.android.com/referen
 - setTaskDescription: Sets the Icon of the Task, the label and set the primary color to the one specified with setTheme. The background color of the icon will be the current primary color.
   - Parameters:
     - aid: The id of an Activity in the Task you want to set the icon.
-    - img: The image data in PNG or JPEG format.
+    - img: The image data in PNG or JPEG format. May also be the literal string "default". to reset to the default Termux icon.
     - label: The new Task label.
 - setPiPParams: Sets the PiP parameters for the Activity. PiP parameters are only available on Android 8+, on earlier versions this is a noop.
   - Parameters:
     - aid: The id of an Activity in the Task you want to set the icon.
     - num: Numerator of the desired aspect ration.
     - den: Denominator of the desired aspect ration.
+- setInputMode: Determines what happens when the virtual keyboard is shown.
+  - Parameters:
+    - aid: The id of the Activity.
+    - mode: one of: "resize": resizes the Activity, "pan": pans the Activity.
+
 
 
 Layout and View control:  
@@ -84,6 +92,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
   - The following Views and Layouts are supported:
     - [LinearLayout](https://developer.android.com/guide/topics/ui/layout/linear)
     - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
+    - [FrameLayout](https://developer.android.com/reference/android/widget/FrameLayout)
     - [TextView](https://developer.android.com/reference/android/widget/TextView)
     - [EditText](https://developer.android.com/reference/android/widget/EditText)
     - [Button](https://developer.android.com/reference/android/widget/Button)
@@ -202,13 +211,39 @@ Event control:
     - aid: The id of the Activity the View is in.
     - send: Whether to send the event ot not, a boolean.
 
+Widgets:  
+App widget support only a subset of Views. See [remote views](https://developer.android.com/reference/android/widget/RemoteViews#public-constructors).  
+- bindWidget: Binds a widget to this connection, so you can perform actions on it. Returns 0 on success, another number on failure.
+  - Parameters:
+    - wid: The widget id.
+- blitWidget: updates the widget with the views you created and configured in it.
+  - Parameters:
+    - wid: The widget id.
+- clearWidget: clears the widget representation. This is needed because you can't remove views in a widget, you then have to build it again.
+  - Parameters:
+    - wid: The widget id.
+- createListView: Creates a ListView where content can be placed dynamically
+
+The following methods can also take the parameter wid instead of aid to operate on widgets:
+- createLinearLayout: can only be used as the root layout
+- createImageView: the image has to be specified in this method and cannot be changed afterwards.
+- createButton: The text has to be specified here and cannot be changed afterwards.
+- createTextView: The text has to be specified here and cannot be changed afterwards.
+- createGridLayout: Works as a collection like ListView
+- createProgressBar
+
+
+
+
+
+
 
 ## Events
 
 Once you have opened an Activity and placed all Views and configured it, like mit GUI applications you have to wait for user input.  
 Events arrive on the event socket.  
 Events that are enabled by default:
-- click for Buttons
+- click for Buttons, Checkboxes
 - 
 
 Event types:  
@@ -236,8 +271,8 @@ Event types:
     - value: whether or not the Activity is finishing
   - stop
     - value: whether or not the Activity is finishing
-  - destroy
-    - value: whether or not the Activity is finishing
+  - destroy:
+    - value: whether or not the Activity is finishing. Only for destroy this is guaranteed to be accurate. The previous events may not report that. So if you want to save state when the Activity is destroyed, request that state when it is stopped instead.
 - Custom events:
   - recitem: The plugin needs an item for a RecyclerView
     - value:

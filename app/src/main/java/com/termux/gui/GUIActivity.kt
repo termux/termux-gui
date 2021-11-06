@@ -1,11 +1,7 @@
 package com.termux.gui
 
-import android.app.PictureInPictureParams
 import android.os.Bundle
-import android.util.Rational
 import androidx.appcompat.app.AppCompatActivity
-import java.lang.ref.WeakReference
-import java.util.*
 
 open class GUIActivity : AppCompatActivity() {
 
@@ -21,6 +17,7 @@ open class GUIActivity : AppCompatActivity() {
         if (intent.getBooleanExtra("pip", false)) {
             println("pip")
             setTheme(R.style.Theme_TermuxGUI_NoAnimation)
+            @Suppress("DEPRECATION")
             enterPictureInPictureMode()
             overridePendingTransition(0,0)
         } else {

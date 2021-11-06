@@ -6,11 +6,19 @@
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.21354166666666666" />
         <entry key="app/src/main/res/drawable/ic_foreground.xml" value="0.21354166666666666" />
         <entry key="app/src/main/res/drawable/ic_launcher.xml" value="0.21354166666666666" />
-        <entry key="app/src/main/res/drawable/ic_launcher_round.xml" value="0.21354166666666666" />
+        <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.37135416666666665" />
+        <entry key="app/src/main/res/drawable/ic_launcher_round.xml" value="0.25" />
+        <entry key="app/src/main/res/drawable/ic_test.xml" value="0.37135416666666665" />
         <entry key="app/src/main/res/layout/activity_gui.xml" value="0.19739583333333333" />
         <entry key="app/src/main/res/layout/activity_guiactivity.xml" value="0.19739583333333333" />
         <entry key="app/src/main/res/layout/fragment_gui.xml" value="0.35520833333333335" />
+        <entry key="app/src/main/res/layout/g_u_i_widget.xml" value="0.35520833333333335" />
+        <entry key="app/src/main/res/layout/remote_button.xml" value="0.35520833333333335" />
+        <entry key="app/src/main/res/layout/remote_linearlayout.xml" value="0.35520833333333335" />
+        <entry key="app/src/main/res/layout/remote_textview.xml" value="0.35520833333333335" />
         <entry key="app/src/main/res/layout/test.xml" value="1.25" />
+        <entry key="app/src/main/res/layout/widget_configuration_layout.xml" value="0.35520833333333335" />
+        <entry key="app/src/main/res/layout/widget_preview.xml" value="0.35520833333333335" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.21354166666666666" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.21354166666666666" />
       </map>

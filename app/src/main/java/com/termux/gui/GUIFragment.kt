@@ -17,6 +17,7 @@ class GUIFragment : Fragment() {
     private var root: FrameLayout? = null
     
     init {
+        @Suppress("DEPRECATION")
         retainInstance = true
     }
     var theme: GUIActivity.GUITheme? = null

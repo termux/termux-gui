@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="20dp"
+    android:minHeight="20dp"
+    android:updatePeriodMillis="0"
+    android:description="@string/widget_description"
+    android:initialLayout="@layout/widget_preview"
+    android:previewImage="@mipmap/ic_launcher"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:configure="com.termux.gui.GUIWidgetConfigurationActivity">
+</appwidget-provider>

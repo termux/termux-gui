@@ -1,5 +1,10 @@
 <resources>
-    <string name="app_name">Termux GUI</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_name">Termux:GUI</string>
+    <string name="widget_description">A widget that can be freely resized and whose contents can be controlled by programs in Termux.</string>
+    <string name="widget_id">Widget id</string>
+    <string name="widget_id_copied">Widget id copied to clipboard</string>
+    <string name="show_widget_id">Widget id: %1$s</string>
+    <string name="copy_clipboard">Copy to clipboard</string>
+    <string name="close">Close</string>
+    <string name="widget_default_text">Use a program to fill this widget</string>
 </resources>
