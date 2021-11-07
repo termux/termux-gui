@@ -4,6 +4,7 @@ import android.app.*
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -37,6 +38,8 @@ import java.lang.reflect.InvocationTargetException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.LinkedBlockingQueue
 import kotlin.collections.HashMap
 import kotlin.math.roundToInt
 
@@ -49,14 +52,23 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     @Suppress("unused")
     class Event(var type: String, var value: JsonElement?)
     companion object {
-        private val gson = Gson()
+        val gson = Gson()
         var INVALID_METHOD: Event = Event("invalidMethod", gson.toJsonTree("invalid method"))
+
+
+        fun sendMessage(w: DataOutputStream, ret: String) {
+            val bytes = ret.toByteArray(UTF_8)
+            w.writeInt(bytes.size)
+            w.write(bytes)
+            w.flush()
+        }
     }
     
     private var activityID = 0
     private val app: Context = service.applicationContext
     private val rand = Random()
-    
+    var eventQueue = LinkedBlockingQueue<String>()
+    var eventWorker: Thread? = null
     
     data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory, val buff: ByteBuffer)
     data class WidgetRepresentation(val usedIds: TreeSet<Int> = TreeSet(), var root: RemoteViews?, var theme: GUIActivity.GUITheme?)
@@ -67,7 +79,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         //println("ptid: $ptid")
         val i = Intent(app, GUIActivity::class.java)
         if (ptid == null) {
-            i.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            println("new task")
+            i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
         }
         val aid = Thread.currentThread().id.toString()+"-"+activityID.toString()
         i.data = Uri.parse(aid)
@@ -107,6 +120,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
             if (task == null) {
                 return gson.toJson(arrayOf("-1",-1))
             }
+            println("stated in task")
             task.startActivity(app, i, null)
         }
         while (true) {
@@ -126,12 +140,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         }
     }
     
-    private fun sendMessage(w: DataOutputStream, ret: String) {
-        val bytes = ret.toByteArray(UTF_8)
-        w.writeInt(bytes.size)
-        w.write(bytes)
-        w.flush()
-    }
+    
 
     private fun sendMessageFd(w: DataOutputStream, ret: String, s: LocalSocket, fd: FileDescriptor) {
         val bytes = ret.toByteArray(UTF_8)
@@ -306,12 +315,16 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         var lifecycleCallbacks: Application.ActivityLifecycleCallbacks? = null
         
         
-        
         try {
             main.use {
                 event.use {
                     main.connect(LocalSocketAddress(request.mainSocket))
                     event.connect(LocalSocketAddress(request.eventSocket))
+                    // check if it is a termux program that wants to connect to the plugin
+                    if (main.peerCredentials.uid != app.applicationInfo.uid || event.peerCredentials.uid != app.applicationInfo.uid) {
+                        return
+                    }
+                    
                     var protocol = -1
                     while (protocol == -1) {
                         protocol = main.inputStream.read()
@@ -328,8 +341,15 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                     val inp = DataInputStream(main.inputStream)
                     var msgbytes = ByteArray(0)
                     val out = DataOutputStream(main.outputStream)
-                    val eventOut = DataOutputStream(event.outputStream)
                     
+
+                    eventWorker = Thread {
+                        val eventOut = DataOutputStream(event.outputStream)
+                        while (! Thread.currentThread().isInterrupted) {
+                            sendMessage(eventOut, eventQueue.take())
+                        }
+                    }
+                    eventWorker!!.start()
                     lifecycleCallbacks = object: Application.ActivityLifecycleCallbacks {
                         override fun onActivityCreated(a: Activity, savedInstanceState: Bundle?) {
                             println("create")
@@ -341,6 +361,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         if (a.taskId == info?.let { getTaskId(it) }) {
                                             if (tasks.find { getTaskInfo(task)?.let { getTaskId(it) } == getTaskId(task.taskInfo)} == null) {
                                                 tasks.add(task)
+                                                a.eventQueue = eventQueue
                                                 println("task added")
                                             }
                                             break
@@ -378,7 +399,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val map = HashMap<String, Any?>()
                                         map["finishing"] = a.isFinishing
                                         map["aid"] = a.intent?.dataString
-                                        sendMessage(eventOut, gson.toJson(Event("stop", gson.toJsonTree(map))))
+                                        eventQueue.add(gson.toJson(Event("stop", gson.toJsonTree(map))))
                                     }
                                 }
                             } catch (e: Exception) {
@@ -401,7 +422,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val map = HashMap<String, Any?>()
                                             map["finishing"] = a.isFinishing
                                             map["aid"] = a.intent?.dataString
-                                            sendMessage(eventOut, gson.toJson(Event("destroy", gson.toJsonTree(map))))
+                                            eventQueue.add(gson.toJson(Event("destroy", gson.toJsonTree(map))))
                                         }
                                     }
                                 }
@@ -412,7 +433,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                         }
                     }
                     App.APP?.registerActivityLifecycleCallbacks(lifecycleCallbacks)
-                    
+                    println("listening")
                     // to use regex in the when clause
                     operator fun Regex.contains(text: String?): Boolean = if (text == null) false else this.matches(text)
                     while (! Thread.currentThread().isInterrupted) {
@@ -575,7 +596,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                                     val map = HashMap<String, Any>()
                                                     map["id"] = v.id
                                                     map["aid"] = aid
-                                                    v.setOnClickListener { sendMessage(eventOut, gson.toJson(Event("click", gson.toJsonTree(map)))) }
+                                                    v.setOnClickListener { eventQueue.add(gson.toJson(Event("click", gson.toJsonTree(map)))) }
                                                     setView(a, v, parent)
                                                     sendMessage(out, gson.toJson(v.id))
                                                     continue
@@ -605,12 +626,13 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                                     val v = CheckBox(ac)
                                                     v.id = generateViewID(a)
                                                     v.text = m.params?.get("text")?.asString
+                                                    v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                                                     val map = HashMap<String, Any>()
                                                     map["id"] = v.id
                                                     map["aid"] = aid
                                                     v.setOnClickListener {
                                                         map["set"] = v.isChecked
-                                                        sendMessage(eventOut, gson.toJson(Event("click", gson.toJsonTree(map))))
+                                                        eventQueue.add(gson.toJson(Event("click", gson.toJsonTree(map))))
                                                     }
                                                     setView(a, v, parent)
                                                     sendMessage(out, gson.toJson(v.id))
@@ -916,6 +938,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
             e.printStackTrace()
         } finally {
             println("cleanup")
+            eventWorker?.interrupt()
             App.APP?.unregisterActivityLifecycleCallbacks(lifecycleCallbacks)
             for (t in tasks) {
                 try {

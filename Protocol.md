@@ -61,7 +61,7 @@ These methods control Android [Activities](https://developer.android.com/referen
 - bringTaskToFront: Shows a Task to the user if it wasn't already.
   - Parameters:
     - tid: The id of the Task to show.
-- setTheme: Sets the theme for the activity. It only applies to newly created Views, so this should be set before any Views are added.The color has to be specified as an RGBA888 integer (in hex literals 0xaabbggrr).
+- setTheme: Sets the theme for the activity. It only applies to newly created Views, so this should be set before any Views are added. The color has to be specified as an RGBA888 integer (in hex literals 0xaabbggrr).
   - Parameters:
     - aid: The Activity id.
     - statusBarColor
@@ -83,7 +83,10 @@ These methods control Android [Activities](https://developer.android.com/referen
   - Parameters:
     - aid: The id of the Activity.
     - mode: one of: "resize": resizes the Activity, "pan": pans the Activity.
-
+- setPiPMode: Makes an Activity enter or exit pip mode.
+  - Parameters:
+    - aid: The id of the Activity.
+    - pip: Whether the Activity should be in pip mode or not.
 
 
 Layout and View control:  
@@ -118,6 +121,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - aid: The id of the Activity in which to create the View.
     - text: For Button, TextView and EditText, this is the initial Text.
     - vertical: For LinearLayout, this specifies if the Layout is vertical or horizontal. If not specified, vertical is assumed.
+    - checked: Whether a RadioButton or Checkbox should be checked. Defaults to false.
     - All possible parameters to set the Layout parameters, depending on the parent Layout.
 - setLinearLayoutParams: Sets the LinearLayout parameters for a View in a LinearLayout.
   - Parameters:
@@ -131,6 +135,12 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - 
 - setVisibility: Sets the visibility of a Vew.
   - Parameters:
+    - visibility: 0 = gone, 1 = hidden, 2 = visible. While hidden, views are not visible but still take up space in the layout. Gone views do not take up layout space.
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+- set(Width/Height): Sets the width/height of the view.
+  - Parameters:
+    - width/height: The desired width/height. Can be a value in [dp](https://developer.android.com/guide/topics/resources/more-resources.html#Dimension), or "MATCH_PARENT" to match the size of the parent layout or "WRAP_CONTENT" to go as big as the view needs to be to display all its content.
     - id: The id of the View.
     - aid: The id of the Activity the View is in.
 - deleteView: Deletes a View and its children from the Layout hierarchy.
@@ -272,13 +282,16 @@ Event types:
   - stop
     - value: whether or not the Activity is finishing
   - destroy:
-    - value: whether or not the Activity is finishing. Only for destroy this is guaranteed to be accurate. The previous events may not report that. So if you want to save state when the Activity is destroyed, request that state when it is stopped instead.
+    - value: finish whether or not the Activity is finishing. Only for destroy this is guaranteed to be accurate. The previous events may not report that. So if you want to save state when the Activity is destroyed, request that state when it is stopped instead.
 - Custom events:
   - recitem: The plugin needs an item for a RecyclerView
     - value:
       - rec: the RecyclerView View id
       - The id of the Activity the View is in.
       - it: the index of the item required
+  - UserLeaveHint: Gets fired when the user leaves an Activity. Can be used to then make the Activity go into pip mode.
+  - pipchanged: Gets fired when the Activity enters or exits pip mode.
+    - value: whether the Activity is now in pip mode or not.
 
 
 

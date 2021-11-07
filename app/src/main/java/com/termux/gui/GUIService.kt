@@ -5,19 +5,19 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 class GUIService : Service() {
     class ConnectionRequest(val mainSocket: String?, val eventSocket: String?)
-
-    private val pool = ThreadPoolExecutor(0, 30, 1, TimeUnit.SECONDS, ArrayBlockingQueue(100))
+    
+    
+    
+    private val pool = ThreadPoolExecutor(30, 30, 1, TimeUnit.SECONDS, ArrayBlockingQueue(10))
     private val requestWatcher: Thread
     private val notification: Notification
         get() {
@@ -85,7 +85,9 @@ class GUIService : Service() {
                 if (r != null) {
                     println("new connection")
                     noRequests = 0
-                    pool.submit(ConnectionHandler(r, this))
+                    try {
+                        pool.submit(ConnectionHandler(r, this))
+                    } catch (ignored: RejectedExecutionException) {}
                 } else {
                     try {
                         Thread.sleep(1)

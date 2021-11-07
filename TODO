@@ -1,5 +1,8 @@
 
 
+[ ] add events to a queue to send them in a background thread per connection, so the ui thread doesn't block when the program doesn't read the events
+
+
 [ ] implement the rest of the already specified methods
 
 
