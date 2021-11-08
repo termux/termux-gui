@@ -67,7 +67,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     private var activityID = 0
     private val app: Context = service.applicationContext
     private val rand = Random()
-    var eventQueue = LinkedBlockingQueue<String>()
+    var eventQueue = LinkedBlockingQueue<String>(10000)
     var eventWorker: Thread? = null
     
     data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory, val buff: ByteBuffer)
@@ -79,7 +79,6 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         //println("ptid: $ptid")
         val i = Intent(app, GUIActivity::class.java)
         if (ptid == null) {
-            println("new task")
             i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
         }
         val aid = Thread.currentThread().id.toString()+"-"+activityID.toString()
@@ -120,7 +119,6 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
             if (task == null) {
                 return gson.toJson(arrayOf("-1",-1))
             }
-            println("stated in task")
             task.startActivity(app, i, null)
         }
         while (true) {
@@ -346,7 +344,9 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                     eventWorker = Thread {
                         val eventOut = DataOutputStream(event.outputStream)
                         while (! Thread.currentThread().isInterrupted) {
-                            sendMessage(eventOut, eventQueue.take())
+                            try {
+                                sendMessage(eventOut, eventQueue.take())
+                            } catch (ignored: Exception) {}
                         }
                     }
                     eventWorker!!.start()
