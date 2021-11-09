@@ -5,10 +5,14 @@
 
 [ ] implement the rest of the already specified methods
 
+[ ] save the view state with saveinstancestate and restore it after a configuration change, so that the views don't have references to the old activity
+[ ] ability to make ImageView focusable, so the virtual keyboard gets activated when it is tapped and you can receive keyevents. That enables you to create custom views.
 
+
+[ ] screen wakelock to keep the screen on
 [ ] Activity lifecycle events
 [ ] support for locking orientation: Activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-[ ] PiP events (enter/exit, onUserLeaveHint)
+[ ] PiP events (enter/exit, onUserLeaveHint), entering and exiting pip manually via setPiPMode
 [ ] system overlay window support
 [ ] Action Bar with elements
 [ ] App widgets
@@ -36,16 +40,18 @@
     - ACTION_SCREEN_OFF
     - ACTION_SCREEN_ON
     - ACTION_TIMEZONE_CHANGED
-[ ] settings explicit size for views
-[ ] settings ImageView size in px, so it can be exactly the size of the bitmap buffer 
+[ ] setting explicit size for views
+[ ] setting ImageView size in px, so it can be exactly the size of the bitmap buffer 
 [ ] or query the current size of the ImageView to use a new buffer
 [ ] Toasts
 
 
-[ ] finish f-droid metadata
+
+
 [ ] finish Python bindings when the plugin is available on f-droid and upload them to pypi
 
 Implement Views:
+[ ] password field (method for EditText to replace every displayed character with *)
 [ ] RelativeLayout
 [x] FrameLayout
 [x] Button
@@ -74,7 +80,7 @@ Implement Views:
 
 Implement Events:
 [ ] Methods to set and unset Listeners
-[ ] Click
+[x] Click
 [ ] LongClick
 [ ] FocusChange
 [ ] Key

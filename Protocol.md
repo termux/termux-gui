@@ -46,7 +46,6 @@ These methods control Android [Activities](https://developer.android.com/referen
 - newActivity: Launches a new Activity and returns the activity id. In case of an error, -1 is returned.
   - Parameters:
     - tid: the task in which the Activity should be started. If not specified, a new Task is created and the id is returned after the Activity id.
-    - flags: Flags to set when launching the Activity via the Intent.
     - One of:
       - dialog: boolean value. If true, the Activity will be launched as a dialog.
       - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
@@ -91,7 +90,7 @@ These methods control Android [Activities](https://developer.android.com/referen
 
 Layout and View control:  
 These methods create and Manipulate [Views](https://developer.android.com/reference/android/view/View), [Layouts](https://developer.android.com/guide/topics/ui/declaring-layout) and the Layout hierarchy.
-- create*: Creates a View and places it in the Layout hierarchy. It returns the View id or -1 in case of an error.
+- create*: Creates a View and places it in the Layout hierarchy. It returns the View id or -1 in case of an error. The main cause of an error is a stopped Activity, as it's state isa already saved and can't be changed until it is resumed.
   - The following Views and Layouts are supported:
     - [LinearLayout](https://developer.android.com/guide/topics/ui/layout/linear)
     - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
@@ -299,7 +298,7 @@ Event types:
 
 The Messages are JSON objects with the "method" value being the name of the method and "params" being an optional JSON object with the parameters.  
 The parameter keys are as described above.  
-Binary data (like images) has to be transmitted bas64 encoded as a JSON string.  
+Binary data (like images) has to be transmitted base64 encoded as a JSON string.  
 If a method returns only one value, it is returned as a single JSON value.  
 If multiple values are returned, they are placed in a JSON array.  
 Events are a JSON object with the field "type" denoting the event type and the field "value" that depends on the event type.  

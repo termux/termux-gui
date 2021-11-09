@@ -44,12 +44,12 @@
         </activity>
         <activity
             android:name=".GUIActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges=""
             android:exported="false"
             android:supportsPictureInPicture="true" />
         <activity
             android:name=".GUIActivityLockscreen"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="uiMode|locale|screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
             android:showOnLockScreen="true"
             android:showWhenLocked="true"
@@ -57,6 +57,7 @@
             tools:targetApi="o_mr1" />
         <activity
             android:name=".GUIActivityDialog"
+            android:configChanges="uiMode|locale|screenSize|smallestScreenSize|screenLayout|orientation"
             android:excludeFromRecents="true"
             android:exported="false"
             android:theme="@style/TermuxAlertDialogStyle" />

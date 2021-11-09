@@ -4,10 +4,8 @@ import android.app.*
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.net.Uri
@@ -38,7 +36,6 @@ import java.lang.reflect.InvocationTargetException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.collections.HashMap
 import kotlin.math.roundToInt
@@ -53,7 +50,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     class Event(var type: String, var value: JsonElement?)
     companion object {
         val gson = Gson()
-        var INVALID_METHOD: Event = Event("invalidMethod", gson.toJsonTree("invalid method"))
+        val INVALID_METHOD: Event = Event("invalidMethod", gson.toJsonTree("invalid method"))
 
 
         fun sendMessage(w: DataOutputStream, ret: String) {
@@ -67,15 +64,15 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     private var activityID = 0
     private val app: Context = service.applicationContext
     private val rand = Random()
-    var eventQueue = LinkedBlockingQueue<String>(10000)
-    var eventWorker: Thread? = null
+    var eventQueue = LinkedBlockingQueue<Event>(10000)
+    private var eventWorker: Thread? = null
     
     data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory, val buff: ByteBuffer)
     data class WidgetRepresentation(val usedIds: TreeSet<Int> = TreeSet(), var root: RemoteViews?, var theme: GUIActivity.GUITheme?)
-    
+    data class ActivityState(var a: GUIActivity?, @Volatile var saved: Boolean = false, val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(10000))
     
     @Suppress("DEPRECATION")
-    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, GUIFragment>, ptid: Int?, flags: Int, pip: Boolean, dialog: Boolean, lockscreen: Boolean, overlay: Boolean): String {
+    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, overlay: Boolean): String {
         //println("ptid: $ptid")
         val i = Intent(app, GUIActivity::class.java)
         if (ptid == null) {
@@ -85,7 +82,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         i.data = Uri.parse(aid)
         activityID++
         
-        activities[aid] = GUIFragment()
+        activities[aid] = ActivityState(null)
         i.putExtra("pip", pip)
         when {
             pip -> {
@@ -122,7 +119,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
             task.startActivity(app, i, null)
         }
         while (true) {
-            if (activities[aid]?.isAdded == true) {
+            if (activities[aid]?.a != null) {
                 break
             }
             Thread.sleep(1)
@@ -148,14 +145,12 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         w.flush()
     }
     
-    private fun generateViewID(a: GUIFragment): Int {
+    private fun generateViewID(a: GUIActivity): Int {
         var id = rand.nextInt(Integer.MAX_VALUE)
-        synchronized(a.usedIds) {
-            while (a.usedIds.contains(id)) {
-                id = rand.nextInt(Integer.MAX_VALUE)
-            }
-            a.usedIds.add(id)
+        while (a.usedIds.contains(id)) {
+            id = rand.nextInt(Integer.MAX_VALUE)
         }
+        a.usedIds.add(id)
         return id
     }
 
@@ -178,12 +173,20 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         return id
     }
     
-    private fun runOnUIThreadBlocking(r: Runnable) {
+    
+
+    private fun runOnUIThreadActivityStarted(a: ActivityState, r: (activity: GUIActivity) -> Unit) {
         var e: Exception? = null
+        var stopped = false
         runBlocking(Dispatchers.Main) {
             launch {
+                val ac = a.a
+                if (a.saved || ac == null) {
+                    stopped = true
+                    return@launch
+                }
                 try {
-                    r.run()
+                    r(ac)
                 } catch (ex: java.lang.Exception) {
                     e = ex
                 }
@@ -193,36 +196,64 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         if (ex != null) {
             throw ex
         }
+        if (stopped) {
+            println("queueing Runnable")
+            a.queued.offer(r)
+        }
+    }
+
+    private fun runOnUIThreadActivityStartedBlocking(a: ActivityState, r: (activity: GUIActivity) -> Unit) : Boolean {
+        var e: Exception? = null
+        var stopped = false
+        runBlocking(Dispatchers.Main) {
+            launch {
+                val ac = a.a
+                if (a.saved || ac == null) {
+                    stopped = true
+                    return@launch
+                }
+                try {
+                    r(ac)
+                } catch (ex: java.lang.Exception) {
+                    e = ex
+                }
+            }
+        }
+        val ex = e
+        if (ex != null) {
+            throw ex
+        }
+        return ! stopped
     }
     
-    private fun setView(a: GUIFragment, v: View, parent: Int?) {
+    
+    
+    fun setView(a: GUIActivity, v: View, parent: Int?) {
         val t = a.theme
         if (t != null) {
             if (v is TextView) {
                 v.setTextColor(t.textColor)
             }
         }
-        runOnUIThreadBlocking {
-            if (parent == null) {
-                if (t != null) {
-                    v.setBackgroundColor(t.windowBackground)
-                }
-                val fl = a.view as FrameLayout
-                fl.removeAllViews()
-                fl.addView(v)
-            } else {
-                val g = a.view?.findViewById<ViewGroup>(parent)
-                if (g is LinearLayout) {
-                    val p = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1F)
-                    if (g.orientation == LinearLayout.VERTICAL) {
-                        p.width = LinearLayout.LayoutParams.MATCH_PARENT
-                    } else {
-                        p.height = LinearLayout.LayoutParams.MATCH_PARENT
-                    }
-                    v.layoutParams = p
-                }
-                g?.addView(v)
+        if (parent == null) {
+            if (t != null) {
+                v.setBackgroundColor(t.windowBackground)
             }
+            val fl = a.findViewById(R.id.root) as FrameLayout
+            fl.removeAllViews()
+            fl.addView(v)
+        } else {
+            val g = a.findViewById<ViewGroup>(parent)
+            if (g is LinearLayout) {
+                val p = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1F)
+                if (g.orientation == LinearLayout.VERTICAL) {
+                    p.width = LinearLayout.LayoutParams.MATCH_PARENT
+                } else {
+                    p.height = LinearLayout.LayoutParams.MATCH_PARENT
+                }
+                v.layoutParams = p
+            }
+            g?.addView(v)
         }
     }
 
@@ -241,24 +272,10 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     }
     
     
-    private fun getFragmentActivityBlocking(f: GUIFragment?, activities: MutableMap<String, GUIFragment>) : GUIActivity? {
-        if (f == null) {
-            return null
-        }
-        var a = f.activity
-        if (a == null) {
-            if (! activities.containsValue(f)) {
-                return null // activity got destroyed
-            }
-            Thread.sleep(0, 100)
-            a = f.activity
-        }
-        return a as GUIActivity
-    }
 
-    private fun removeViewRecursive(f: GUIFragment, v: View?) {
+    private fun removeViewRecursive(v: View?) {
         if (v is ViewGroup) {
-            removeViewRecursive(f, v)
+            removeViewRecursive(v)
         } else {
             if (v != null) {
                 val p = v.parent
@@ -283,7 +300,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         
         
         val tasks = LinkedList<ActivityManager.AppTask>()
-        val activities = Collections.synchronizedMap(HashMap<String,GUIFragment>())
+        val activities = Collections.synchronizedMap(HashMap<String,ActivityState>())
         val buffers: MutableMap<Int, SharedBuffer> = HashMap()
         val widgets: MutableMap<Int,WidgetRepresentation> = HashMap()
         
@@ -313,6 +330,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         var lifecycleCallbacks: Application.ActivityLifecycleCallbacks? = null
         
         
+        
+        
         try {
             main.use {
                 event.use {
@@ -330,7 +349,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                     }
                     val pversion = (protocol and 0xf0) shr 4
                     val ptype = protocol and 0x0f
-                    if (ptype != 0 && ptype != 1) {
+                    if (pversion != 0 && ptype != 1) {
                         main.outputStream.write(1)
                         return
                     }
@@ -345,7 +364,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                         val eventOut = DataOutputStream(event.outputStream)
                         while (! Thread.currentThread().isInterrupted) {
                             try {
-                                sendMessage(eventOut, eventQueue.take())
+                                sendMessage(eventOut, gson.toJson(eventQueue.take()))
                             } catch (ignored: Exception) {}
                         }
                     }
@@ -356,17 +375,16 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                             if (a is GUIActivity) {
                                 val f = activities[a.intent?.dataString]
                                 if (f != null) {
-                                    for (task in am.appTasks) {
-                                        val info = getTaskInfo(task)
-                                        if (a.taskId == info?.let { getTaskId(it) }) {
-                                            if (tasks.find { getTaskInfo(task)?.let { getTaskId(it) } == getTaskId(task.taskInfo)} == null) {
-                                                tasks.add(task)
-                                                a.eventQueue = eventQueue
+                                    if (tasks.find { getTaskInfo(it)?.let { it1 -> getTaskId(it1) } == a.taskId } == null) {
+                                        for (t in am.appTasks) {
+                                            if (getTaskInfo(t)?.let { it1 -> getTaskId(it1) } == a.taskId) {
                                                 println("task added")
+                                                tasks.add(t)
+                                                break
                                             }
-                                            break
                                         }
                                     }
+                                    f.a = a
                                 }
                             }
                         }
@@ -375,17 +393,21 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                             if (a is GUIActivity) {
                                 val f = activities[a.intent?.dataString]
                                 if (f != null) {
-                                    if (a.supportFragmentManager.fragments.find { f2 -> f2 == f } == null) {
-                                        a.supportFragmentManager.beginTransaction().add(R.id.root, f).commitNow()
-                                        println("fragment attached")
+                                    f.saved = false
+                                    for (r in f.queued) {
+                                        println("running queued")
+                                        try {
+                                            r(a)
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
                                     }
-                                    // to reset the window background color
-                                    f.theme = f.theme
                                 }
                             }
                         }
                         override fun onActivityResumed(a: Activity) {
                             println("resume")
+                            
                         }
                         override fun onActivityPaused(a: Activity) {
                             println("pause")
@@ -399,7 +421,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val map = HashMap<String, Any?>()
                                         map["finishing"] = a.isFinishing
                                         map["aid"] = a.intent?.dataString
-                                        eventQueue.add(gson.toJson(Event("stop", gson.toJsonTree(map))))
+                                        eventQueue.add(Event("stop", gson.toJsonTree(map)))
                                     }
                                 }
                             } catch (e: Exception) {
@@ -409,6 +431,17 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                         }
                         override fun onActivitySaveInstanceState(a: Activity, outState: Bundle) {
                             println("saveInstanceState")
+                            try {
+                                if (a is GUIActivity) {
+                                    val aid = a.intent?.dataString
+                                    val f = activities[aid]
+                                    if (f != null) {
+                                        f.saved = true
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
                         override fun onActivityDestroyed(a: Activity) {
                             try {
@@ -422,8 +455,10 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val map = HashMap<String, Any?>()
                                             map["finishing"] = a.isFinishing
                                             map["aid"] = a.intent?.dataString
-                                            eventQueue.add(gson.toJson(Event("destroy", gson.toJsonTree(map))))
+                                            eventQueue.add(Event("destroy", gson.toJsonTree(map)))
                                         }
+                                    } else {
+                                        f?.a = null
                                     }
                                 }
                                 println("destroy")
@@ -448,7 +483,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                             1 -> {
                                 val msg = msgbytes.decodeToString(0, len, true)
                                 val m = gson.fromJson(msg, Message::class.java)
-                                println(m.method)
+                                println(m?.method)
                                 when (m?.method) {
                                     // Activity and Task methods
                                     "newActivity" -> {
@@ -462,19 +497,27 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             }
                                         }
                                         sendMessage(out, newActivityJSON(tasks, activities, m.params?.get("tid")?.asInt,
-                                                 m.params?.get("flags")?.asInt ?: 0, m.params?.get("pip")?.asBoolean ?: false,
-                                                m.params?.get("dialog")?.asBoolean ?: false, m.params?.get("lockscreen")?.asBoolean ?: false,
-                                               m.params?.get("overlay")?.asBoolean ?: false))
+                                                m.params?.get("pip")?.asBoolean ?: false, m.params?.get("dialog")?.asBoolean ?: false,
+                                                m.params?.get("lockscreen")?.asBoolean ?: false, m.params?.get("overlay")?.asBoolean ?: false))
                                         continue
                                     }
                                     "finishActivity" -> {
-                                        getFragmentActivityBlocking(activities[m.params?.get("aid")?.asString], activities)?.finish()
+                                        val aid = m.params?.get("aid")?.asString
+                                        val a = activities[aid]
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.finish()
+                                            }
+                                        }
+                                        continue
                                     }
                                     "finishTask" -> {
                                         tasks.find { t -> getTaskInfo(t)?.let { it1 -> getTaskId(it1) } == m.params?.get("tid")?.asInt }?.finishAndRemoveTask()
+                                        continue
                                     }
                                     "bringTaskToFront" -> {
                                         tasks.find { t -> getTaskInfo(t)?.let { it1 -> getTaskId(it1) } == m.params?.get("tid")?.asInt }?.moveToFront()
+                                        continue
                                     }
                                     "setTheme" -> {
                                         val aid = m.params?.get("aid")?.asString
@@ -488,8 +531,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val w = widgets[wid]
                                         if ((a != null || w != null) && s != null && t != null && b != null && p != null && ac != null) {
                                             if (a != null) {
-                                                runOnUIThreadBlocking {
-                                                    a.theme = GUIActivity.GUITheme(s, p, b, t, ac)
+                                                runOnUIThreadActivityStarted(a) {
+                                                    it.theme = GUIActivity.GUITheme(s, p, b, t, ac)
                                                 }
                                             }
                                             if (w != null) {
@@ -501,22 +544,21 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                     "setTaskDescription" -> {
                                         val aid = m.params?.get("aid")?.asString
                                         val a = activities[aid]
-                                        val ac = getFragmentActivityBlocking(a, activities)
                                         val img = m.params?.get("img")?.asString
-                                        if (ac != null && a != null) {
-                                            runOnUIThreadBlocking {
-                                                val t = a.theme
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                val t = it.theme
                                                 val prim = t?.colorPrimary ?: (0xFF000000).toInt()
                                                 if (img != null) {
                                                     if (img == "default") {
-                                                        ac.setTaskDescription(ActivityManager.TaskDescription(m.params?.get("label")?.asString, BitmapFactory.decodeResource(ac.resources, R.mipmap.ic_launcher_round), prim))
+                                                        it.setTaskDescription(ActivityManager.TaskDescription(m.params?.get("label")?.asString, BitmapFactory.decodeResource(it.resources, R.mipmap.ic_launcher_round), prim))
                                                     } else {
                                                         val bin = Base64.decode(img, Base64.DEFAULT)
                                                         val bitmap = BitmapFactory.decodeByteArray(bin, 0, bin.size)
-                                                        ac.setTaskDescription(ActivityManager.TaskDescription(m.params?.get("label")?.asString, bitmap, prim))
+                                                        it.setTaskDescription(ActivityManager.TaskDescription(m.params?.get("label")?.asString, bitmap, prim))
                                                     }
                                                 } else {
-                                                    ac.setTaskDescription(ActivityManager.TaskDescription(m.params?.get("label")?.asString, null, prim))
+                                                    it.setTaskDescription(ActivityManager.TaskDescription(m.params?.get("label")?.asString, null, prim))
                                                 }
                                             }
                                         }
@@ -527,10 +569,11 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val num = m.params?.get("num")?.asInt
                                         val den = m.params?.get("den")?.asInt
                                         val a = activities[aid]
-                                        val ac = getFragmentActivityBlocking(a, activities)
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ac != null && num != null && den != null) {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && num != null && den != null && a != null) {
                                             val rat = Rational(num,den).coerceAtMost(Rational(239,100)).coerceAtLeast(Rational(100, 239))
-                                            ac.setPictureInPictureParams(PictureInPictureParams.Builder().setAspectRatio(rat).build())
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.setPictureInPictureParams(PictureInPictureParams.Builder().setAspectRatio(rat).build())
+                                            }
                                         }
                                         continue
                                     }
@@ -538,14 +581,15 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val aid = m.params?.get("aid")?.asString
                                         val mode = m.params?.get("mode")?.asString
                                         val a = activities[aid]
-                                        val ac = getFragmentActivityBlocking(a, activities)
-                                        if (ac != null && mode != null) {
-                                            when (mode) {
-                                                "resize" -> {
-                                                    ac.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-                                                }
-                                                "pan" -> {
-                                                    ac.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+                                        if (a != null && mode != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                when (mode) {
+                                                    "resize" -> {
+                                                        it.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+                                                    }
+                                                    "pan" -> {
+                                                        it.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+                                                    }
                                                 }
                                             }
                                         }
@@ -557,92 +601,131 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val aid = m.params?.get("aid")?.asString
                                             val parent = m.params?.get("parent")?.asInt
                                             val a = activities[aid]
-                                            val ac = getFragmentActivityBlocking(a, activities)
                                             val wid = m.params?.get("wid")?.asInt
                                             val w = widgets[wid]
-                                            if (ac != null && a != null && aid != null) {
+                                            if (a != null && aid != null) {
                                                 if (m.method == "createTextView") {
-                                                    val v = TextView(ac)
-                                                    v.id = generateViewID(a)
-                                                    v.text = m.params?.get("text")?.asString
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = TextView(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        v.text = m.params?.get("text")?.asString
+                                                        v.freezesText = true
+                                                        setView(it, v, parent)
+                                                    }
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createEditText") {
-                                                    val v = EditText(ac)
-                                                    v.id = generateViewID(a)
-                                                    v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = EditText(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
+                                                        setView(it, v, parent)
+                                                    }
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createLinearLayout") {
-                                                    val v = LinearLayout(ac)
-                                                    v.id = generateViewID(a)
-                                                    v.orientation = if (m.params?.get("vertical")?.asBoolean != false) {
-                                                        LinearLayout.VERTICAL
-                                                    } else {
-                                                        LinearLayout.HORIZONTAL
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = LinearLayout(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        v.orientation = if (m.params?.get("vertical")?.asBoolean != false) {
+                                                            LinearLayout.VERTICAL
+                                                        } else {
+                                                            LinearLayout.HORIZONTAL
+                                                        }
+                                                        setView(it, v, parent)
                                                     }
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createButton") {
-                                                    val v = Button(ac)
-                                                    v.id = generateViewID(a)
-                                                    v.text = m.params?.get("text")?.asString
-                                                    val map = HashMap<String, Any>()
-                                                    map["id"] = v.id
-                                                    map["aid"] = aid
-                                                    v.setOnClickListener { eventQueue.add(gson.toJson(Event("click", gson.toJsonTree(map)))) }
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = Button(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        v.text = m.params?.get("text")?.asString
+                                                        v.freezesText = true
+                                                        val map = HashMap<String, Any>()
+                                                        map["id"] = v.id
+                                                        map["aid"] = aid
+                                                        v.setOnClickListener { eventQueue.offer(Event("click", gson.toJsonTree(map))) }
+                                                        setView(it, v, parent)
+                                                    }
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createImageView") {
-                                                    val v = ImageView(ac)
-                                                    v.id = generateViewID(a)
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = ImageView(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        setView(it, v, parent)
+                                                    }
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createSpace") {
-                                                    val v = Space(ac)
-                                                    v.id = generateViewID(a)
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = Space(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        setView(it, v, parent)
+                                                    }
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createFrameLayout") {
-                                                    val v = FrameLayout(ac)
-                                                    v.id = generateViewID(a)
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = FrameLayout(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        setView(it, v, parent)
+                                                    }
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createCheckbox") {
-                                                    val v = CheckBox(ac)
-                                                    v.id = generateViewID(a)
-                                                    v.text = m.params?.get("text")?.asString
-                                                    v.isChecked = m.params?.get("checked")?.asBoolean ?: false
-                                                    val map = HashMap<String, Any>()
-                                                    map["id"] = v.id
-                                                    map["aid"] = aid
-                                                    v.setOnClickListener {
-                                                        map["set"] = v.isChecked
-                                                        eventQueue.add(gson.toJson(Event("click", gson.toJsonTree(map))))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = CheckBox(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        v.text = m.params?.get("text")?.asString
+                                                        v.isChecked = m.params?.get("checked")?.asBoolean
+                                                                ?: false
+                                                        v.freezesText = true
+                                                        val map = HashMap<String, Any>()
+                                                        map["id"] = v.id
+                                                        map["aid"] = aid
+                                                        v.setOnClickListener {
+                                                            map["set"] = v.isChecked
+                                                            eventQueue.offer(Event("click", gson.toJsonTree(map)))
+                                                        }
+                                                        setView(it, v, parent)
                                                     }
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                                 if (m.method == "createNestedScrollView") {
-                                                    val v = NestedScrollView(ac)
-                                                    v.id = generateViewID(a)
-                                                    setView(a, v, parent)
-                                                    sendMessage(out, gson.toJson(v.id))
+                                                    var id = -1
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        val v = NestedScrollView(it)
+                                                        id = generateViewID(it)
+                                                        v.id = id
+                                                        setView(it, v, parent)
+                                                    }
+                                                    sendMessage(out, gson.toJson(id))
                                                     continue
                                                 }
                                             }
@@ -690,14 +773,15 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                                 }
                                             }
                                         }
+                                        continue
                                     }
                                     "deleteView" -> {
                                         val aid = m.params?.get("aid")?.asString
                                         val id = m.params?.get("id")?.asInt
                                         val a = activities[aid]
                                         if (a != null && id != null) {
-                                            runOnUIThreadBlocking {
-                                                removeViewRecursive(a, a.view?.findViewById(id))
+                                            runOnUIThreadActivityStarted(a) {
+                                                removeViewRecursive(it.findViewById(id))
                                             }
                                         }
                                         continue
@@ -709,8 +793,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val size = m.params?.get("size")?.asInt
                                             val a = activities[aid]
                                             if (a != null && id != null && size != null && size > 0) {
-                                                runOnUIThreadBlocking {
-                                                    val tv = a.view?.findViewById<TextView>(id)
+                                                runOnUIThreadActivityStarted(a) {
+                                                    val tv = it.findViewById<TextView>(id)
                                                     tv?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
                                                 }
                                             }
@@ -723,10 +807,10 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val id = m.params?.get("id")?.asInt
                                         val img = m.params?.get("img")?.asString
                                         if (img != null && a != null && id != null) {
-                                            runOnUIThreadBlocking {
+                                            runOnUIThreadActivityStarted(a) {
                                                 val bin = Base64.decode(img, Base64.DEFAULT)
                                                 val bitmap = BitmapFactory.decodeByteArray(bin, 0, bin.size)
-                                                a.view?.findViewById<ImageView>(id)?.setImageBitmap(bitmap)
+                                                it.findViewById<ImageView>(id)?.setImageBitmap(bitmap)
                                             }
                                         }
                                         continue
@@ -737,22 +821,19 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val id = m.params?.get("id")?.asInt
                                             val margin = m.params?.get("margin")?.asInt
                                             val a = activities[aid]
-                                            val ac = getFragmentActivityBlocking(a, activities)
-                                            if (id != null && margin != null) {
-                                                if (ac != null && a != null) {
-                                                    runOnUIThreadBlocking {
-                                                        val mar = toPX(ac, margin)
-                                                        val v = a.view?.findViewById<View>(id)
-                                                        val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
-                                                        when (m.params?.get("dir")?.asString) {
-                                                            "top" -> p?.topMargin = mar
-                                                            "bottom" -> p?.bottomMargin = mar
-                                                            "left" -> p?.marginStart = mar
-                                                            "right" -> p?.marginEnd = mar
-                                                            else -> p?.setMargins(mar, mar, mar, mar)
-                                                        }
-                                                        v?.layoutParams = p
+                                            if (id != null && margin != null && a != null) {
+                                                runOnUIThreadActivityStarted(a) {
+                                                    val mar = toPX(it, margin)
+                                                    val v = it.findViewById<View>(id)
+                                                    val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
+                                                    when (m.params?.get("dir")?.asString) {
+                                                        "top" -> p?.topMargin = mar
+                                                        "bottom" -> p?.bottomMargin = mar
+                                                        "left" -> p?.marginStart = mar
+                                                        "right" -> p?.marginEnd = mar
+                                                        else -> p?.setMargins(mar, mar, mar, mar)
                                                     }
+                                                    v?.layoutParams = p
                                                 }
                                             }
                                         }
@@ -764,8 +845,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val id = m.params?.get("id")?.asInt
                                         val weight = m.params?.get("weight")?.asInt
                                         if (a != null && id != null && weight != null) {
-                                            runOnUIThreadBlocking {
-                                                val v = a.view?.findViewById<View>(id)
+                                            runOnUIThreadActivityStarted(a) {
+                                                val v = it.findViewById<View>(id)
                                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                                 if (p != null) {
                                                     p.weight = weight.toFloat()
@@ -782,8 +863,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val text = m.params?.get("text")?.asString
                                             val a = activities[aid]
                                             if (a != null && id != null) {
-                                                runOnUIThreadBlocking {
-                                                    val tv = a.view?.findViewById<TextView>(id)
+                                                runOnUIThreadActivityStarted(a) {
+                                                    val tv = it.findViewById<TextView>(id)
                                                     tv?.text = text
                                                 }
                                             }
@@ -797,8 +878,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             var text: String? = null
                                             val a = activities[aid]
                                             if (a != null && id != null) {
-                                                runOnUIThreadBlocking {
-                                                    text = a.view?.findViewById<TextView>(id)?.text?.toString()
+                                                runOnUIThreadActivityStartedBlocking(a) {
+                                                    text = it.findViewById<TextView>(id)?.text?.toString()
                                                 }
                                             }
                                             sendMessage(out, gson.toJson(text ?: ""))
@@ -878,8 +959,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val id = m.params?.get("id")?.asInt
                                         val buffer = buffers[m.params?.get("bid")?.asInt]
                                         if (buffer != null && a != null && id != null) {
-                                            runOnUIThreadBlocking {
-                                                a.view?.findViewById<ImageView>(id)?.setImageBitmap(buffer.btm)
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.findViewById<ImageView>(id)?.setImageBitmap(buffer.btm)
                                             }
                                         }
                                         continue
@@ -889,8 +970,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val a = activities[aid]
                                         val id = m.params?.get("id")?.asInt
                                         if (a != null && id != null) {
-                                            runOnUIThreadBlocking {
-                                                a.view?.findViewById<ImageView>(id)?.invalidate()
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.findViewById<ImageView>(id)?.invalidate()
                                             }
                                         }
                                         continue
@@ -900,6 +981,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         if (wid != null && ! widgets.containsKey(wid)) {
                                             widgets[wid] = WidgetRepresentation(TreeSet(), null, null)
                                         }
+                                        continue
                                     }
                                     "blitWidget" -> {
                                         val wid = m.params?.get("wid")?.asInt
@@ -908,6 +990,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             println("updated widget")
                                             app.getSystemService(AppWidgetManager::class.java).updateAppWidget(wid, root)
                                         }
+                                        continue
                                     }
                                     "clearWidget" -> {
                                         val wid = m.params?.get("wid")?.asInt
@@ -916,8 +999,10 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             v.root = null
                                             v.usedIds.clear()
                                         }
+                                        continue
                                     }
                                 }
+                                eventQueue.offer(INVALID_METHOD)
                             }
                             0 -> {
                                 
@@ -937,12 +1022,17 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
             }
             e.printStackTrace()
         } finally {
-            println("cleanup")
             eventWorker?.interrupt()
+            println("cleanup")
             App.APP?.unregisterActivityLifecycleCallbacks(lifecycleCallbacks)
             for (t in tasks) {
                 try {
                     t.finishAndRemoveTask()
+                } catch (ignored: Exception) {}
+            }
+            for (a in activities.values) {
+                try {
+                    a.a?.finishAndRemoveTask()
                 } catch (ignored: Exception) {}
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -952,6 +1042,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                     b.btm.recycle() // this frees the bitmap memory
                 }
             }
+            
         }
     }
 
