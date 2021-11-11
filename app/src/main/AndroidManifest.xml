@@ -5,7 +5,8 @@
     android:sharedUserId="com.termux">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    
     <application
         android:name=".App"
         android:allowBackup="false"
@@ -44,7 +45,7 @@
         </activity>
         <activity
             android:name=".GUIActivity"
-            android:configChanges=""
+            android:configChanges="uiMode|locale|screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
             android:supportsPictureInPicture="true" />
         <activity

@@ -1,20 +1,19 @@
 
 
-[ ] add events to a queue to send them in a background thread per connection, so the ui thread doesn't block when the program doesn't read the events
 
 
 [ ] implement the rest of the already specified methods
 
-[ ] save the view state with saveinstancestate and restore it after a configuration change, so that the views don't have references to the old activity
 [ ] ability to make ImageView focusable, so the virtual keyboard gets activated when it is tapped and you can receive keyevents. That enables you to create custom views.
 
 
-[ ] screen wakelock to keep the screen on
-[ ] Activity lifecycle events
-[ ] support for locking orientation: Activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-[ ] PiP events (enter/exit, onUserLeaveHint), entering and exiting pip manually via setPiPMode
+[ ] for all supported views and layouts check if restoring the state works
+
+[x] screen wakelock to keep the screen on
+[x] Activity lifecycle events
+[x] support for locking orientation: Activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 [ ] system overlay window support
-[ ] Action Bar with elements
+[ ] Action Bar with elements: https://developer.android.com/training/appbar/setting-up
 [ ] App widgets
     [ ] only 1 depth layouts, because the IDs can't be changed
         [ ] or have 10 different layout files for each view type with 10 different ids, that allows a bit of nesting
@@ -31,19 +30,14 @@
 [ ] method to check dark mode and other configuration variables
 [ ] register dynamic broadcast receivers for things like language chance, airplane mode and other useful events and relay them to the program
     - ACTION_AIRPLANE_MODE_CHANGED
-    - ACTION_BATTERY_LOW
-    - ACTION_BATTERY_OKAY
-    - ACTION_DEVICE_STORAGE_LOW
-    - ACTION_DEVICE_STORAGE_OK
     - ACTION_LOCALE_CHANGED
-    - ACTION_BATTERY_CHANGED
     - ACTION_SCREEN_OFF
     - ACTION_SCREEN_ON
     - ACTION_TIMEZONE_CHANGED
 [ ] setting explicit size for views
 [ ] setting ImageView size in px, so it can be exactly the size of the bitmap buffer 
 [ ] or query the current size of the ImageView to use a new buffer
-[ ] Toasts
+[x] Toasts
 
 
 

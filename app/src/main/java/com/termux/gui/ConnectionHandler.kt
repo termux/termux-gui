@@ -1,11 +1,14 @@
 package com.termux.gui
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.PixelFormat
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.net.Uri
@@ -13,13 +16,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.os.SharedMemory
+import android.provider.Settings
 import android.util.Base64
 import android.util.Rational
 import android.util.TypedValue
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import android.widget.*
+import androidx.core.view.ScaleGestureDetectorCompat
 import androidx.core.widget.NestedScrollView
 import com.google.gson.Gson
 import com.google.gson.JsonElement
@@ -70,9 +73,41 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory, val buff: ByteBuffer)
     data class WidgetRepresentation(val usedIds: TreeSet<Int> = TreeSet(), var root: RemoteViews?, var theme: GUIActivity.GUITheme?)
     data class ActivityState(var a: GUIActivity?, @Volatile var saved: Boolean = false, val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(10000))
+    data class Overlay(val context: Context) {
+        class OverlayView(c: Context) : FrameLayout(c) {
+            var interceptListener : ((MotionEvent) -> Unit)? = null
+            override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+                val int = interceptListener
+                if (int != null && ev != null) {
+                    int(ev)
+                }
+                return false
+            }
+            fun inside(ev: MotionEvent) : Boolean {
+                val loc = IntArray(2)
+                getLocationOnScreen(loc)
+                val x = ev.rawX
+                val y = ev.rawY
+                if (x < loc[0] || x > loc[0]+width || y < loc[1] || y > loc[1]+height) {
+                    return false
+                }
+                return true
+            }
+        }
+        val usedIds: TreeSet<Int> = TreeSet()
+        var theme: GUIActivity.GUITheme? = null
+        var sendTouch = false
+        val root = OverlayView(context)
+        init {
+            usedIds.add(R.id.root)
+            root.id = R.id.root
+        }
+    }
+    
+    
     
     @Suppress("DEPRECATION")
-    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, overlay: Boolean): String {
+    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean): String {
         //println("ptid: $ptid")
         val i = Intent(app, GUIActivity::class.java)
         if (ptid == null) {
@@ -93,9 +128,6 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
             }
             lockscreen -> { // dialog overrides lockscreen
                 i.setClass(app, GUIActivityLockscreen::class.java)
-            }
-            overlay -> {
-
             }
         }
         
@@ -154,6 +186,15 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         return id
     }
 
+    private fun generateViewIDRaw(usedIds: MutableSet<Int>): Int {
+        var id = rand.nextInt(Integer.MAX_VALUE)
+        while (usedIds.contains(id)) {
+            id = rand.nextInt(Integer.MAX_VALUE)
+        }
+        usedIds.add(id)
+        return id
+    }
+
     private fun generateWidgetViewID(w: WidgetRepresentation): Int {
         var id = rand.nextInt(Integer.MAX_VALUE)
         synchronized(w.usedIds) {
@@ -172,8 +213,23 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         }
         return id
     }
-    
-    
+
+    private fun runOnUIThreadBlocking(r: Runnable) {
+        var e: Exception? = null
+        runBlocking(Dispatchers.Main) {
+            launch {
+                try {
+                    r.run()
+                } catch (ex: java.lang.Exception) {
+                    e = ex
+                }
+            }
+        }
+        val ex = e
+        if (ex != null) {
+            throw ex
+        }
+    }
 
     private fun runOnUIThreadActivityStarted(a: ActivityState, r: (activity: GUIActivity) -> Unit) {
         var e: Exception? = null
@@ -228,7 +284,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     
     
     
-    fun setView(a: GUIActivity, v: View, parent: Int?) {
+    private fun setViewActivity(a: GUIActivity, v: View, parent: Int?) {
         val t = a.theme
         if (t != null) {
             if (v is TextView) {
@@ -257,7 +313,42 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         }
     }
 
-
+    private fun setViewOverlay(o: Overlay, v: View, parent: Int?) {
+        val t = o.theme
+        if (v is TextView) {
+            if (t != null) {
+                v.setTextColor(t.textColor)
+            } else {
+                v.setTextColor((0xffffffff).toInt())
+            }
+        }
+        if (parent == null) {
+            if (t != null) {
+                v.setBackgroundColor(t.windowBackground)
+            } else {
+                v.setBackgroundColor((0xff000000).toInt())
+            }
+            val fl = o.root
+            println("removing views")
+            fl.removeAllViews()
+            println("adding view")
+            fl.addView(v)
+        } else {
+            val g = o.root.findViewById<ViewGroup>(parent)
+            if (g is LinearLayout) {
+                val p = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1F)
+                if (g.orientation == LinearLayout.VERTICAL) {
+                    p.width = LinearLayout.LayoutParams.MATCH_PARENT
+                } else {
+                    p.height = LinearLayout.LayoutParams.MATCH_PARENT
+                }
+                v.layoutParams = p
+            }
+            g?.addView(v)
+        }
+    }
+    
+    
     private fun setViewWidget(w: WidgetRepresentation, v: RemoteViews, parent: Int?, id: Int) {
         if (parent == null) {
             if (w.theme != null) {
@@ -273,15 +364,21 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     
     
 
-    private fun removeViewRecursive(v: View?) {
+    private fun removeViewRecursive(v: View?, usedIds: MutableSet<Int>) {
         if (v is ViewGroup) {
-            removeViewRecursive(v)
+            removeViewRecursive(v, usedIds)
+            val p = v.parent
+            if (p is ViewGroup) {
+                p.removeView(v)
+            }
+            usedIds.remove(v.id)
         } else {
             if (v != null) {
                 val p = v.parent
                 if (p is ViewGroup) {
                     p.removeView(v)
                 }
+                usedIds.remove(v.id)
             }
         }
     }
@@ -289,6 +386,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
     
     
     
+    @SuppressLint("ClickableViewAccessibility")
     @Suppress("DEPRECATION")
     override fun run() {
         println("Socket address: " + request.mainSocket)
@@ -297,13 +395,13 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         val event = LocalSocket(LocalSocket.SOCKET_STREAM)
         
         val am = app.getSystemService(ActivityManager::class.java)
-        
+        val wm = app.getSystemService(WindowManager::class.java)
         
         val tasks = LinkedList<ActivityManager.AppTask>()
         val activities = Collections.synchronizedMap(HashMap<String,ActivityState>())
         val buffers: MutableMap<Int, SharedBuffer> = HashMap()
         val widgets: MutableMap<Int,WidgetRepresentation> = HashMap()
-        
+        val overlays = Collections.synchronizedMap(HashMap<String,Overlay>())
         
         
         fun getTaskInfo(task: ActivityManager.AppTask): ActivityManager.RecentTaskInfo? {
@@ -321,7 +419,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                 info.id
             }
         }
-        fun toPX(a: GUIActivity, dip: Int): Int {
+        fun toPX(a: Context, dip: Int): Int {
             return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip.toFloat(), a.resources.displayMetrics).roundToInt()
         }
         
@@ -384,7 +482,12 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             }
                                         }
                                     }
+                                    a.eventQueue = eventQueue
                                     f.a = a
+                                    val map = HashMap<String, Any?>()
+                                    map["finishing"] = a.isFinishing
+                                    map["aid"] = a.intent?.dataString
+                                    eventQueue.offer(Event("create", gson.toJsonTree(map)))
                                 }
                             }
                         }
@@ -402,15 +505,44 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             e.printStackTrace()
                                         }
                                     }
+                                    val map = HashMap<String, Any?>()
+                                    map["finishing"] = a.isFinishing
+                                    map["aid"] = a.intent?.dataString
+                                    eventQueue.offer(Event("start", gson.toJsonTree(map)))
                                 }
                             }
                         }
                         override fun onActivityResumed(a: Activity) {
                             println("resume")
-                            
+                            try {
+                                if (a is GUIActivity) {
+                                    val f = activities[a.intent?.dataString]
+                                    if (f != null) {
+                                        val map = HashMap<String, Any?>()
+                                        map["finishing"] = a.isFinishing
+                                        map["aid"] = a.intent?.dataString
+                                        eventQueue.add(Event("resume", gson.toJsonTree(map)))
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
                         override fun onActivityPaused(a: Activity) {
                             println("pause")
+                            try {
+                                if (a is GUIActivity) {
+                                    val f = activities[a.intent?.dataString]
+                                    if (f != null) {
+                                        val map = HashMap<String, Any?>()
+                                        map["finishing"] = a.isFinishing
+                                        map["aid"] = a.intent?.dataString
+                                        eventQueue.add(Event("pause", gson.toJsonTree(map)))
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
                         override fun onActivityStopped(a: Activity) {
                             println("stop")
@@ -448,14 +580,16 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                 if (a is GUIActivity) {
                                     val aid = a.intent?.dataString
                                     val f = activities[aid]
+                                    if (f != null) {
+                                        val map = HashMap<String, Any?>()
+                                        map["finishing"] = a.isFinishing
+                                        map["aid"] = a.intent?.dataString
+                                        eventQueue.add(Event("destroy", gson.toJsonTree(map)))
+                                    }
                                     if (a.isFinishing) {
                                         println("finishing")
                                         if (f != null) {
                                             activities.remove(aid)
-                                            val map = HashMap<String, Any?>()
-                                            map["finishing"] = a.isFinishing
-                                            map["aid"] = a.intent?.dataString
-                                            eventQueue.add(Event("destroy", gson.toJsonTree(map)))
                                         }
                                     } else {
                                         f?.a = null
@@ -496,18 +630,101 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                                 tasks.remove(t)
                                             }
                                         }
+                                        if (m.params?.get("overlay")?.asBoolean == true) {
+                                            if (! Settings.canDrawOverlays(app)) {
+                                                try {
+                                                    val a = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                                                    a.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                    a.data = Uri.parse(app.packageName)
+                                                    app.startActivity(a)
+                                                } catch (ignored: Exception) {
+                                                    runOnUIThreadBlocking {
+                                                        Toast.makeText(app, R.string.overlay_settings, Toast.LENGTH_LONG).show()
+                                                    }
+                                                }
+                                                sendMessage(out, gson.toJson(arrayOf("-1")))
+                                            } else {
+                                                val aid = Thread.currentThread().id.toString()+"-"+activityID.toString()
+                                                activityID++
+                                                val o = Overlay(app)
+                                                overlays[aid] = o
+                                                try {
+                                                    runOnUIThreadBlocking {
+                                                        val params = WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE, 0, PixelFormat.RGBA_8888)
+                                                        params.x = 0
+                                                        params.y = 0
+                                                        params.gravity = Gravity.START or Gravity.TOP
+                                                        params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                                        val scale = ScaleGestureDetector(app, object: ScaleGestureDetector.OnScaleGestureListener {
+                                                            override fun onScale(detector: ScaleGestureDetector?): Boolean {
+                                                                if (o.sendTouch) {
+                                                                    eventQueue.offer(Event("overlayScale", gson.toJsonTree(detector?.currentSpan)))
+                                                                }
+                                                                return true
+                                                            }
+
+                                                            override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+                                                                return true
+                                                            }
+
+                                                            override fun onScaleEnd(detector: ScaleGestureDetector?) {}
+                                                        })
+                                                        o.root.interceptListener = {e ->
+                                                            //println(e)
+                                                            if (o.sendTouch) {
+                                                                val map = HashMap<String, Any?>()
+                                                                map["x"] = e.rawX
+                                                                map["y"] = e.rawY
+                                                                map["action"] = when (e.action) {
+                                                                    MotionEvent.ACTION_DOWN -> "down"
+                                                                    MotionEvent.ACTION_UP -> "up"
+                                                                    MotionEvent.ACTION_MOVE -> "move"
+                                                                    else -> null
+                                                                }
+                                                                if (map["action"] != null) {
+                                                                    eventQueue.offer(Event("overlayTouch", gson.toJsonTree(map)))
+                                                                }
+                                                            }
+                                                            if (o.root.inside(e)) {
+                                                                scale.onTouchEvent(e)
+                                                                //println("inside")
+                                                                params.flags = 0
+                                                                wm.updateViewLayout(o.root, params)
+                                                            } else {
+                                                                //println("outside")
+                                                                params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                                                wm.updateViewLayout(o.root, params)
+                                                            }
+                                                        }
+                                                        
+                                                        wm.addView(o.root, params)
+                                                    }
+                                                    sendMessage(out, gson.toJson(aid))
+                                                } catch (e: Exception) {
+                                                    e.printStackTrace()
+                                                    overlays[aid] = null
+                                                    sendMessage(out, gson.toJson("-1"))
+                                                }
+                                            }
+                                            continue
+                                        }
                                         sendMessage(out, newActivityJSON(tasks, activities, m.params?.get("tid")?.asInt,
                                                 m.params?.get("pip")?.asBoolean ?: false, m.params?.get("dialog")?.asBoolean ?: false,
-                                                m.params?.get("lockscreen")?.asBoolean ?: false, m.params?.get("overlay")?.asBoolean ?: false))
+                                                m.params?.get("lockscreen")?.asBoolean ?: false))
                                         continue
                                     }
                                     "finishActivity" -> {
                                         val aid = m.params?.get("aid")?.asString
                                         val a = activities[aid]
+                                        val o = overlays[aid]
                                         if (a != null) {
                                             runOnUIThreadActivityStarted(a) {
                                                 it.finish()
                                             }
+                                        }
+                                        if (o != null) {
+                                            wm.removeView(o.root)
+                                            overlays[aid] = null
                                         }
                                         continue
                                     }
@@ -517,6 +734,16 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                     }
                                     "bringTaskToFront" -> {
                                         tasks.find { t -> getTaskInfo(t)?.let { it1 -> getTaskId(it1) } == m.params?.get("tid")?.asInt }?.moveToFront()
+                                        continue
+                                    }
+                                    "moveTaskToBack" -> {
+                                        val aid = m.params?.get("aid")?.asString
+                                        val a = activities[aid]
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.moveTaskToBack(true)
+                                            }
+                                        }
                                         continue
                                     }
                                     "setTheme" -> {
@@ -529,7 +756,8 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val ac = m.params?.get("colorAccent")?.asInt
                                         val wid = m.params?.get("wid")?.asInt
                                         val w = widgets[wid]
-                                        if ((a != null || w != null) && s != null && t != null && b != null && p != null && ac != null) {
+                                        val o = overlays[aid]
+                                        if ((a != null || w != null || o != null) && s != null && t != null && b != null && p != null && ac != null) {
                                             if (a != null) {
                                                 runOnUIThreadActivityStarted(a) {
                                                     it.theme = GUIActivity.GUITheme(s, p, b, t, ac)
@@ -537,6 +765,9 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             }
                                             if (w != null) {
                                                 w.theme = GUIActivity.GUITheme(s, p, b, t, ac)
+                                            }
+                                            if (o != null) {
+                                                o.theme = GUIActivity.GUITheme(s, p, b, t, ac)
                                             }
                                         }
                                         continue
@@ -595,138 +826,335 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         }
                                         continue
                                     }
+                                    "setPiPMode" -> {
+                                        val aid = m.params?.get("aid")?.asString
+                                        val pip = m.params?.get("pip")?.asBoolean ?: false
+                                        val a = activities[aid]
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                if (pip) {
+                                                    it.enterPictureInPictureMode()
+                                                } else {
+                                                    it.moveTaskToBack(true)
+                                                }
+                                            }
+                                        }
+                                        continue
+                                    }
+                                    "setPiPModeAuto" -> {
+                                        val aid = m.params?.get("aid")?.asString
+                                        val pip = m.params?.get("pip")?.asBoolean ?: false
+                                        val a = activities[aid]
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.data.autopip = pip
+                                            }
+                                        }
+                                        continue
+                                    }
+                                    "toast" -> {
+                                        val text = m.params?.get("text")?.asString ?: ""
+                                        val long = m.params?.get("long")?.asBoolean ?: false
+                                        runOnUIThreadBlocking {
+                                            Toast.makeText(app, text, if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+                                        }
+                                        continue
+                                    }
+                                    "keepScreenOn" -> {
+                                        val aid = m.params?.get("aid")?.asString
+                                        val on = m.params?.get("on")?.asBoolean ?: false
+                                        val a = activities[aid]
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                if (on) {
+                                                    it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                                } else {
+                                                    it.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                                }
+                                            }
+                                        }
+                                        continue
+                                    }
+                                    "setOrientation" -> {
+                                        val aid = m.params?.get("aid")?.asString
+                                        val orientation = m.params?.get("orientation")?.asString
+                                        val a = activities[aid]
+                                        if (a != null && orientation != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.requestedOrientation = when (orientation) {
+                                                    "behind" -> ActivityInfo.SCREEN_ORIENTATION_BEHIND
+                                                    "fullSensor" -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                                                    "fullUser" -> ActivityInfo.SCREEN_ORIENTATION_FULL_USER
+                                                    "landscape" -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                                                    "locked" -> ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                                                    "nosensor" -> ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+                                                    "portrait" -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                                                    "reverseLandscape" -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                                                    "reversePortrait" -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                                                    "sensorLandscape" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                                                    "sensorPortrait" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                                                    "user" -> ActivityInfo.SCREEN_ORIENTATION_USER
+                                                    "userLandscape" -> ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+                                                    "userPortrait" -> ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+                                                    else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                                                }
+                                            }
+                                        }
+                                        continue
+                                    }
                                     // View and Layout Methods
                                     in Regex("create.*") -> {
                                         if (m.params != null) {
                                             val aid = m.params?.get("aid")?.asString
                                             val parent = m.params?.get("parent")?.asInt
                                             val a = activities[aid]
+                                            val o = overlays[aid]
                                             val wid = m.params?.get("wid")?.asInt
                                             val w = widgets[wid]
-                                            if (a != null && aid != null) {
-                                                if (m.method == "createTextView") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = TextView(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        v.text = m.params?.get("text")?.asString
-                                                        v.freezesText = true
-                                                        setView(it, v, parent)
-                                                    }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
-                                                }
-                                                if (m.method == "createEditText") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = EditText(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
-                                                        setView(it, v, parent)
-                                                    }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
-                                                }
-                                                if (m.method == "createLinearLayout") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = LinearLayout(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        v.orientation = if (m.params?.get("vertical")?.asBoolean != false) {
-                                                            LinearLayout.VERTICAL
-                                                        } else {
-                                                            LinearLayout.HORIZONTAL
+                                            println(o)
+                                            if (aid != null) {
+                                                if (a != null) {
+                                                    if (m.method == "createTextView") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = TextView(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            v.text = m.params?.get("text")?.asString
+                                                            v.freezesText = true
+                                                            setViewActivity(it, v, parent)
                                                         }
-                                                        setView(it, v, parent)
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
                                                     }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
-                                                }
-                                                if (m.method == "createButton") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = Button(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        v.text = m.params?.get("text")?.asString
-                                                        v.freezesText = true
-                                                        val map = HashMap<String, Any>()
-                                                        map["id"] = v.id
-                                                        map["aid"] = aid
-                                                        v.setOnClickListener { eventQueue.offer(Event("click", gson.toJsonTree(map))) }
-                                                        setView(it, v, parent)
-                                                    }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
-                                                }
-                                                if (m.method == "createImageView") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = ImageView(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        setView(it, v, parent)
-                                                    }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
-                                                }
-                                                if (m.method == "createSpace") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = Space(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        setView(it, v, parent)
-                                                    }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
-                                                }
-                                                if (m.method == "createFrameLayout") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = FrameLayout(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        setView(it, v, parent)
-                                                    }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
-                                                }
-                                                if (m.method == "createCheckbox") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = CheckBox(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        v.text = m.params?.get("text")?.asString
-                                                        v.isChecked = m.params?.get("checked")?.asBoolean
-                                                                ?: false
-                                                        v.freezesText = true
-                                                        val map = HashMap<String, Any>()
-                                                        map["id"] = v.id
-                                                        map["aid"] = aid
-                                                        v.setOnClickListener {
-                                                            map["set"] = v.isChecked
-                                                            eventQueue.offer(Event("click", gson.toJsonTree(map)))
+                                                    if (m.method == "createEditText") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = EditText(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
+                                                            setViewActivity(it, v, parent)
                                                         }
-                                                        setView(it, v, parent)
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
                                                     }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
+                                                    if (m.method == "createLinearLayout") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = LinearLayout(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            v.orientation = if (m.params?.get("vertical")?.asBoolean != false) {
+                                                                LinearLayout.VERTICAL
+                                                            } else {
+                                                                LinearLayout.HORIZONTAL
+                                                            }
+                                                            setViewActivity(it, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createButton") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = Button(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            v.text = m.params?.get("text")?.asString
+                                                            v.freezesText = true
+                                                            val map = HashMap<String, Any>()
+                                                            map["id"] = v.id
+                                                            map["aid"] = aid
+                                                            v.setOnClickListener { eventQueue.offer(Event("click", gson.toJsonTree(map))) }
+                                                            setViewActivity(it, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createImageView") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = ImageView(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            setViewActivity(it, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createSpace") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = Space(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            setViewActivity(it, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createFrameLayout") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = FrameLayout(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            setViewActivity(it, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createCheckbox") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = CheckBox(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            v.text = m.params?.get("text")?.asString
+                                                            v.isChecked = m.params?.get("checked")?.asBoolean
+                                                                    ?: false
+                                                            v.freezesText = true
+                                                            val map = HashMap<String, Any>()
+                                                            map["id"] = v.id
+                                                            map["aid"] = aid
+                                                            v.setOnClickListener {
+                                                                map["set"] = v.isChecked
+                                                                eventQueue.offer(Event("click", gson.toJsonTree(map)))
+                                                            }
+                                                            setViewActivity(it, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createNestedScrollView") {
+                                                        var id = -1
+                                                        runOnUIThreadActivityStartedBlocking(a) {
+                                                            val v = NestedScrollView(it)
+                                                            id = generateViewID(it)
+                                                            v.id = id
+                                                            setViewActivity(it, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
                                                 }
-                                                if (m.method == "createNestedScrollView") {
-                                                    var id = -1
-                                                    runOnUIThreadActivityStartedBlocking(a) {
-                                                        val v = NestedScrollView(it)
-                                                        id = generateViewID(it)
-                                                        v.id = id
-                                                        setView(it, v, parent)
+                                                if (o != null) {
+                                                    if (m.method == "createTextView") {
+                                                        val v = TextView(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            v.text = m.params?.get("text")?.asString
+                                                            v.freezesText = true
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
                                                     }
-                                                    sendMessage(out, gson.toJson(id))
-                                                    continue
+                                                    if (m.method == "createEditText") {
+                                                        val v = EditText(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createLinearLayout") {
+                                                        val v = LinearLayout(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            v.orientation = if (m.params?.get("vertical")?.asBoolean != false) {
+                                                                LinearLayout.VERTICAL
+                                                            } else {
+                                                                LinearLayout.HORIZONTAL
+                                                            }
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createButton") {
+                                                        val v = Button(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            v.text = m.params?.get("text")?.asString
+                                                            v.freezesText = true
+                                                            val map = HashMap<String, Any>()
+                                                            map["id"] = v.id
+                                                            map["aid"] = aid
+                                                            v.setOnClickListener { eventQueue.offer(Event("click", gson.toJsonTree(map))) }
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createImageView") {
+                                                        val v = ImageView(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createSpace") {
+                                                        val v = Space(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createFrameLayout") {
+                                                        val v = FrameLayout(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createCheckbox") {
+                                                        val v = CheckBox(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            v.text = m.params?.get("text")?.asString
+                                                            v.isChecked = m.params?.get("checked")?.asBoolean
+                                                                    ?: false
+                                                            v.freezesText = true
+                                                            val map = HashMap<String, Any>()
+                                                            map["id"] = v.id
+                                                            map["aid"] = aid
+                                                            v.setOnClickListener {
+                                                                map["set"] = v.isChecked
+                                                                eventQueue.offer(Event("click", gson.toJsonTree(map)))
+                                                            }
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
+                                                    if (m.method == "createNestedScrollView") {
+                                                        val v = NestedScrollView(app)
+                                                        val id = generateViewIDRaw(o.usedIds)
+                                                        runOnUIThreadBlocking {
+                                                            v.id = id
+                                                            setViewOverlay(o, v, parent)
+                                                        }
+                                                        sendMessage(out, gson.toJson(id))
+                                                        continue
+                                                    }
                                                 }
                                             }
                                             if (wid != null && w != null) {
@@ -779,9 +1207,15 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val aid = m.params?.get("aid")?.asString
                                         val id = m.params?.get("id")?.asInt
                                         val a = activities[aid]
+                                        val o = overlays[aid]
                                         if (a != null && id != null) {
                                             runOnUIThreadActivityStarted(a) {
-                                                removeViewRecursive(it.findViewById(id))
+                                                removeViewRecursive(it.findViewById(id), it.usedIds)
+                                            }
+                                        }
+                                        if (o != null && id != null) {
+                                            runOnUIThreadBlocking {
+                                                removeViewRecursive(o.root.findViewById(id), o.usedIds)
                                             }
                                         }
                                         continue
@@ -792,10 +1226,18 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val id = m.params?.get("id")?.asInt
                                             val size = m.params?.get("size")?.asInt
                                             val a = activities[aid]
-                                            if (a != null && id != null && size != null && size > 0) {
-                                                runOnUIThreadActivityStarted(a) {
-                                                    val tv = it.findViewById<TextView>(id)
-                                                    tv?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
+                                            val o = overlays[aid]
+                                            if (id != null && size != null && size > 0) {
+                                                if (a != null) {
+                                                    runOnUIThreadActivityStarted(a) {
+                                                        val tv = it.findViewById<TextView>(id)
+                                                        tv?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
+                                                    }
+                                                }
+                                                if (o != null) {
+                                                    runOnUIThreadBlocking {
+                                                        o.root.findViewById<TextView>(id)?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
+                                                    }
                                                 }
                                             }
                                         }
@@ -806,13 +1248,24 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val a = activities[aid]
                                         val id = m.params?.get("id")?.asInt
                                         val img = m.params?.get("img")?.asString
-                                        if (img != null && a != null && id != null) {
-                                            runOnUIThreadActivityStarted(a) {
+                                        val o = overlays[aid]
+                                        if (img != null && id != null) {
+                                            if (a != null) {
+                                                runOnUIThreadActivityStarted(a) {
+                                                    val bin = Base64.decode(img, Base64.DEFAULT)
+                                                    val bitmap = BitmapFactory.decodeByteArray(bin, 0, bin.size)
+                                                    it.findViewById<ImageView>(id)?.setImageBitmap(bitmap)
+                                                }
+                                            }
+                                            if (o != null) {
                                                 val bin = Base64.decode(img, Base64.DEFAULT)
                                                 val bitmap = BitmapFactory.decodeByteArray(bin, 0, bin.size)
-                                                it.findViewById<ImageView>(id)?.setImageBitmap(bitmap)
+                                                runOnUIThreadBlocking {
+                                                    o.root.findViewById<ImageView>(id)?.setImageBitmap(bitmap)
+                                                }
                                             }
                                         }
+                                        
                                         continue
                                     }
                                     "setMargin" -> {
@@ -821,19 +1274,37 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val id = m.params?.get("id")?.asInt
                                             val margin = m.params?.get("margin")?.asInt
                                             val a = activities[aid]
-                                            if (id != null && margin != null && a != null) {
-                                                runOnUIThreadActivityStarted(a) {
-                                                    val mar = toPX(it, margin)
-                                                    val v = it.findViewById<View>(id)
-                                                    val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
-                                                    when (m.params?.get("dir")?.asString) {
-                                                        "top" -> p?.topMargin = mar
-                                                        "bottom" -> p?.bottomMargin = mar
-                                                        "left" -> p?.marginStart = mar
-                                                        "right" -> p?.marginEnd = mar
-                                                        else -> p?.setMargins(mar, mar, mar, mar)
+                                            val o = overlays[aid]
+                                            if (id != null && margin != null) {
+                                                if (a != null) {
+                                                    runOnUIThreadActivityStarted(a) {
+                                                        val mar = toPX(it, margin)
+                                                        val v = it.findViewById<View>(id)
+                                                        val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
+                                                        when (m.params?.get("dir")?.asString) {
+                                                            "top" -> p?.topMargin = mar
+                                                            "bottom" -> p?.bottomMargin = mar
+                                                            "left" -> p?.marginStart = mar
+                                                            "right" -> p?.marginEnd = mar
+                                                            else -> p?.setMargins(mar, mar, mar, mar)
+                                                        }
+                                                        v?.layoutParams = p
                                                     }
-                                                    v?.layoutParams = p
+                                                }
+                                                if (o != null) {
+                                                    runOnUIThreadBlocking {
+                                                        val mar = toPX(app, margin)
+                                                        val v = o.root.findViewById<View>(id)
+                                                        val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
+                                                        when (m.params?.get("dir")?.asString) {
+                                                            "top" -> p?.topMargin = mar
+                                                            "bottom" -> p?.bottomMargin = mar
+                                                            "left" -> p?.marginStart = mar
+                                                            "right" -> p?.marginEnd = mar
+                                                            else -> p?.setMargins(mar, mar, mar, mar)
+                                                        }
+                                                        v?.layoutParams = p
+                                                    }
                                                 }
                                             }
                                         }
@@ -844,13 +1315,26 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val a = activities[aid]
                                         val id = m.params?.get("id")?.asInt
                                         val weight = m.params?.get("weight")?.asInt
-                                        if (a != null && id != null && weight != null) {
-                                            runOnUIThreadActivityStarted(a) {
-                                                val v = it.findViewById<View>(id)
-                                                val p = v?.layoutParams as? LinearLayout.LayoutParams
-                                                if (p != null) {
-                                                    p.weight = weight.toFloat()
-                                                    v.layoutParams = p
+                                        val o = overlays[aid]
+                                        if (id != null && weight != null) {
+                                            if (a != null) {
+                                                runOnUIThreadActivityStarted(a) {
+                                                    val v = it.findViewById<View>(id)
+                                                    val p = v?.layoutParams as? LinearLayout.LayoutParams
+                                                    if (p != null) {
+                                                        p.weight = weight.toFloat()
+                                                        v.layoutParams = p
+                                                    }
+                                                }
+                                            }
+                                            if (o != null) {
+                                                runOnUIThreadBlocking {
+                                                    val v = o.root.findViewById<View>(id)
+                                                    val p = v?.layoutParams as? LinearLayout.LayoutParams
+                                                    if (p != null) {
+                                                        p.weight = weight.toFloat()
+                                                        v.layoutParams = p
+                                                    }
                                                 }
                                             }
                                         }
@@ -862,10 +1346,18 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val id = m.params?.get("id")?.asInt
                                             val text = m.params?.get("text")?.asString
                                             val a = activities[aid]
-                                            if (a != null && id != null) {
-                                                runOnUIThreadActivityStarted(a) {
-                                                    val tv = it.findViewById<TextView>(id)
-                                                    tv?.text = text
+                                            val o = overlays[aid]
+                                            if (id != null) {
+                                                if (a != null) {
+                                                    runOnUIThreadActivityStarted(a) {
+                                                        val tv = it.findViewById<TextView>(id)
+                                                        tv?.text = text
+                                                    }
+                                                }
+                                                if (o != null) {
+                                                    runOnUIThreadBlocking {
+                                                        o.root.findViewById<TextView>(id)?.text = text
+                                                    }
                                                 }
                                             }
                                         }
@@ -877,9 +1369,17 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                             val id = m.params?.get("id")?.asInt
                                             var text: String? = null
                                             val a = activities[aid]
-                                            if (a != null && id != null) {
-                                                runOnUIThreadActivityStartedBlocking(a) {
-                                                    text = it.findViewById<TextView>(id)?.text?.toString()
+                                            val o = overlays[aid]
+                                            if (id != null) {
+                                                if (a != null) {
+                                                    runOnUIThreadActivityStartedBlocking(a) {
+                                                        text = it.findViewById<TextView>(id)?.text?.toString()
+                                                    }
+                                                }
+                                                if (o != null) {
+                                                    runOnUIThreadBlocking {
+                                                        text = o.root.findViewById<TextView>(id)?.text?.toString()
+                                                    }
                                                 }
                                             }
                                             sendMessage(out, gson.toJson(text ?: ""))
@@ -958,9 +1458,17 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val a = activities[aid]
                                         val id = m.params?.get("id")?.asInt
                                         val buffer = buffers[m.params?.get("bid")?.asInt]
-                                        if (buffer != null && a != null && id != null) {
-                                            runOnUIThreadActivityStarted(a) {
-                                                it.findViewById<ImageView>(id)?.setImageBitmap(buffer.btm)
+                                        val o = overlays[aid]
+                                        if (buffer != null && id != null) {
+                                            if (a != null) {
+                                                runOnUIThreadActivityStarted(a) {
+                                                    it.findViewById<ImageView>(id)?.setImageBitmap(buffer.btm)
+                                                }
+                                            }
+                                            if (o != null) {
+                                                runOnUIThreadBlocking {
+                                                    o.root.findViewById<ImageView>(id)?.setImageBitmap(buffer.btm)
+                                                }
                                             }
                                         }
                                         continue
@@ -969,9 +1477,17 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         val aid = m.params?.get("aid")?.asString
                                         val a = activities[aid]
                                         val id = m.params?.get("id")?.asInt
-                                        if (a != null && id != null) {
-                                            runOnUIThreadActivityStarted(a) {
-                                                it.findViewById<ImageView>(id)?.invalidate()
+                                        val o = overlays[aid]
+                                        if (id != null) {
+                                            if (a != null) {
+                                                runOnUIThreadActivityStarted(a) {
+                                                    it.findViewById<ImageView>(id)?.invalidate()
+                                                }
+                                            }
+                                            if (o != null) {
+                                                runOnUIThreadBlocking {
+                                                    o.root.findViewById<ImageView>(id)?.invalidate()
+                                                }
                                             }
                                         }
                                         continue
@@ -1001,6 +1517,18 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
                                         }
                                         continue
                                     }
+                                    // Event methods
+                                    in Regex("send.*Event") -> {
+                                        val aid = m.params?.get("aid")?.asString
+                                        val a = activities[aid]
+                                        val id = m.params?.get("id")?.asInt
+                                        val o = overlays[aid]
+                                        val send = m.params?.get("send")?.asBoolean ?: false
+                                        if (m.method == "sendOverlayTouchEvent" && o != null) {
+                                            o.sendTouch = send
+                                        }
+                                        continue
+                                    }
                                 }
                                 eventQueue.offer(INVALID_METHOD)
                             }
@@ -1024,6 +1552,9 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, servi
         } finally {
             eventWorker?.interrupt()
             println("cleanup")
+            for (o in overlays.values) {
+                wm.removeView(o.root)
+            }
             App.APP?.unregisterActivityLifecycleCallbacks(lifecycleCallbacks)
             for (t in tasks) {
                 try {

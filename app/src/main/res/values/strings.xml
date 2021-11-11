@@ -7,4 +7,5 @@
     <string name="copy_clipboard">Copy to clipboard</string>
     <string name="close">Close</string>
     <string name="widget_default_text">Use a program to fill this widget</string>
+    <string name="overlay_settings">Please enable overlays in the app permissions.</string>
 </resources>

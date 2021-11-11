@@ -50,7 +50,7 @@ These methods control Android [Activities](https://developer.android.com/referen
       - dialog: boolean value. If true, the Activity will be launched as a dialog.
       - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
       - lockscreen: displays this Activity on the lockscreen.
-      - overlay: uses a system overlay window to display above everything else.
+      - overlay: uses a system overlay window to display above everything else. Overlays are never in a Task and creating one doesn't return a Task id. Overlays don't get Activity lifecycle events.
 - finishActivity: Closes an Activity.
   - Parameters:
      - aid: The id of the Activity to close.
@@ -60,6 +60,9 @@ These methods control Android [Activities](https://developer.android.com/referen
 - bringTaskToFront: Shows a Task to the user if it wasn't already.
   - Parameters:
     - tid: The id of the Task to show.
+- moveTaskToBack: Makes the Task go into the background.
+  - Parameters:
+    - aid: The id of an Activity in the Task.
 - setTheme: Sets the theme for the activity. It only applies to newly created Views, so this should be set before any Views are added. The color has to be specified as an RGBA888 integer (in hex literals 0xaabbggrr).
   - Parameters:
     - aid: The Activity id.
@@ -85,7 +88,29 @@ These methods control Android [Activities](https://developer.android.com/referen
 - setPiPMode: Makes an Activity enter or exit pip mode.
   - Parameters:
     - aid: The id of the Activity.
-    - pip: Whether the Activity should be in pip mode or not.
+    - pip: Whether the Activity should be in pip mode or not. Exiting pip mode makes the Activity a background task, that is it's not immediately shown fullscreen to the user.
+- setPiPModeAuto: Whether or not an Activity should automatically enter pip mode when the user navigates away.
+  - Parameters:
+    - aid: The id of the Activity.
+    - pip: Whether or not an Activity should automatically enter pip mode when the user navigates away.
+- toast: Sends a [Toast](https://developer.android.com/guide/topics/ui/notifiers/toasts).
+  - Parameters:
+    - text: The text to display.
+    - long: true if the text should be displayed for longer.
+- keepScreenOn: Sets whether the screen should be kept on when an Activity shows.
+  - Parameters:
+    - aid: The id of the Activity.
+    - on: Whether the screen should be kept on.
+- setOrientation: Set the screen orientation (only when the activity is shown).
+  - Parameters:
+    - aid: The id of the Activity.
+    - orientation: Can be one of the values of the constant column in [this table](https://developer.android.com/reference/android/R.attr#screenOrientation).
+- setPosition: Can be used to set the Position of an overlay window in screen pixels.
+  - Parameters:
+    - aid: The id of the Activity.
+    - x
+    - y
+
 
 
 Layout and View control:  
@@ -222,6 +247,7 @@ Event control:
 
 Widgets:  
 App widget support only a subset of Views. See [remote views](https://developer.android.com/reference/android/widget/RemoteViews#public-constructors).  
+WARNING: This part will be re-worked due to limitations by Androids widget system.
 - bindWidget: Binds a widget to this connection, so you can perform actions on it. Returns 0 on success, another number on failure.
   - Parameters:
     - wid: The widget id.
@@ -269,11 +295,12 @@ Event types:
   - key
     - Additional value: key: the key that was pressed.
   - touch
-    - Additional values x,y: Coordinates in the View.
+    - Additional values x,y, action: Coordinates in the View, "down", "move" or "up"
   - refresh: Refresh triggered in a SwipeRefreshLayout
 - [Activity Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) :
   - values for all:
     - aid: The id of the Activity.
+  - create
   - start
   - resume
   - pause
@@ -291,6 +318,7 @@ Event types:
   - UserLeaveHint: Gets fired when the user leaves an Activity. Can be used to then make the Activity go into pip mode.
   - pipchanged: Gets fired when the Activity enters or exits pip mode.
     - value: whether the Activity is now in pip mode or not.
+  - overlayTouch: like touch, but is dispatched for every touch in an overlay window. The coordinates are the absolute screen coordinates
 
 
 

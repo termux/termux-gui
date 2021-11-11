@@ -1,5 +1,9 @@
 # Termux:GUI
 
+<img src="https://img.shields.io/github/v/release/tareksander/termux-gui?include_prereleases"/>
+<img src="https://img.shields.io/f-droid/v/com.termux.gui"/>
+
+
 This is a plugin for [Termux](https://github.com/termux/termux-app) that enables command line programs to use the native android GUI.  
   
 In the examples directory you can find demo videos and sample code.
