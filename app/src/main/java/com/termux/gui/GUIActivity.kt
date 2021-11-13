@@ -61,8 +61,6 @@ open class GUIActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             enterPictureInPictureMode()
             overridePendingTransition(0,0)
-        } else {
-            setTheme(R.style.Theme_TermuxGUI)
         }
         setContentView(R.layout.activity_gui)
         if (savedInstanceState != null) {
