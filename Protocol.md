@@ -146,11 +146,18 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - text: For Button, TextView and EditText, this is the initial Text.
     - vertical: For LinearLayout, this specifies if the Layout is vertical or horizontal. If not specified, vertical is assumed.
     - checked: Whether a RadioButton or Checkbox should be checked. Defaults to false.
-    - All possible parameters to set the Layout parameters, depending on the parent Layout.
+    - singleline: Whether an EditText should enable multiple lines to be entered.
+    - line: Whether the line below an EditText should be shown.
+- showCursor: Sets whether or not a cursor is shown in the EditText.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the View.
+    - show: A boolean.
 - setLinearLayoutParams: Sets the LinearLayout parameters for a View in a LinearLayout.
   - Parameters:
     - parent: The View id of the parent in the Layout hierarchy.
     - aid: The id of the Activity the View is in.
+    - id: The id of the View.
     - weight: Sets the Layout weight.
 - setRelativeLayoutParams: Sets the RelativeLayout parameters for a View in a RelativeLayout.
   - Parameters:
@@ -170,6 +177,10 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
 - deleteView: Deletes a View and its children from the Layout hierarchy.
   - Parameters:
     - id: The id of the View to delete.
+    - aid: The id of the Activity the View is in.
+- deleteChildren: Deletes the children of a View from the Layout hierarchy.
+  - Parameters:
+    - id: The id of the View.
     - aid: The id of the Activity the View is in.
 - setMargin: Sets the margin of a View.
   - Parameters:
@@ -229,6 +240,15 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
   - Parameters:
     - id: The View id of a ImageView.
     - aid: The id of the Activity the View is in.
+
+
+RecyclerViews:
+RecyclerViews can be used to display large datasets efficiently.  
+All methods that accept a View id can also additionally accept recyclerview as the id of a RecyclerView and recyclerindex as the index of the element in the list.  
+The View to act on is then searched in the specified item of the specified RecyclerView.  
+These can additionally be used for create* methods to set the item in the RecyclerView.  
+These limitations are there so that searching for a View doesn't lead to the whole dataset being searched.
+
 
 
 
@@ -310,15 +330,11 @@ Event types:
   - destroy:
     - value: finish whether or not the Activity is finishing. Only for destroy this is guaranteed to be accurate. The previous events may not report that. So if you want to save state when the Activity is destroyed, request that state when it is stopped instead.
 - Custom events:
-  - recitem: The plugin needs an item for a RecyclerView
-    - value:
-      - rec: the RecyclerView View id
-      - The id of the Activity the View is in.
-      - it: the index of the item required
   - UserLeaveHint: Gets fired when the user leaves an Activity. Can be used to then make the Activity go into pip mode.
   - pipchanged: Gets fired when the Activity enters or exits pip mode.
-    - value: whether the Activity is now in pip mode or not.
-  - overlayTouch: like touch, but is dispatched for every touch in an overlay window. The coordinates are the absolute screen coordinates
+    - value: Whether the Activity is now in pip mode or not.
+  - overlayTouch: Like touch, but is dispatched for every touch in an overlay window. The coordinates are the absolute screen coordinates
+  - overlayScale: 
 
 
 

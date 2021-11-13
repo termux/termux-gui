@@ -10,13 +10,15 @@ import android.os.IBinder
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import java.util.*
 import java.util.concurrent.*
+import kotlin.collections.HashSet
 
 class GUIService : Service() {
     class ConnectionRequest(val mainSocket: String?, val eventSocket: String?)
     
     
-    
+    val destroywatch = Collections.synchronizedSet(HashSet<Runnable>())
     private val pool = ThreadPoolExecutor(30, 30, 1, TimeUnit.SECONDS, ArrayBlockingQueue(10))
     private val requestWatcher: Thread
     private val notification: Notification
@@ -55,6 +57,11 @@ class GUIService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        for (r in destroywatch) {
+            try {
+                r.run()
+            } catch (ignored: Exception) {}
+        }
         requestWatcher.interrupt()
         pool.shutdownNow()
     }

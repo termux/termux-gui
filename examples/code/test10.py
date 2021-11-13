@@ -7,6 +7,7 @@ import json
 import base64
 import mmap
 import array
+import io
 
 
 def read_msg(s):
@@ -53,7 +54,7 @@ while len(ret) == 0:
 send_msg(connection, '{"method":"newActivity", "params": {"overlay": true} }')
 aid = (read_msg(connection))
 
-
+f = io.open(sys.argv[1], "w")
 
 
 #send_msg(connection, f'{{"method":"setTheme","params":{{"aid": "{aid}", "statusBarColor": {0xff003180},"colorPrimary": {0xffd1d1d1},"windowBackground": {0xffdedede},"textColor": {0xff000000},"colorAccent": {0xff003180} }} }}')
@@ -62,51 +63,42 @@ send_msg(connection, f'{{"method":"createLinearLayout", "params": {{"aid": "{aid
 root = read_msg(connection)
 
 
-send_msg(connection, f'{{"method":"createTextView", "params": {{"aid": "{aid}", "parent": {root}, "text": "Input Dialog" }} }}')
+send_msg(connection, f'{{"method":"createEditText", "params": {{"aid": "{aid}", "parent": {root}, "text": "", "line": false }} }}')
 tv = read_msg(connection)
 
-send_msg(connection, f'{{"method":"setTextSize", "params": {{"aid": "{aid}", "id": {tv}, "size": 30 }} }}')
-send_msg(connection, f'{{"method":"setMargin", "params": {{"aid": "{aid}", "id": {tv}, "margin": 10 }} }}')
+send_msg(connection, f'{{"method":"setMargin", "params": {{"aid": "{aid}", "id": {tv}, "margin": 2 }} }}')
+
+send_msg(connection, f'{{"method":"setWidth", "params": {{"aid": "{aid}", "id": {tv}, "width": 100 }} }}')
+send_msg(connection, f'{{"method":"setHeight", "params": {{"aid": "{aid}", "id": {tv}, "height": 100 }} }}')
+
+send_msg(connection, f'{{"method":"sendOverlayTouchEvent", "params": {{"aid": "{aid}", "send": true }} }}')
 
 
 
-send_msg(connection, f'{{"method":"createTextView", "params": {{"aid": "{aid}", "parent": {root}, "text": "In difference to Termux:API, you can create dialogs with custom Layouts." }} }}')
-tv2 = read_msg(connection)
-send_msg(connection, f'{{"method":"setMargin", "params": {{"aid": "{aid}", "id": {tv2}, "margin": 5 }} }}')
-
-send_msg(connection, f'{{"method":"createEditText", "params": {{"aid": "{aid}", "parent": {root} }} }}')
-et = read_msg(connection)
-
-send_msg(connection, f'{{"method":"setMargin", "params": {{"aid": "{aid}", "id": {et}, "margin": 5 }} }}')
-
-send_msg(connection, f'{{"method":"createCheckbox", "params": {{"aid": "{aid}", "parent": {root}, "text": "show next TextView" }} }}')
-check = read_msg(connection)
-
-send_msg(connection, f'{{"method":"setMargin", "params": {{"aid": "{aid}", "id": {check}, "margin": 5 }} }}')
-
-tv3 = None
-
-send_msg(connection, f'{{"method":"createButton", "params": {{"aid": "{aid}", "parent": {root}, "text": "submit" }} }}')
-bt = read_msg(connection)
-
-send_msg(connection, f'{{"method":"setMargin", "params": {{"aid": "{aid}", "id": {bt}, "margin": 5 }} }}')
-
-while True:
-    ev = read_msg(connection2)
-    if ev["type"] == "click" and ev["value"]["id"] == bt:
-        send_msg(connection, f'{{"method":"getText", "params": {{"aid": "{aid}", "id": {et} }} }}')
-        print(read_msg(connection))
-        
-        sys.exit()
-    if ev["type"] == "click" and ev["value"]["id"] == check:
-        checked = ev["value"]["set"]
-        if checked and tv3 == None:
-            send_msg(connection, f'{{"method":"createTextView", "params": {{"aid": "{aid}", "parent": {root}, "text": "And even change the Layout while the Dialog is showing." }} }}')
-            tv3 = read_msg(connection)
-            send_msg(connection, f'{{"method":"setMargin", "params": {{"aid": "{aid}", "id": {tv3}, "margin": 5 }} }}')
-        if not checked and tv3 != None:
-            send_msg(connection, f'{{"method":"deleteView", "params": {{"aid": "{aid}", "id": {tv3} }} }}')
-            tv3 = None
-    if ev["type"] == "overlayTouch":
-        
-            
+size = 100
+scale = 0
+try:
+    while True:
+        ev = read_msg(connection2)
+        if ev["type"] == "overlayScale":
+            if scale != 0:
+                size = size + (scale - ev["value"])/5
+            scale = ev["value"]
+            send_msg(connection, f'{{"method":"setWidth", "params": {{"aid": "{aid}", "id": {tv}, "width": {int(size)} }} }}')
+            send_msg(connection, f'{{"method":"setHeight", "params": {{"aid": "{aid}", "id": {tv}, "height": {int(size)} }} }}')
+        if ev["type"] == "overlayTouch":
+            #print("touch")
+            if scale != 0:
+                #print("drag")
+                if ev["value"]["action"] == "up":
+                    scale = 0
+                else:
+                    send_msg(connection, f'{{"method":"setPosition", "params": {{"aid": "{aid}", "x": {int(ev["value"]["x"])}, "y": {int(ev["value"]["y"])} }} }}')
+                
+except:
+    try:
+        print()
+        send_msg(connection, f'{{"method":"getText", "params": {{"aid": "{aid}", "id": {tv} }} }}')
+        f.write(read_msg(connection))
+    except:
+        pass

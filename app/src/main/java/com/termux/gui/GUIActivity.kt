@@ -3,13 +3,17 @@ package com.termux.gui
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Parcelable
+import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import java.io.Serializable
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
+import kotlin.collections.HashMap
 
 open class GUIActivity : AppCompatActivity() {
     
@@ -24,6 +28,7 @@ open class GUIActivity : AppCompatActivity() {
         private const val IDS_KEY = "gui_used_ids"
         private const val VIEWS_KEY = "gui_views"
         private const val DATA_KEY = "gui_data"
+        private const val RECYCLERVIEWS_KEY = "rec_data"
     }
     val usedIds: TreeSet<Int> = TreeSet()
     init {
@@ -43,7 +48,10 @@ open class GUIActivity : AppCompatActivity() {
     
     data class GUITheme(val statusBarColor: Int, val colorPrimary: Int, var windowBackground: Int, val textColor: Int, val colorAccent: Int) : Serializable
     var eventQueue : LinkedBlockingQueue<ConnectionHandler.Event>? = null
-    
+
+    val recyclerviews = HashMap<Int, GUIRecyclerViewAdapter>()
+
+    @Suppress("UNCHECKED_CAST")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         println("oncreate activity")
@@ -74,6 +82,17 @@ open class GUIActivity : AppCompatActivity() {
             val tree = savedInstanceState.getSerializable(VIEWS_KEY) as? Node
             if (tree != null) {
                 findViewById<FrameLayout>(R.id.root).addView(buildHierarchyFromTree(tree))
+            }
+            val recs = savedInstanceState.getSerializable(RECYCLERVIEWS_KEY) as? HashMap<Int, Pair<LinkedList<GUIRecyclerViewAdapter.ViewData>, Pair<LinkedList<Node>, LinkedList<SparseArray<Parcelable>>>>>
+            if (recs != null) {
+                for (r in recs) {
+                    val rec = GUIRecyclerViewAdapter(this)
+                    for (i in 0 until r.value.first.size) {
+                        r.value.first[i].v = buildHierarchyFromTree(r.value.second.first[i])
+                        r.value.first[i].v.restoreHierarchyState(r.value.second.second[i])
+                    }
+                    rec.importViewList(r.value.first)
+                }
             }
         }
     }
@@ -124,6 +143,21 @@ open class GUIActivity : AppCompatActivity() {
             val tree = createViewTree(root, null)
             outState.putSerializable(VIEWS_KEY, tree)
         }
+        val recs = HashMap<Int, Pair<LinkedList<GUIRecyclerViewAdapter.ViewData>, Pair<LinkedList<Node>, LinkedList<SparseArray<Parcelable>>>>>()
+        for (r in recyclerviews) {
+            val l = r.value.exportViewList()
+            val n = LinkedList<Node>()
+            val pl = LinkedList<SparseArray<Parcelable>>()
+            for (v in l) {
+                val p = SparseArray<Parcelable>()
+                val view = v.v
+                n.add(createViewTree(view, null))
+                view.saveHierarchyState(p)
+                pl.add(p)
+            }
+            recs[r.key] = Pair(l, Pair(n, pl))
+        }
+        outState.putSerializable(RECYCLERVIEWS_KEY, recs)
         outState.putSerializable(DATA_KEY, data)
     }
     
@@ -141,7 +175,20 @@ open class GUIActivity : AppCompatActivity() {
         return tree
     }
     
-    
+    @Suppress("UNCHECKED_CAST")
+    fun <T> findViewReimplemented(id: Int, recid: Int?, recindex: Int?) : T? {
+        if (recid != null && recindex != null) {
+            val rec = recyclerviews[recid]
+            if (rec != null) {
+                val el = rec.getViewByIndex(recindex)
+                if (el != null) {
+                    return el.v.findViewById<View>(id) as? T
+                }
+            }
+            return null
+        }
+        return findViewById(id)
+    }
     
     
 }
