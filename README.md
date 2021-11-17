@@ -8,11 +8,14 @@ This is a plugin for [Termux](https://github.com/termux/termux-app) that enables
   
 In the examples directory you can find demo videos and sample code.
 
+[There are also prepackaged programs you can use](https://github.com/tareksander/termux-gui-package).
+
 [Installation notes](https://github.com/termux/termux-app#installation)  
 There is currently no release on f-droid, so the only method to install this plugin is to compile it and termux yourself.  
-Releases on f-droid will be provided as soon as possible.  
+Releases on f-droid will be provided as soon as possible. When there is a release, the f-droid badge at the top will show a version number.  
 
-Protocol.md describes the Protocol used and the available functions you can use.
+Protocol.md describes the Protocol used and the available functions you can use.  
+If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  
 Using this plugin requires a bit of knowledge of the android GUI system. You can read about it in detail in the [official documentation](https://developer.android.com/guide).  
 Relevant documentation is also linked in Protocol.md for more specific subjects.  
 Here is a crash-course:

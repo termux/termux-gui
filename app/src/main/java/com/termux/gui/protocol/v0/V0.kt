@@ -23,6 +23,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.termux.gui.*
 import com.termux.gui.Util.Companion.runOnUIThreadBlocking
 import com.termux.gui.protocol.v0.HandleActivityAndTask.Companion.handleActivityTaskMessage
+import com.termux.gui.protocol.v0.HandleView.Companion.handleView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -125,8 +126,8 @@ class V0(val app: Context) {
                         val m = ConnectionHandler.gson.fromJson(msg, ConnectionHandler.Message::class.java)
                         //println(m?.method)
                         if (m?.method != null) {
-                            handleActivityTaskMessage(m, activities, tasks, widgets, overlays, app, wm)
-                            HandleView.handleView(m, activities, widgets, overlays, rand, out, app, eventQueue)
+                            if (handleActivityTaskMessage(m, activities, tasks, widgets, overlays, app, wm)) continue
+                            if (handleView(m, activities, widgets, overlays, rand, out, app, eventQueue)) continue
                         }
                         when (m?.method) {
                             // Activity and Task methods

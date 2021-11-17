@@ -1,6 +1,5 @@
 package com.termux.gui
 
-import android.content.ComponentCallbacks
 import android.content.Context
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
@@ -26,8 +25,6 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, val s
     companion object {
         val gson = Gson()
         val INVALID_METHOD: Event = Event("invalidMethod", gson.toJsonTree("invalid method"))
-
-
         
     }
     

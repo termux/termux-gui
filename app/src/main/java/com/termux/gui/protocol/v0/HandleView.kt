@@ -6,13 +6,11 @@ import android.util.Base64
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.termux.gui.ConnectionHandler
+import com.termux.gui.R
 import com.termux.gui.Util
 import java.io.DataOutputStream
 import java.util.*
@@ -22,14 +20,14 @@ class HandleView {
     companion object {
         fun handleView(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, widgets: MutableMap<Int, V0.WidgetRepresentation>,
                        overlays: MutableMap<String, V0.Overlay>, rand: Random, out: DataOutputStream,
-                       app: Context, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+                       app: Context, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : Boolean {
             operator fun Regex.contains(text: String?): Boolean = if (text == null) false else this.matches(text)
             when (m.method) {
                 in Regex("create.*") -> {
                     if (m.params != null) {
                         Create.handleCreateMessage(m, activities, widgets, overlays, rand, out, app, eventQueue)
                     }
-                    return
+                    return true
                 }
                 "showCursor" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -47,7 +45,7 @@ class HandleView {
                             o.root.findViewReimplemented<EditText>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isCursorVisible = show
                         }
                     }
-                    return
+                    return true
                 }
                 "deleteView" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -65,7 +63,7 @@ class HandleView {
                             Util.removeViewRecursive(o.root.findViewReimplemented(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt), o.usedIds, o.recyclerviews)
                         }
                     }
-                    return
+                    return true
                 }
                 "deleteChildren" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -92,7 +90,7 @@ class HandleView {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setTextSize" -> {
                     if (m.params != null) {
@@ -115,7 +113,7 @@ class HandleView {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setImage" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -139,7 +137,7 @@ class HandleView {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setMargin" -> {
                     if (m.params != null) {
@@ -181,7 +179,7 @@ class HandleView {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setLinearLayoutParams" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -211,15 +209,15 @@ class HandleView {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setWidth" -> {
                     setDimension(m, activities, overlays, app)
-                    return
+                    return true
                 }
                 "setHeight" -> {
                     setDimension(m, activities, overlays, app)
-                    return
+                    return true
                 }
                 "setText" -> {
                     if (m.params != null) {
@@ -242,7 +240,7 @@ class HandleView {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "getText" -> {
                     if (m.params != null) {
@@ -267,9 +265,44 @@ class HandleView {
                     } else {
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(""))
                     }
-                    return
+                    return true
+                }
+                "setList" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val list = m.params?.get("list")?.asJsonArray
+                        val options = LinkedList<String>()
+                        if (list != null) {
+                            for (a in list) {
+                                if (! a.isJsonPrimitive || ! a.asJsonPrimitive.isString) {
+                                    return true
+                                } else {
+                                    options.add(a.asString)
+                                }
+                            }
+                        } else {
+                            return true
+                        }
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStartedBlocking(a) {
+                                    it.findViewReimplemented<Spinner>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.adapter = ArrayAdapter(it, R.layout.spinner_text, options)
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<Spinner>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.adapter = ArrayAdapter(app, R.layout.spinner_text, options)
+                                }
+                            }
+                        }
+                    }
+                    return true
                 }
             }
+            return false
         }
 
         private fun setDimension(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, overlays: MutableMap<String, V0.Overlay>, app: Context) {

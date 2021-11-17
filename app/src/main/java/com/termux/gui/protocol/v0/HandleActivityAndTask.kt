@@ -20,15 +20,15 @@ class HandleActivityAndTask {
     companion object {
         @Suppress("DEPRECATION")
         fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>,
-                                      widgets: MutableMap<Int, V0.WidgetRepresentation>, overlays: MutableMap<String, V0.Overlay>, app: Context, wm: WindowManager) {
+                                      widgets: MutableMap<Int, V0.WidgetRepresentation>, overlays: MutableMap<String, V0.Overlay>, app: Context, wm: WindowManager) : Boolean {
             when (m.method) {
                 "finishTask" -> {
                     tasks.find { t -> Util.getTaskInfo(tasks, t)?.let { it1 -> Util.getTaskId(it1) } == m.params?.get("tid")?.asInt }?.finishAndRemoveTask()
-                    return
+                    return true
                 }
                 "bringTaskToFront" -> {
                     tasks.find { t -> Util.getTaskInfo(tasks, t)?.let { it1 -> Util.getTaskId(it1) } == m.params?.get("tid")?.asInt }?.moveToFront()
-                    return
+                    return true
                 }
                 "moveTaskToBack" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -38,7 +38,7 @@ class HandleActivityAndTask {
                             it.moveTaskToBack(true)
                         }
                     }
-                    return
+                    return true
                 }
                 "setTheme" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -64,7 +64,7 @@ class HandleActivityAndTask {
                             o.theme = GUIActivity.GUITheme(s, p, b, t, ac)
                         }
                     }
-                    return
+                    return true
                 }
                 "setTaskDescription" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -87,7 +87,7 @@ class HandleActivityAndTask {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setPiPParams" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -100,7 +100,7 @@ class HandleActivityAndTask {
                             it.setPictureInPictureParams(PictureInPictureParams.Builder().setAspectRatio(rat).build())
                         }
                     }
-                    return
+                    return true
                 }
                 "setInputMode" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -118,7 +118,7 @@ class HandleActivityAndTask {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setPiPMode" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -133,7 +133,7 @@ class HandleActivityAndTask {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setPiPModeAuto" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -144,7 +144,7 @@ class HandleActivityAndTask {
                             it.data.autopip = pip
                         }
                     }
-                    return
+                    return true
                 }
                 "toast" -> {
                     val text = m.params?.get("text")?.asString ?: ""
@@ -152,7 +152,7 @@ class HandleActivityAndTask {
                     Util.runOnUIThreadBlocking {
                         Toast.makeText(app, text, if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
                     }
-                    return
+                    return true
                 }
                 "keepScreenOn" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -167,7 +167,7 @@ class HandleActivityAndTask {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setOrientation" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -194,7 +194,7 @@ class HandleActivityAndTask {
                             }
                         }
                     }
-                    return
+                    return true
                 }
                 "setPosition" -> {
                     val aid = m.params?.get("aid")?.asString
@@ -209,8 +209,10 @@ class HandleActivityAndTask {
                             wm.updateViewLayout(o.root, p)
                         }
                     }
+                    return true
                 }
             }
+            return false
         }
     }
 }

@@ -7,10 +7,7 @@ import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.RemoteViews
-import android.widget.TextView
+import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +17,7 @@ import java.io.DataOutputStream
 import java.io.FileDescriptor
 import java.nio.charset.StandardCharsets
 import java.util.*
+import java.util.concurrent.LinkedBlockingQueue
 import kotlin.math.roundToInt
 
 class Util {
@@ -120,6 +118,29 @@ class Util {
                 g?.addView(v)
             }
         }
+        
+        fun setClickListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            if (enabled) {
+                if (v is CheckBox) {
+                    val map = HashMap<String, Any>()
+                    map["id"] = v.id
+                    map["aid"] = aid
+                    v.setOnClickListener {
+                        map["set"] = v.isChecked
+                        eventQueue.offer(ConnectionHandler.Event("click", ConnectionHandler.gson.toJsonTree(map)))
+                    }
+                } else {
+                    val map = HashMap<String, Any>()
+                    map["id"] = v.id
+                    map["aid"] = aid
+                    val ev = ConnectionHandler.Event("click", ConnectionHandler.gson.toJsonTree(map))
+                    v.setOnClickListener { eventQueue.offer(ev) }
+                }
+            } else {
+                v.setOnClickListener(null)
+            }
+        }
+        
         
         fun removeViewRecursive(v: View?, usedIds: MutableSet<Int>, recyclerviews: HashMap<Int, GUIRecyclerViewAdapter>) {
             if (v != null) {

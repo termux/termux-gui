@@ -15,6 +15,8 @@ Features:
 
 Using the plugin:
 
+<a href="https://github.com/tareksander/termux-gui-package">There are also prepackaged programs you can use.</a>
+
 There are currently only <a href="https://github.com/tareksander/termux-gui-python-bindings">Python bindings</a>, but the <a href="https://github.com/tareksander/termux-gui/blob/main/README.md">protocol</a> used is fully documented.
 Implementing the protocol only requires the ability to use unix sockets, JSON handling and reading and writing 4 byte big endian integers.
 The python bindings should provide further clarification in case the protocol didn't specify something.

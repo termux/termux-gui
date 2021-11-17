@@ -148,6 +148,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - checked: Whether a RadioButton or Checkbox should be checked. Defaults to false.
     - singleline: Whether an EditText should enable multiple lines to be entered.
     - line: Whether the line below an EditText should be shown.
+    - blockinput: Disables adding the typed key automatically to a EditText and instead sends a key event.
 - showCursor: Sets whether or not a cursor is shown in the EditText.
   - Parameters:
     - aid: The id of the Activity the View is in.
@@ -208,6 +209,11 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
     - aid: The id of the Activity the View is in.
+- setList: Set the list of a Spinner.
+  - Parameters:
+    - id: The View id of a TextView, Button or EditText.
+    - aid: The id of the Activity the View is in.
+    - list: An array containing the available Spinner options as strings
 - inflateJSON: Creates a View hierarchy from a [JSON object](https://github.com/flipkart-incubator/proteus). Warning: you must take care to not have duplicate View ids.
   - Parameters:
     - aid: The id of the Activity the View is in.
@@ -317,6 +323,13 @@ Event types:
   - touch
     - Additional values x,y, action: Coordinates in the View, "down", "move" or "up"
   - refresh: Refresh triggered in a SwipeRefreshLayout
+  - selected: A RadioButton in a RadioButtonGroup has been selected
+    - Additional values: selected: The id of the now selected RadioButton
+  - itemselected: When a Item is selected in a Spinner
+    - Additional values: selected: The item as a String, or null if no item was selected
+  - input: Send from EditText where you set the input to blocked
+  - cut: Send from EditText where you set the input to blocked
+  - paste: Send from EditText where you set the input to blocked
 - [Activity Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) :
   - values for all:
     - aid: The id of the Activity.

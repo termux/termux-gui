@@ -1,6 +1,17 @@
 
 
 
+[ ] idea: Fragment connections: create a child connection whose root View is a FrameLayout in the current hierarchy.
+    - the child connection doesn't count as a full connection and can't create it's own activities or overlays. For that the child has to create a completely new connection.
+    - child connections get closed when the parent closes.
+    - a method the get the fragment activity id. That will be a virtual activity id, because all view methods need an activity to act on.
+    - fragment connections can send events to the parent connection. The event will be reported as from the id of the layout of the parent of the fragment
+    - also a method to send custom messages to fragments. That enables a full 2-way communication
+    - Implementing it should probably be done with real fragments.
+    - This system allows you to transparently use other programs as custom views in you layout, by creating a configured fragment connections, setting the fd to not close on exec, exec the program and pass the fd number as a parameter
+    - nesting should be supported.
+
+
 
 [ ] implement the rest of the already specified methods
 
@@ -9,10 +20,18 @@
 
 [ ] for all supported views and layouts check if restoring the state works
 
-[x] screen wakelock to keep the screen on
-[x] Activity lifecycle events
-[x] support for locking orientation: Activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-[ ] system overlay window support
+
+
+[ ] also implement notifications in general, because Termux:API has a noticeable startup time
+    [ ] also implement other features from Termux:API that are useful to have low-latency for a GUI app
+        - brightness
+        - clipboard
+        
+
+
+[ ] method to move views in the hierarchy
+[ ] method to inflate a json layout n times and add the layouts as children, for better list performance
+[ ] screen wakelock to keep the screen on
 [ ] Action Bar with elements: https://developer.android.com/training/appbar/setting-up
 [ ] App widgets
     [ ] only 1 depth layouts, because the IDs can't be changed
@@ -37,9 +56,8 @@
 [ ] setting explicit size for views
 [ ] setting ImageView size in px, so it can be exactly the size of the bitmap buffer 
 [ ] or query the current size of the ImageView to use a new buffer
-[x] Toasts
-
-
+[ ] methods to get the size of Views and to set the scroll position in a NestedScrollView
+    [ ] also a scroll change event. But that should only fire after a minimum amount of pixel moved, 5 should be good
 
 
 [ ] finish Python bindings when the plugin is available on f-droid and upload them to pypi
@@ -47,18 +65,11 @@
 Implement Views:
 [ ] password field (method for EditText to replace every displayed character with *)
 [ ] RelativeLayout
-[x] FrameLayout
-[x] Button
-[x] ImageView
-[x] Space
-[x] NestedScrollView
-[ ] RecyclerView
+[ ] RecyclerView: Maybe don't support RecyclerView, but instead expose enough method to build one with a NestedScrollView and a LinearLayout
+    ViewPager2 is more important, as you can't do the smooth transitions normally.
     [ ] use the paging library to get good performance. When a new page is needed, send an event to the program.
         Then the program has to send back a list of json layouts to populate the view.
         To update existing items, the program can send a page unrequested.
-[ ] RadioButton
-[ ] RadioGroup
-[x] Checkbox
 [ ] ToggleButton
 [ ] ImageButton
 [ ] Spinner
