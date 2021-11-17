@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
 import com.termux.gui.*
 import java.io.DataOutputStream
@@ -51,8 +52,23 @@ class Create {
                             val v = if (m.params?.get("blockinput")?.asBoolean == true) getCustomEditText(it, aid, eventQueue) else EditText(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            when (m.params?.get("type")?.asString) {
+                                "text" -> v.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_NORMAL
+                                "textMultiLine" -> v.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE or EditorInfo.TYPE_TEXT_VARIATION_NORMAL
+                                "phone" -> v.inputType = EditorInfo.TYPE_CLASS_PHONE
+                                "date" -> v.inputType = EditorInfo.TYPE_CLASS_DATETIME or EditorInfo.TYPE_DATETIME_VARIATION_DATE
+                                "time" -> v.inputType = EditorInfo.TYPE_CLASS_DATETIME or EditorInfo.TYPE_DATETIME_VARIATION_TIME
+                                "datetime" -> v.inputType = EditorInfo.TYPE_CLASS_DATETIME or EditorInfo.TYPE_DATETIME_VARIATION_NORMAL
+                                "number" -> v.inputType = EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_VARIATION_NORMAL
+                                "numberDecimal" -> v.inputType = EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL or EditorInfo.TYPE_NUMBER_VARIATION_NORMAL
+                                "numberPassword" -> v.inputType = EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD
+                                "numberSigned" -> v.inputType = EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_SIGNED or EditorInfo.TYPE_NUMBER_VARIATION_NORMAL
+                                "numberDecimalSigned" -> v.inputType = EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL or EditorInfo.TYPE_NUMBER_FLAG_SIGNED or EditorInfo.TYPE_NUMBER_VARIATION_NORMAL
+                                "textEmailAddress" -> v.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                                "textPassword" -> v.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+                            }
                             if (m.params?.get("singleline")?.asBoolean == true) {
-                                println("singleline")
+                                //println("singleline")
                                 v.inputType = EditorInfo.TYPE_CLASS_TEXT
                             }
                             if (m.params?.get("line")?.asBoolean == false) {
@@ -140,8 +156,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             v.text = m.params?.get("text")?.asString
-                            v.isChecked = m.params?.get("checked")?.asBoolean
-                                    ?: false
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
@@ -184,6 +199,9 @@ class Create {
                             val v = RadioButton(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            v.text = m.params?.get("text")?.asString
+                            v.freezesText = true
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -210,6 +228,35 @@ class Create {
                                     eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
                                 }
                             }
+                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createToggleButton") {
+                        var id = -1
+                        V0.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = ToggleButton(it)
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
+                            v.freezesText = true
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                            Util.setClickListener(v, aid, true, eventQueue)
+                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createSwitch") {
+                        var id = -1
+                        V0.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = SwitchCompat(it)
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
+                            v.text = m.params?.get("text")?.asString
+                            v.freezesText = true
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                            Util.setClickListener(v, aid, true, eventQueue)
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -307,8 +354,7 @@ class Create {
                         Util.runOnUIThreadBlocking {
                             v.id = id
                             v.text = m.params?.get("text")?.asString
-                            v.isChecked = m.params?.get("checked")?.asBoolean
-                                    ?: false
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
@@ -348,6 +394,9 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
+                            v.text = m.params?.get("text")?.asString
+                            v.freezesText = true
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -373,6 +422,35 @@ class Create {
                                     eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
                                 }
                             }
+                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createToggleButton") {
+                        var id = -1
+                        Util.runOnUIThreadBlocking {
+                            val v = ToggleButton(app)
+                            id = Util.generateViewIDRaw(rand, o.usedIds)
+                            v.id = id
+                            v.freezesText = true
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                            Util.setClickListener(v, aid, true, eventQueue)
+                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createSwitch") {
+                        var id = -1
+                        Util.runOnUIThreadBlocking {
+                            val v = SwitchCompat(app)
+                            id = Util.generateViewIDRaw(rand, o.usedIds)
+                            v.id = id
+                            v.text = m.params?.get("text")?.asString
+                            v.freezesText = true
+                            v.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                            Util.setClickListener(v, aid, true, eventQueue)
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))

@@ -421,12 +421,12 @@ class V0(val app: Context) {
                 m.params?.get("pip")?.asBoolean
                         ?: false, m.params?.get("dialog")?.asBoolean
                 ?: false,
-                m.params?.get("lockscreen")?.asBoolean ?: false))
+                m.params?.get("lockscreen")?.asBoolean ?: false, m.params?.get("canceloutside")?.asBoolean ?: true))
     }
 
 
     @Suppress("DEPRECATION")
-    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean): String {
+    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, canceloutside: Boolean): String {
         //println("ptid: $ptid")
         val i = Intent(app, GUIActivity::class.java)
         if (ptid == null) {
@@ -444,6 +444,7 @@ class V0(val app: Context) {
             }
             dialog -> { // pip overrides dialog
                 i.setClass(app, GUIActivityDialog::class.java)
+                i.putExtra("canceloutside", canceloutside)
             }
             lockscreen -> { // dialog overrides lockscreen
                 i.setClass(app, GUIActivityLockscreen::class.java)

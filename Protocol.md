@@ -48,6 +48,7 @@ These methods control Android [Activities](https://developer.android.com/referen
     - tid: the task in which the Activity should be started. If not specified, a new Task is created and the id is returned after the Activity id.
     - One of:
       - dialog: boolean value. If true, the Activity will be launched as a dialog.
+      - canceloutside: boolean value, optional. Sets whether the Activity is destroyed when it is displayed as a dialog and the user clicks outside. Default is true.
       - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
       - lockscreen: displays this Activity on the lockscreen.
       - overlay: uses a system overlay window to display above everything else. Overlays are never in a Task and creating one doesn't return a Task id. Overlays don't get Activity lifecycle events.
@@ -132,6 +133,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - [RadioGroup](https://developer.android.com/reference/android/widget/RadioGroup)
     - [Checkbox](https://developer.android.com/guide/topics/ui/controls/checkbox)
     - [ToggleButton](https://developer.android.com/guide/topics/ui/controls/togglebutton)
+    - [Switch](https://developer.android.com/reference/android/widget/Switch.html)
     - [ImageButton](https://developer.android.com/reference/android/widget/ImageButton)
     - [Spinner](https://developer.android.com/guide/topics/ui/controls/spinner)
     - [GridLayout](https://developer.android.com/reference/android/widget/GridLayout)
@@ -145,10 +147,11 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - aid: The id of the Activity in which to create the View.
     - text: For Button, TextView and EditText, this is the initial Text.
     - vertical: For LinearLayout, this specifies if the Layout is vertical or horizontal. If not specified, vertical is assumed.
-    - checked: Whether a RadioButton or Checkbox should be checked. Defaults to false.
+    - checked: Whether a RadioButton, CheckBox, Switch or ToggleButton should be checked. Defaults to false.
     - singleline: Whether an EditText should enable multiple lines to be entered.
     - line: Whether the line below an EditText should be shown.
     - blockinput: Disables adding the typed key automatically to a EditText and instead sends a key event.
+    - type: For EditText this specifies the [input type](https://developer.android.com/reference/android/widget/TextView#attr_android:inputType) : can be one of "text", "textMultiLine", "phone", "date", "time", "datetime", "number", "numberDecimal", "numberPassword", "numberSigned", "numberDecimalSigned", "textEmailAddress", "textPassword". "text" is the default. Specifying singleline as true sets this to "text".
 - showCursor: Sets whether or not a cursor is shown in the EditText.
   - Parameters:
     - aid: The id of the Activity the View is in.
@@ -209,6 +212,11 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
     - aid: The id of the Activity the View is in.
+- setChecked: Sets a RadioButton, CheckBox, Switch or ToggleButton to checked or unchecked explicitly. This does not emit an Event.
+  - Parameters:
+    - id: The View id.
+    - aid: The id of the Activity the View is in.
+    - checked: Whether a RadioButton, CheckBox, Switch or ToggleButton should be checked.
 - setList: Set the list of a Spinner.
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
@@ -314,7 +322,7 @@ Event types:
     - aid: The id of the Activity the View is in.
   - click
     - Additional values for ImageView: x and y position in the view
-    - Additional values for RadioButton and checkbox: set: whether the View is set or not
+    - Additional values for CheckBox, Switch and ToggleButton: set: whether the View is set or not
   - longClick
   - focusChange
     - Additional value: focus: whether or not the View now has focus.

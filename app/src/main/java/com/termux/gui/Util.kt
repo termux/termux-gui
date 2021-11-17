@@ -121,7 +121,7 @@ class Util {
         
         fun setClickListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
-                if (v is CheckBox) {
+                if (v is CompoundButton) {
                     val map = HashMap<String, Any>()
                     map["id"] = v.id
                     map["aid"] = aid

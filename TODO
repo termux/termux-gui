@@ -1,5 +1,56 @@
 
 
+Roadmap:
+    - 0.1.3
+        [x] Spinner
+        [x] RadioGroup, RadioButton
+        [ ] SwipeRefreshLayout
+        [ ] NestedScrollView with item snapping
+        [ ] Intercepting input in EditText
+        [x] Input Types for EditText
+        [ ] ProgressBar
+        [ ] Event control methods
+        [ ] method to get dimensions of Views in the layout
+        [ ] method to set Dimensions in pixels instead of dp
+        [x] ToggleButton
+        [ ] set visibility
+    - 0.1.4
+        [ ] configuration change events
+        [ ] screen un/locked event, so lockscreen apps can enable more functionality when the screen isn't locked
+        [ ] TabLayout
+        [ ] Action Bar
+        [ ] clipboard
+        [ ] brightness
+        [ ] notifications
+        [ ] notifications with custom layout (the same principle as with widgets, probably just mae a special RemoteViews interface)
+        [ ] Rework the widgets
+    - 1.0.0
+        [ ] fragment connections
+        [ ] implement RecyclerView native or as a component in the python library (custom class with methods around a NestedScrollView)
+        [ ] implement ViewPager native or as a component in the python library (custom class with methods around a NestedScrollView)
+        [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
+        [ ] broadcast events:
+            [ ] airplane mode
+            [ ] screen on/off
+            [ ] timezone
+            [ ] locale
+        [ ] GridLayout
+        [ ] WebView
+        [ ] RelativeLayout
+        [ ] ConstraintLayout
+        
+        
+
+
+
+
+
+
+
+
+
+
+
 
 [ ] idea: Fragment connections: create a child connection whose root View is a FrameLayout in the current hierarchy.
     - the child connection doesn't count as a full connection and can't create it's own activities or overlays. For that the child has to create a completely new connection.
@@ -10,6 +61,7 @@
     - Implementing it should probably be done with real fragments.
     - This system allows you to transparently use other programs as custom views in you layout, by creating a configured fragment connections, setting the fd to not close on exec, exec the program and pass the fd number as a parameter
     - nesting should be supported.
+        - Views in Fragments can still be found from the Parent activity. Make a custom findViewById that doesn't search Fragments, also for performance reasons
 
 
 
@@ -70,9 +122,9 @@ Implement Views:
     [ ] use the paging library to get good performance. When a new page is needed, send an event to the program.
         Then the program has to send back a list of json layouts to populate the view.
         To update existing items, the program can send a page unrequested.
-[ ] ToggleButton
+[x] ToggleButton
 [ ] ImageButton
-[ ] Spinner
+[x] Spinner
 [ ] SwipeRefreshLayout
 [ ] GridLayout
 [ ] ProgressBar

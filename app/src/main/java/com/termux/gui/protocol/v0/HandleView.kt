@@ -267,6 +267,27 @@ class HandleView {
                     }
                     return true
                 }
+                "setChecked" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<CompoundButton>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<CompoundButton>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
                 "setList" -> {
                     if (m.params != null) {
                         val aid = m.params?.get("aid")?.asString
