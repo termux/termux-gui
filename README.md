@@ -9,7 +9,7 @@ This is a plugin for [Termux](https://github.com/termux/termux-app) that enables
 In the examples directory you can find demo videos and sample code.
 
 [Installation notes](https://github.com/termux/termux-app#installation)  
-There is currently no release on f-droid, so the only method to install this plugin is to compile it and termux yourself.  
+There is currently no release on f-droid, so the only method to install this plugin is to use the apk from the [releases](https://github.com/tareksander/termux-gui/releases) and the [Termux apk from Github Actions](https://github.com/termux/termux-app/actions).  
 Releases on f-droid will be provided as soon as possible.  
 
 Protocol.md describes the Protocol used and the available functions you can use.
