@@ -1,0 +1,16 @@
+name: Build
+
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Build
+      run: ./gradlew assembleDebug
