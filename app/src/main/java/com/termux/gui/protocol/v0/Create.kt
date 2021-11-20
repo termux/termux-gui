@@ -6,6 +6,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -15,6 +17,8 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
 import com.termux.gui.*
+import com.termux.gui.views.SnappingHorizontalScrollView
+import com.termux.gui.views.SnappingNestedScrollView
 import java.io.DataOutputStream
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
@@ -75,10 +79,7 @@ class Create {
                                 v.setBackgroundResource(android.R.color.transparent)
                             }
                             if (m.params?.get("blockinput")?.asBoolean == true) {
-                                val args = HashMap<String, Any>()
-                                args["id"] = v.id
-                                args["aid"] = aid
-                                
+                                v.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_FILTER or EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                             }
                             v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
@@ -167,7 +168,18 @@ class Create {
                     if (m.method == "createNestedScrollView") {
                         var id = -1
                         V0.runOnUIThreadActivityStartedBlocking(a) {
-                            val v = NestedScrollView(it)
+                            val v = if (m.params?.get("snap")?.asBoolean == true) SnappingNestedScrollView(it) else NestedScrollView(it)
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
+                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "HorizontalScrollView") {
+                        var id = -1
+                        V0.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = if (m.params?.get("snap")?.asBoolean == true) SnappingHorizontalScrollView(it) else HorizontalScrollView(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
@@ -372,6 +384,16 @@ class Create {
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
                     }
+                    if (m.method == "HorizontalScrollView") {
+                        val v = HorizontalScrollView(app)
+                        val id = Util.generateViewIDRaw(rand, o.usedIds)
+                        Util.runOnUIThreadBlocking {
+                            v.id = id
+                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
                     if (m.method == "createRadioGroup") {
                         val v = RadioGroup(app)
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
@@ -511,13 +533,19 @@ class Create {
                     return InputWrapper(super.onCreateInputConnection(outAttrs), true)
                 }
 
+                override fun isSuggestionsEnabled(): Boolean {
+                    return false
+                }
+                
                 override fun onTextContextMenuItem(id: Int): Boolean {
                     val consumed: Boolean = super.onTextContextMenuItem(id)
                     val args = HashMap<String, Any>()
                     args["aid"] = aid
                     args["id"] = getId()
+                    println("contextmenu")
                     when (id) {
                         android.R.id.cut -> {
+                            println("cut")
                             val t = text
                             if (t != null) {
                                 val selStart = selectionStart
@@ -529,6 +557,7 @@ class Create {
                             }
                         }
                         android.R.id.paste -> {
+                            println("paste")
                             val clip = it.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             if (clip.hasPrimaryClip() && clip.primaryClipDescription!!.hasMimeType(MIMETYPE_TEXT_PLAIN)) {
                                 val item = clip.primaryClip!!.getItemAt(0)
@@ -547,6 +576,23 @@ class Create {
                         args["aid"] = aid
                     }
 
+                    override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean {
+                        println(text)
+                        return super.commitText(text, newCursorPosition)
+                    }
+
+                    override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
+                        println("delete $beforeLength $afterLength")
+                        return super.deleteSurroundingText(beforeLength, afterLength)
+                    }
+
+                    override fun setComposingText(text: CharSequence?, newCursorPosition: Int): Boolean {
+                        println(text)
+                        return true
+                        //return super.setComposingText(text, newCursorPosition)
+                    }
+                    
+                    
                     override fun sendKeyEvent(e: KeyEvent?): Boolean {
                         if (!args.containsKey("id")) {
                             args["id"] = id

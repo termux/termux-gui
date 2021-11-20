@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.io.FileDescriptor
 import java.lang.reflect.InvocationTargetException
 import java.nio.ByteBuffer
 import java.util.*
@@ -124,7 +125,7 @@ class V0(val app: Context) {
                     1 -> {
                         val msg = msgbytes.decodeToString(0, len, true)
                         val m = ConnectionHandler.gson.fromJson(msg, ConnectionHandler.Message::class.java)
-                        //println(m?.method)
+                        println(m?.method)
                         if (m?.method != null) {
                             if (handleActivityTaskMessage(m, activities, tasks, widgets, overlays, app, wm)) continue
                             if (handleView(m, activities, widgets, overlays, rand, out, app, eventQueue)) continue
@@ -172,10 +173,10 @@ class V0(val app: Context) {
                                             Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
                                             continue
                                         }
-                                        val fd = ParcelFileDescriptor.fromFd(fdint)
-                                        fd.use {
-                                            Util.sendMessageFd(out, ConnectionHandler.gson.toJson(bid), main, fd.fileDescriptor)
-                                        }
+                                        val fdesc = FileDescriptor()
+                                        val setInt =  FileDescriptor::class.java.getDeclaredMethod("setInt$", Int::class.java)
+                                        setInt(fdesc, fdint)
+                                        Util.sendMessageFd(out, ConnectionHandler.gson.toJson(bid), main, fdesc)
                                         buffers[bid] = b
                                     } catch (e: Exception) {
                                         SharedMemory.unmap(b.buff)
@@ -289,6 +290,21 @@ class V0(val app: Context) {
                                 if (m.method == "sendOverlayTouchEvent" && o != null) {
                                     o.sendTouch = send
                                 }
+                                if (id != null && aid != null) {
+                                    if (m.method == "sendTouchEvent") {
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setTouchListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                        if (o != null) {
+                                            runOnUIThreadBlocking {
+                                                o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setTouchListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                    }
+                                }
+                                
                                 continue
                             }
                         }
@@ -319,7 +335,6 @@ class V0(val app: Context) {
                 for (b in buffers.values) {
                     SharedMemory.unmap(b.buff)
                     b.shm.close()
-                    b.btm.recycle() // this frees the bitmap memory
                 }
             }
         }

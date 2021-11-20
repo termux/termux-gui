@@ -127,6 +127,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - [ImageView](https://developer.android.com/reference/android/widget/ImageView)
     - [Space](https://developer.android.com/reference/android/widget/Space)
     - [NestedScrollView](https://developer.android.com/reference/androidx/core/widget/NestedScrollView)
+    - [HorizontalScrollView](https://developer.android.com/reference/android/widget/HorizontalScrollView)
     - [RecyclerView](https://developer.android.com/guide/topics/ui/layout/recyclerview)
     - [AutocompleteTextView](https://developer.android.com/reference/android/widget/AutoCompleteTextView)
     - [RadioButton](https://developer.android.com/guide/topics/ui/controls/radiobutton)
@@ -147,6 +148,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - aid: The id of the Activity in which to create the View.
     - text: For Button, TextView and EditText, this is the initial Text.
     - vertical: For LinearLayout, this specifies if the Layout is vertical or horizontal. If not specified, vertical is assumed.
+    - snap: NestedScrollView and HorizontalScrollView snap to the nearest item if this is set to true.
     - checked: Whether a RadioButton, CheckBox, Switch or ToggleButton should be checked. Defaults to false.
     - singleline: Whether an EditText should enable multiple lines to be entered.
     - line: Whether the line below an EditText should be shown.
@@ -212,7 +214,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
     - aid: The id of the Activity the View is in.
-- setChecked: Sets a RadioButton, CheckBox, Switch or ToggleButton to checked or unchecked explicitly. This does not emit an Event.
+- setChecked: Sets a RadioButton, CheckBox, Switch or ToggleButton to checked or unchecked explicitly.
   - Parameters:
     - id: The View id.
     - aid: The id of the Activity the View is in.
@@ -274,6 +276,7 @@ Event control:
     - FocusChange
     - Key
     - Touch
+    - Gesture
   - Parameters:
     - id: The View id.
     - aid: The id of the Activity the View is in.
@@ -329,7 +332,6 @@ Event types:
   - key
     - Additional value: key: the key that was pressed.
   - touch
-    - Additional values x,y, action: Coordinates in the View, "down", "move" or "up"
   - refresh: Refresh triggered in a SwipeRefreshLayout
   - selected: A RadioButton in a RadioButtonGroup has been selected
     - Additional values: selected: The id of the now selected RadioButton
@@ -357,7 +359,16 @@ Event types:
   - overlayTouch: Like touch, but is dispatched for every touch in an overlay window. The coordinates are the absolute screen coordinates
   - overlayScale: 
 
+#### Touch events
 
+Touch events are more complex, because multitouch is supported.  
+The additional values are:
+- action: one of "up", "down", "pointer_up", "pointer_down", "cancel", "move", corresponding to [MotionEvent values](https://developer.android.com/reference/android/view/MotionEvent#constants_1) for ACTION_DOWN etc.
+- index: for "pointer_up" and "pointer_down" this is the index of the pointer removed/added.
+- time: The time of the event in milliseconds since boot excluding sleep. Use this when checking for gestures or other time-sensitive things.
+- pointers: An array of pointer data objects, each containing:
+  - x, y: The coordinates of the pointer inside the View (not in the window). For ImageView, these are the coordinates of the pixel in the displayed image or buffer, so you don't need to convert the position yourself.
+  - id: The pointer id. This stays consistent for each pointer in the frame between "up" and "down" events
 
 ## JSON protocol
 

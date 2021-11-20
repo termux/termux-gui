@@ -5,9 +5,10 @@ Roadmap:
         [x] Spinner
         [x] RadioGroup, RadioButton
         [ ] SwipeRefreshLayout
+        [ ] Text watching event for EditText
         [ ] NestedScrollView with item snapping
-        [ ] Intercepting input in EditText
         [x] Input Types for EditText
+        [ ] Input catching for ImageView
         [ ] ProgressBar
         [ ] Event control methods
         [ ] method to get dimensions of Views in the layout

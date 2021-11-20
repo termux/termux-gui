@@ -1,13 +1,17 @@
 package com.termux.gui
 
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
+import android.graphics.Matrix
 import android.net.LocalSocket
 import android.os.Build
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.RecyclerView
 import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +22,8 @@ import java.io.FileDescriptor
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
+import kotlin.collections.HashMap
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 class Util {
@@ -46,9 +52,9 @@ class Util {
         }
         
         fun sendMessageFd(w: DataOutputStream, ret: String, s: LocalSocket, fd: FileDescriptor) {
+            s.setFileDescriptorsForSend(arrayOf(fd))
             val bytes = ret.toByteArray(StandardCharsets.UTF_8)
             w.writeInt(bytes.size)
-            s.setFileDescriptorsForSend(arrayOf(fd))
             w.write(bytes)
             w.flush()
         }
@@ -138,6 +144,59 @@ class Util {
                 }
             } else {
                 v.setOnClickListener(null)
+            }
+        }
+        
+        private val TOUCH_EVENT_MAP: Map<Int, String>
+        init {
+            val map = HashMap<Int,String>()
+            map[MotionEvent.ACTION_DOWN] = "down"
+            map[MotionEvent.ACTION_UP] = "up"
+            map[MotionEvent.ACTION_POINTER_DOWN] = "pointer_down"
+            map[MotionEvent.ACTION_POINTER_UP] = "pointer_up"
+            map[MotionEvent.ACTION_CANCEL] = "cancel"
+            map[MotionEvent.ACTION_MOVE] = "move"
+            TOUCH_EVENT_MAP = Collections.unmodifiableMap(map)
+        }
+        
+        @SuppressLint("ClickableViewAccessibility")
+        fun setTouchListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            if (enabled) {
+                val map = HashMap<String, Any>()
+                map["id"] = v.id
+                map["aid"] = aid
+                data class PointerData(val x: Int, val y: Int, val id: Int)
+                v.setOnTouchListener { _, event ->
+                    val mapped = TOUCH_EVENT_MAP[event.actionMasked]
+                    if (mapped != null) {
+                        map["action"] = mapped
+                        map["index"] = event.actionIndex
+                        map["time"] = event.eventTime
+                        val pd = LinkedList<PointerData>()
+                        val rev = Matrix()
+                        var inv = false
+                        if (v is ImageView) {
+                            inv = v.imageMatrix.invert(rev)
+                        }
+                        for (i in 0 until event.pointerCount) {
+                            if (inv) {
+                                // if it is an ImageView, automatically transform from view coordinates to image coordinates
+                                val pos = FloatArray(2)
+                                pos[0] = event.getX(i)
+                                pos[1] = event.getY(i)
+                                rev.mapPoints(pos)
+                                pd.add(PointerData(pos[0].roundToInt(), pos[1].roundToInt(), event.getPointerId(i)))
+                            } else {
+                                pd.add(PointerData(event.getX(i).roundToInt(), event.getY(i).roundToInt(), event.getPointerId(i)))
+                            }
+                        }
+                        map["pointers"] = pd
+                        eventQueue.offer(ConnectionHandler.Event("touch", ConnectionHandler.gson.toJsonTree(map)))
+                    }
+                    true
+                }
+            } else {
+                v.setOnTouchListener(null)
             }
         }
         
