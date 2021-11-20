@@ -11,6 +11,7 @@ import com.termux.gui.protocol.v0.V0
 import kotlinx.coroutines.Runnable
 import java.io.DataOutputStream
 import java.io.EOFException
+import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -25,7 +26,14 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, val s
     companion object {
         val gson = Gson()
         val INVALID_METHOD: Event = Event("invalidMethod", gson.toJsonTree("invalid method"))
-        
+        init {
+            System.loadLibrary("gui")
+        }
+        // methods to use ashmem pre API 27
+        external fun create_ashmem(size: Int): Int
+        external fun destroy_ashmem(fd: Int)
+        external fun map_ashmem(fd: Int, size: Int): ByteBuffer?
+        external fun unmap_ashmem(buff: ByteBuffer) // DO NOT use the ByteBuffer after this, clear the reference before so it isn't even possible!
     }
     
     

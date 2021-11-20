@@ -15,18 +15,13 @@ c = tg.Connection()
 
 b = tg.Buffer(c, resolution, resolution)
 
-
+conlock = threading.Lock()
 
 a = tg.Activity(c)
 
 layout = tg.LinearLayout(a)
 
 im = tg.ImageView(a, layout)
-
-
-
-
-
 
 
 
@@ -38,6 +33,15 @@ interface = tg.LinearLayout(a, layout)
 massedit = tg.EditText(a, "10", interface, singleline=True)
 massedit.setheight("WRAP_CONTENT")
 
+sim = tg.ToggleButton(a, interface)
+sim.setchecked(True)
+
+
+
+
+
+
+
 memp = cast(pointer(c_uint8.from_buffer(b.mem, 0)), c_void_p)
 
 SDL_Init(SDL_INIT_VIDEO)
@@ -46,6 +50,7 @@ surf = SDL_CreateRGBSurfaceFrom(memp, resolution, resolution, 32, 4*resolution, 
 
 
 def drawcircle(surf, x, y ,r, color):
+    # too lazy to actually write a circle drawing algorithm that performs good enough in python
     sdl2.ext.fill(surf, color, (x-r/2, y-r/2, r, r))
     return
     view = sdl2.ext.PixelView(surf)
@@ -113,8 +118,6 @@ stopped = False
 def render():
     while True:
         #print("loop")
-        while stopped:
-            time.sleep(0.01)
         t1 = time.time()
         
         white = sdl2.ext.Color(255, 255, 255, 255)
@@ -124,18 +127,19 @@ def render():
         for m in world:
             drawcircle(surf, int(m.x), int(m.y), int(m.m), blue)
         
-        for m1 in world:
-            for m2 in world:
-                if m1 != m2:
-                    m1.attract(m2)
+        if not stopped:
+            for m1 in world:
+                for m2 in world:
+                    if m1 != m2:
+                        m1.attract(m2)
+            for m in world:
+                m.x += m.dx
+                m.y += m.dy
         
-        for m in world:
-            m.x += m.dx
-            m.y += m.dy
         
-        b.mem.flush()
-        b.blit()
-        im.refresh()
+        with conlock:
+            b.blit()
+            im.refresh()
         t2 = time.time()
         #print("drawing finished")
         time.sleep(max(0, 0.030-abs(t2-t1))) # target 30 fps
@@ -145,22 +149,39 @@ renderer.start()
 
 x = 0
 y = 0
+multi = False
 
 for ev in c.events():
     if ev.type == tg.Event.destroy and ev.value["finishing"]:
         sys.exit()
+    if ev.type == tg.Event.click and ev.id == sim:
+        stopped = not ev.value["set"]
     if ev.type == tg.Event.touch and ev.id == im:
         if ev.value["action"] == "down":
             p1 = ev.value["pointers"][0]
             x = p1["x"]
             y = p1["y"]
-        if ev.value["action"] == "down":
+        if ev.value["action"] == "pointer_down":
+            multi = True
+        if ev.value["action"] == "up":
+            if multi:
+                multi = False
+                continue
+            removed = False
+            for m in world:
+                if m.x-m.m/2 <= x and x < m.x+m.m/2 and m.y-m.m/2 <= y and y < m.y+m.m/2:
+                    removed = True
+                    world.remove(m)
+                    break
+            if removed:
+                continue
             p1 = ev.value["pointers"][0]
             dx = x-p1["x"]
             dy = y-p1["y"]
-            m = Mass(p1["x"], p1["y"], int(massedit.gettext()))
-            m.dx = dx
-            m.dy = dy
+            with conlock:
+                m = Mass(p1["x"], p1["y"], int(massedit.gettext()))
+            m.dx = dx/10
+            m.dy = dy/10
             world.append(m)
     
     

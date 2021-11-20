@@ -236,7 +236,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - id: The View id of a ImageView.
     - aid: The id of the Activity the View is in.
     - img: The image data in PNG or JPEG format.
-- addBuffer: Adds a buffer to be used for ImageViews. Returns to id of the generated buffer. Returns -1 in case of an error. This should be a file descriptor to a shared memory file. You can then write to the shared memory and use the image in the plugin without having to transmit it. When successful, it transfers a file descriptor via SCM_RIGHTS. That file descriptor can then be mapped. This feature is only supported on Android 8.1+, on earlier versions this always fails.
+- addBuffer: Adds a buffer to be used for ImageViews. Returns to id of the generated buffer. Returns -1 in case of an error. This should be a file descriptor to a shared memory file. You can then write to the shared memory and use the image in the plugin without having to transmit it. When successful, it transfers a file descriptor via SCM_RIGHTS. That file descriptor can then be mapped.
   - Parameters:
     - format: the Image buffer format. Supported: "ARGB888". The order in memory will be rgba with one byte each.
     - w: The width of the buffer.

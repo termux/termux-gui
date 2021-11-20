@@ -529,7 +529,7 @@ class Create {
 
         private fun getCustomEditText(it : Context, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>): EditText {
             return object : androidx.appcompat.widget.AppCompatEditText(it) {
-                override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
+                override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection {
                     return InputWrapper(super.onCreateInputConnection(outAttrs), true)
                 }
 

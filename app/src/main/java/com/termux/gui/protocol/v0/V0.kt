@@ -38,7 +38,7 @@ import kotlin.collections.HashMap
 
 
 class V0(val app: Context) {
-    data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory, val buff: ByteBuffer)
+    data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory?, val buff: ByteBuffer, val fd: Int?)
     data class WidgetRepresentation(val usedIds: TreeSet<Int> = TreeSet(), var root: RemoteViews?, var theme: GUIActivity.GUITheme?)
     data class ActivityState(var a: GUIActivity?, @Volatile var saved: Boolean = false, val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(10000))
     data class Overlay(val context: Context) {
@@ -125,7 +125,7 @@ class V0(val app: Context) {
                     1 -> {
                         val msg = msgbytes.decodeToString(0, len, true)
                         val m = ConnectionHandler.gson.fromJson(msg, ConnectionHandler.Message::class.java)
-                        println(m?.method)
+                        //println(m?.method)
                         if (m?.method != null) {
                             if (handleActivityTaskMessage(m, activities, tasks, widgets, overlays, app, wm)) continue
                             if (handleView(m, activities, widgets, overlays, rand, out, app, eventQueue)) continue
@@ -155,44 +155,80 @@ class V0(val app: Context) {
                                 val format = m.params?.get("format")?.asString
                                 val w = m.params?.get("w")?.asInt
                                 val h = m.params?.get("h")?.asInt
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 && w != null && h != null && format == "ARGB888" && w > 0 && h > 0) {
+                                if (w != null && h != null && format == "ARGB888" && w > 0 && h > 0) {
                                     val bid = generateBufferID(rand, buffers)
-                                    val shm = SharedMemory.create(bid.toString(), w * h * 4)
-                                    val b = SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888, true), shm, shm.mapReadOnly())
-                                    try {
-                                        // this is a dirty trick to get the FileDescriptor of a SharedMemory object without using JNI or a higher API version.
-                                        // this could break anytime, though it is still marked as public but discouraged, so that is unlikely, also given the implementation of the class.
-                                        // noinspection DiscouragedPrivateApi
-                                        val getFd = SharedMemory::class.java.getDeclaredMethod("getFd")
-                                        val fdint = getFd.invoke(shm) as? Int
-                                        if (fdint == null) {
-                                            println("fd empty or not a Int")
-                                            b.shm.close()
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                                        println("creating buffer on API 27+")
+                                        val shm = SharedMemory.create(bid.toString(), w * h * 4)
+                                        val b = SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888, true), shm, shm.mapReadOnly(), null)
+                                        try {
+                                            // this is a dirty trick to get the FileDescriptor of a SharedMemory object without using JNI or a higher API version.
+                                            // this could break anytime, though it is still marked as public but discouraged, so that is unlikely, also given the implementation of the class.
+                                            // noinspection DiscouragedPrivateApi
+                                            val getFd = SharedMemory::class.java.getDeclaredMethod("getFd")
+                                            val fdint = getFd.invoke(shm) as? Int
+                                            if (fdint == null) {
+                                                println("fd empty or not a Int")
+                                                shm.close()
+                                                SharedMemory.unmap(b.buff)
+                                                b.btm.recycle()
+                                                Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
+                                                continue
+                                            }
+                                            val fdesc = FileDescriptor()
+                                            val setInt =  FileDescriptor::class.java.getDeclaredMethod("setInt$", Int::class.java)
+                                            setInt(fdesc, fdint)
+                                            Util.sendMessageFd(out, ConnectionHandler.gson.toJson(bid), main, fdesc)
+                                            buffers[bid] = b
+                                        } catch (e: Exception) {
                                             SharedMemory.unmap(b.buff)
+                                            b.shm?.close()
                                             b.btm.recycle()
-                                            Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
-                                            continue
+                                            if (e is NoSuchMethodException || e is IllegalArgumentException || e is IllegalAccessException ||
+                                                    e is InstantiationException || e is InvocationTargetException) {
+                                                println("reflection exception")
+                                                e.printStackTrace()
+                                                Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
+                                            } else {
+                                                throw e
+                                            }
                                         }
-                                        val fdesc = FileDescriptor()
-                                        val setInt =  FileDescriptor::class.java.getDeclaredMethod("setInt$", Int::class.java)
-                                        setInt(fdesc, fdint)
-                                        Util.sendMessageFd(out, ConnectionHandler.gson.toJson(bid), main, fdesc)
-                                        buffers[bid] = b
-                                    } catch (e: Exception) {
-                                        SharedMemory.unmap(b.buff)
-                                        b.shm.close()
-                                        b.btm.recycle()
-                                        if (e is NoSuchMethodException || e is IllegalArgumentException || e is IllegalAccessException ||
-                                                e is InstantiationException || e is InvocationTargetException) {
-                                            println("reflection exception")
-                                            e.printStackTrace()
+                                    } else {
+                                        println("creating buffer on API 26-")
+                                        val fdint = ConnectionHandler.create_ashmem(w * h * 4)
+                                        if (fdint == -1) {
+                                            println("could not create ashmem with NDK")
                                             Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
-                                        } else {
-                                            throw e
+                                            return
+                                        }
+                                        val buff: ByteBuffer? = ConnectionHandler.map_ashmem(fdint, w * h * 4)
+                                        if (buff == null) {
+                                            println("could not map ashmem with NDK")
+                                            ConnectionHandler.destroy_ashmem(fdint)
+                                            Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
+                                            return
+                                        }
+                                        try {
+                                            val fdesc = FileDescriptor()
+                                            val setInt =  FileDescriptor::class.java.getDeclaredMethod("setInt$", Int::class.java)
+                                            setInt(fdesc, fdint)
+                                            Util.sendMessageFd(out, ConnectionHandler.gson.toJson(bid), main, fdesc)
+                                            buffers[bid] = SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888), null, buff, fdint)
+                                        } catch (e: Exception) {
+                                            ConnectionHandler.unmap_ashmem(buff)
+                                            ConnectionHandler.destroy_ashmem(fdint)
+                                            if (e is NoSuchMethodException || e is IllegalArgumentException || e is IllegalAccessException ||
+                                                    e is InstantiationException || e is InvocationTargetException) {
+                                                println("reflection exception")
+                                                e.printStackTrace()
+                                                Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
+                                            } else {
+                                                throw e
+                                            }
                                         }
                                     }
                                 } else {
-                                    println("invalid parameters or api version")
+                                    println("invalid parameters")
                                     Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
                                 }
                                 continue
@@ -200,11 +236,18 @@ class V0(val app: Context) {
                             "deleteBuffer" -> {
                                 val bid = m.params?.get("bid")?.asInt
                                 val buffer = buffers[bid]
-                                if (buffer != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                                if (buffer != null) {
                                     buffers.remove(bid)
-                                    SharedMemory.unmap(buffer.buff)
-                                    buffer.shm.close()
-                                    buffer.btm.recycle() // this frees the bitmap memory
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                                        SharedMemory.unmap(buffer.buff)
+                                        buffer.shm?.close()
+                                    } else {
+                                        val fd = buffer.fd
+                                        if (fd != null) {
+                                            ConnectionHandler.unmap_ashmem(buffer.buff)
+                                            ConnectionHandler.destroy_ashmem(fd)
+                                        }
+                                    }
                                 }
                                 continue
                             }
@@ -334,7 +377,15 @@ class V0(val app: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 for (b in buffers.values) {
                     SharedMemory.unmap(b.buff)
-                    b.shm.close()
+                    b.shm?.close()
+                }
+            } else {
+                for (b in buffers.values) {
+                    val fd = b.fd
+                    if (fd != null) {
+                        ConnectionHandler.unmap_ashmem(b.buff)
+                        ConnectionHandler.destroy_ashmem(fd)
+                    }
                 }
             }
         }

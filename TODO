@@ -4,6 +4,8 @@ Roadmap:
     - 0.1.3
         [x] Spinner
         [x] RadioGroup, RadioButton
+        [x] use /dev/ashmem with the ndk to create ashmem for android 9-, Android 10 only allows creating ashmem from the API.
+            That makes shared memory buffers usable event pre api 27
         [ ] SwipeRefreshLayout
         [ ] Text watching event for EditText
         [ ] NestedScrollView with item snapping
