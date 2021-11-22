@@ -7,6 +7,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.termux.gui.ConnectionHandler
@@ -219,6 +220,37 @@ class HandleView {
                     setDimension(m, activities, overlays, app)
                     return true
                 }
+                "getDimensions" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v != null) {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.width, v.height)))
+                                    } else {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(0, 0)))
+                                    }
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v != null) {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.width, v.height)))
+                                    } else {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(0, 0)))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
                 "setText" -> {
                     if (m.params != null) {
                         val aid = m.params?.get("aid")?.asString
@@ -236,6 +268,94 @@ class HandleView {
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
                                     o.root.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.text = text
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setBackgroundColor" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val color = m.params?.get("color")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && color != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setBackgroundColor(color)
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setBackgroundColor(color)
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setTextColor" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val color = m.params?.get("color")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && color != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setTextColor(color)
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setTextColor(color)
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setProgress" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val progress = m.params?.get("progress")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && progress != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setProgress(progress)
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setProgress(progress)
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setRefreshing" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val refresh = m.params?.get("refresh")?.asBoolean
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && refresh != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<SwipeRefreshLayout>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isRefreshing = refresh
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<SwipeRefreshLayout>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isRefreshing = refresh
                                 }
                             }
                         }
@@ -322,6 +442,38 @@ class HandleView {
                     }
                     return true
                 }
+                "setVisibility" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val vis = m.params?.get("vis")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && vis != null && vis >= 0 && vis <= 2) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.visibility = when (vis) {
+                                        0 -> View.GONE
+                                        1 -> View.INVISIBLE
+                                        2 -> View.VISIBLE
+                                        else -> {View.VISIBLE}
+                                    }
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.visibility = when (vis) {
+                                        0 -> View.GONE
+                                        1 -> View.INVISIBLE
+                                        2 -> View.VISIBLE
+                                        else -> {View.VISIBLE}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
             }
             return false
         }
@@ -332,6 +484,7 @@ class HandleView {
             val id = m.params?.get("id")?.asInt
             val width = m.params?.get("width")
             val height = m.params?.get("height")
+            val px = m.params?.get("px")?.asBoolean
             val o = overlays[aid]
             val el: JsonElement? = width ?: height
             fun set(pa: ViewGroup.LayoutParams, p: JsonPrimitive) {
@@ -353,9 +506,9 @@ class HandleView {
                 }
                 if (p.isNumber) {
                     if (width != null) {
-                        pa.width = Util.toPX(app, p.asInt)
+                        pa.width = if (px == true) p.asInt else Util.toPX(app, p.asInt)
                     } else {
-                        pa.height = Util.toPX(app, p.asInt)
+                        pa.height = if (px == true) p.asInt else Util.toPX(app, p.asInt)
                     }
                 }
             }

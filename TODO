@@ -6,18 +6,24 @@ Roadmap:
         [x] RadioGroup, RadioButton
         [x] use /dev/ashmem with the ndk to create ashmem for android 9-, Android 10 only allows creating ashmem from the API.
             That makes shared memory buffers usable event pre api 27
-        [ ] SwipeRefreshLayout
-        [ ] Text watching event for EditText
-        [ ] NestedScrollView with item snapping
+        [x] SwipeRefreshLayout
+        [x] Text watching event for EditText
         [x] Input Types for EditText
-        [ ] Input catching for ImageView
-        [ ] ProgressBar
-        [ ] Event control methods
-        [ ] method to get dimensions of Views in the layout
-        [ ] method to set Dimensions in pixels instead of dp
+        [x] ProgressBar
+        [x] Event control methods
+        [x] method to get dimensions of Views in the layout
+        [x] method to set dimensions in pixels instead of dp
         [x] ToggleButton
-        [ ] set visibility
+        [x] set visibility
+        [x] setting View background and text color
     - 0.1.4
+        [ ] NestedScrollView with item snapping
+        [ ] HorizontalScrollView
+        [ ] a configuration activity as the launcher activity, where you can set settings:
+            - how long the plugin should stay active after all connections are closed:
+                - a negative number will make the plugin inactive only when you click the close option in the notification
+            - option to make the plugin go into the background (no notification shown) when no programs are connected. That will shorten the startup time. Can only be used when the timeout setting above is set to negative.
+        [ ] Input catching for ImageView
         [ ] configuration change events
         [ ] screen un/locked event, so lockscreen apps can enable more functionality when the screen isn't locked
         [ ] TabLayout
@@ -25,12 +31,12 @@ Roadmap:
         [ ] clipboard
         [ ] brightness
         [ ] notifications
-        [ ] notifications with custom layout (the same principle as with widgets, probably just mae a special RemoteViews interface)
+        [ ] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
         [ ] Rework the widgets
     - 1.0.0
         [ ] fragment connections
         [ ] implement RecyclerView native or as a component in the python library (custom class with methods around a NestedScrollView)
-        [ ] implement ViewPager native or as a component in the python library (custom class with methods around a NestedScrollView)
+        [ ] implement ViewPager native or as a component in the python library (custom class with methods around a HorizontalScrollView)
         [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
         [ ] broadcast events:
             [ ] airplane mode
@@ -39,12 +45,32 @@ Roadmap:
             [ ] locale
         [ ] GridLayout
         [ ] WebView
+            - Run javascript in the WebView with user consent.
+            - setting: always allow javascript in WebViews
         [ ] RelativeLayout
         [ ] ConstraintLayout
+        [ ] the rest of the views in the protocol
+    - 1.0.1
+        [ ] option to expose the api to javascript running in a WebView with user consent.
+        [ ] SurfaceView with EGL buffers for accelerated graphics
         
         
+idea: use vulkan to create a buffer and create a file descriptor for it, use the buffer in opengl to draw to a GL SurfaceView and pass the file descriptor to the program, so it can also map it.
+That consumes no cpu memory and allows the program to use accelerated graphics in the buffer.
+
+Android doesn't support the extension to export a buffer as a fd, look into EGL instead.
+https://source.android.com/devices/graphics/arch-egl-opengl?hl=en
+https://www.khronos.org/registry/EGL/specs/eglspec.1.5.pdf
+https://www.khronos.org/registry/OpenGL/specs/es/2.0/es_full_spec_2.0.pdf
+
+Turns out sharing between processes isn't in the scope of EGL.
+Look at the android-specific interfaces instead.
+You can use hardware buffers with the ndk and even
+https://developer.android.com/ndk/reference/group/a-hardware-buffer#ahardwarebuffer_recvhandlefromunixsocket
 
 
+https://developer.android.com/guide/topics/graphics/opengl
+https://developer.android.com/ndk/guides/graphics/getting-started
 
 
 
@@ -139,12 +165,11 @@ Implement Views:
 
 
 Implement Events:
-[ ] Methods to set and unset Listeners
+[x] Methods to set and unset Listeners
 [x] Click
-[ ] LongClick
-[ ] FocusChange
-[ ] Key
-[ ] Touch
+[x] LongClick
+[x] FocusChange
+[x] Touch
 [ ] Refresh (SwipeRefreshLayout)
 [ ] 
 

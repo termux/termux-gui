@@ -6,12 +6,13 @@ import android.content.Context
 import android.graphics.Matrix
 import android.net.LocalSocket
 import android.os.Build
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.RecyclerView
 import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,6 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.collections.HashMap
-import kotlin.math.round
 import kotlin.math.roundToInt
 
 class Util {
@@ -146,6 +146,32 @@ class Util {
                 v.setOnClickListener(null)
             }
         }
+
+        fun setLongClickListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            if (enabled) {
+                val map = HashMap<String, Any>()
+                map["id"] = v.id
+                map["aid"] = aid
+                val ev = ConnectionHandler.Event("longClick", ConnectionHandler.gson.toJsonTree(map))
+                v.setOnLongClickListener { eventQueue.offer(ev) }
+            } else {
+                v.setOnLongClickListener(null)
+            }
+        }
+
+        fun setFocusChangeListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            if (enabled) {
+                val map = HashMap<String, Any>()
+                map["id"] = v.id
+                map["aid"] = aid
+                v.setOnFocusChangeListener { _, hasFocus -> 
+                    map["focus"] = hasFocus
+                    eventQueue.offer(ConnectionHandler.Event("focusChange", ConnectionHandler.gson.toJsonTree(map)))
+                }
+            } else {
+                v.onFocusChangeListener = null
+            }
+        }
         
         private val TOUCH_EVENT_MAP: Map<Int, String>
         init {
@@ -158,6 +184,26 @@ class Util {
             map[MotionEvent.ACTION_MOVE] = "move"
             TOUCH_EVENT_MAP = Collections.unmodifiableMap(map)
         }
+        
+        fun setTextWatcher(v: TextView, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            if (enabled) {
+                v.addTextChangedListener(object: TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                    override fun afterTextChanged(s: Editable?) {
+                        if (s != null) {
+                            val map = HashMap<String, Any>()
+                            map["id"] = v.id
+                            map["aid"] = aid
+                            map["text"] = s.toString()
+                            eventQueue.offer(ConnectionHandler.Event("text", ConnectionHandler.gson.toJsonTree(map)))
+                        }
+                    }
+                })
+            }
+        }
+        
+        
         
         @SuppressLint("ClickableViewAccessibility")
         fun setTouchListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
@@ -190,6 +236,23 @@ class Util {
                                 pd.add(PointerData(event.getX(i).roundToInt(), event.getY(i).roundToInt(), event.getPointerId(i)))
                             }
                         }
+                        for (i in 0 until event.historySize) {
+                            val pdh = LinkedList<PointerData>()
+                            for (a in 0 until event.pointerCount) {
+                                if (inv) {
+                                    // if it is an ImageView, automatically transform from view coordinates to image coordinates
+                                    val pos = FloatArray(2)
+                                    pos[0] = event.getHistoricalX(a, i)
+                                    pos[1] = event.getHistoricalY(a, i)
+                                    rev.mapPoints(pos)
+                                    pdh.add(PointerData(pos[0].roundToInt(), pos[1].roundToInt(), event.getPointerId(a)))
+                                } else {
+                                    pdh.add(PointerData(event.getHistoricalX(a, i).roundToInt(), event.getHistoricalY(a, i).roundToInt(), event.getPointerId(a)))
+                                }
+                            }
+                            map["pointers"] = pdh
+                            eventQueue.offer(ConnectionHandler.Event("touch", ConnectionHandler.gson.toJsonTree(map)))
+                        }
                         map["pointers"] = pd
                         eventQueue.offer(ConnectionHandler.Event("touch", ConnectionHandler.gson.toJsonTree(map)))
                     }
@@ -207,7 +270,7 @@ class Util {
                     if (v is RecyclerView) {
                         val rv = recyclerviews[v.id]
                         if (rv != null) {
-                            usedIds.removeAll(rv.exportViewList().map { it.id })
+                            usedIds.removeAll(rv.exportViewList().map { it.id }.toSet())
                             recyclerviews.remove(v.id)
                         }
                     } else {

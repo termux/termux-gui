@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.termux.gui"
     android:sharedUserId="com.termux">
-
+    
+    <!-- According to google surveys EGL2.0 should be available on all devices anyways -->
+    <uses-feature android:glEsVersion="0x00020000" android:required="false" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     

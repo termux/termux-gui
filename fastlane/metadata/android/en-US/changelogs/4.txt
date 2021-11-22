@@ -1,0 +1,8 @@
+Added Spinners
+Made shared buffers available for Android 8.0 and earlier
+Added RadioButtons and RadioGroups
+Added event control methods
+Added touch events
+Added ToggleButtons
+You can now set the visibility of Views and the background and text colors
+Added SwipeRefreshLayout

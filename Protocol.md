@@ -121,6 +121,7 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - [LinearLayout](https://developer.android.com/guide/topics/ui/layout/linear)
     - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
     - [FrameLayout](https://developer.android.com/reference/android/widget/FrameLayout)
+    - [SwipeRefreshLayout](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout)
     - [TextView](https://developer.android.com/reference/android/widget/TextView)
     - [EditText](https://developer.android.com/reference/android/widget/EditText)
     - [Button](https://developer.android.com/reference/android/widget/Button)
@@ -172,12 +173,17 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - 
 - setVisibility: Sets the visibility of a Vew.
   - Parameters:
-    - visibility: 0 = gone, 1 = hidden, 2 = visible. While hidden, views are not visible but still take up space in the layout. Gone views do not take up layout space.
+    - vis: 0 = gone, 1 = hidden, 2 = visible. While hidden, views are not visible but still take up space in the layout. Gone views do not take up layout space.
     - id: The id of the View.
     - aid: The id of the Activity the View is in.
 - set(Width/Height): Sets the width/height of the view.
   - Parameters:
     - width/height: The desired width/height. Can be a value in [dp](https://developer.android.com/guide/topics/resources/more-resources.html#Dimension), or "MATCH_PARENT" to match the size of the parent layout or "WRAP_CONTENT" to go as big as the view needs to be to display all its content.
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+    - px: If true, the measurement is in pixels instead of dp.
+- getDimensions: Gets the current with and height of a View in pixels.
+  - Parameters:
     - id: The id of the View.
     - aid: The id of the Activity the View is in.
 - deleteView: Deletes a View and its children from the Layout hierarchy.
@@ -200,6 +206,26 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - aid: The id of the Activity the View is in.
     - padding: The padding value as an integer in [dp](https://developer.android.com/guide/topics/resources/more-resources.html#Dimension)
     - dir: can be "top", "bottom", "left", "right" to set the padding for one of those directions. If not specified. the padding is set for all directions.
+- setBackgroundColor: Sets the background color of a View.
+  - Parameters:
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+    - color: The color in the same format as for setTheme.
+- setTextColor: Sets the text color of a View.
+  - Parameters:
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+    - color: The color in the same format as for setTheme.
+- setProgress: Sets the Progress of a ProgressBar.
+  - Parameters:
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+    - progress: The progress value as an integer in the range of 0 to 100.
+- setRefreshing: Sets whether a SwipeRefreshLayout is refreshing.
+  - Parameters:
+    - id: The id of the View.
+    - aid: The id of the Activity the View is in.
+    - refresh: The refreshing value as a boolean.
 - setText: Sets the text of the View.
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
@@ -274,9 +300,9 @@ Event control:
     - Click
     - LongClick
     - FocusChange
-    - Key
     - Touch
-    - Gesture
+    - Gesture: not implemented yet. You can detect gestures like pinch yourself with touch events.
+    - Text: emits an event every time the text of the View is changed. This listener cannot be unset.
   - Parameters:
     - id: The View id.
     - aid: The id of the Activity the View is in.
@@ -315,7 +341,10 @@ The following methods can also take the parameter wid instead of aid to operate 
 Once you have opened an Activity and placed all Views and configured it, like mit GUI applications you have to wait for user input.  
 Events arrive on the event socket.  
 Events that are enabled by default:
-- click for Buttons, Checkboxes
+- click for Buttons, Checkboxes, Switches, ToggleButtons
+- refresh for SwipeRefreshLayout
+- selected for RadioGroup
+- itemselected for Spinner
 - 
 
 Event types:  
@@ -329,8 +358,6 @@ Event types:
   - longClick
   - focusChange
     - Additional value: focus: whether or not the View now has focus.
-  - key
-    - Additional value: key: the key that was pressed.
   - touch
   - refresh: Refresh triggered in a SwipeRefreshLayout
   - selected: A RadioButton in a RadioButtonGroup has been selected
@@ -340,6 +367,8 @@ Event types:
   - input: Send from EditText where you set the input to blocked
   - cut: Send from EditText where you set the input to blocked
   - paste: Send from EditText where you set the input to blocked
+  - text: Send when the Text of the View changed, even when the text was chenged with setText.
+    - Additional values: text: The new text of the view
 - [Activity Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) :
   - values for all:
     - aid: The id of the Activity.

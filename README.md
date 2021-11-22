@@ -17,20 +17,28 @@ Releases on f-droid will be provided as soon as possible. When there is a releas
 
 Protocol.md describes the Protocol used and the available functions you can use.  
 If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  
-Using this plugin requires a bit of knowledge of the android GUI system. You can read about it in detail in the [official documentation](https://developer.android.com/guide).  
+
+## Language Bindings
+
+- [Python](https://github.com/tareksander/termux-gui-python-bindings)
+- [C/C++](https://github.com/tareksander/termux-gui-c-bindings)
+
+## Using the plugin
+
+Using this plugin requires a bit of knowledge of the Android GUI system. You can read about it in detail in the [official documentation](https://developer.android.com/guide).  
 Relevant documentation is also linked in Protocol.md for more specific subjects.  
 Here is a crash-course:
 
 #### Tasks
 
-Tasks are the individual screen you can switch between. Each Task has a stack of Activities, called the back stack, with the top one being visible.
+Tasks are the individual screens you can switch between. Each Task has a stack of Activities, called the back stack, with the top one being visible.
 
 #### Activities
 
 Activities are the individual screens of apps, like a home screen, a settings screen etc.  
 When an Activity finishes itself, it is removed from the Activity stack of its Task, showing the underlying Activity.  
 An Activity can also launch another Activity in the Task, adding it to the back stack on top of itself.  
-To not let the device to unneeded work like drawing Elements that aren't visible, the System informs Activities of certain changes.  
+To not let the device do unneeded work like drawing Elements that aren't visible, the System informs Activities of certain changes.  
 These are the Activity lifecycle events.
 
 #### Activity Lifecycle
@@ -55,11 +63,6 @@ ImageViews can display images.
   
 With these fundamentals you can go ahead and use this plugin.  If you need more sophisticated Views or Layouts look into Protocol.md for what's available.
 
-
-## Language Bindings
-
-- [Python](https://github.com/tareksander/termux-gui-python-bindings)
-- [C/C++](https://github.com/tareksander/termux-gui-c-bindings)
 
 
 

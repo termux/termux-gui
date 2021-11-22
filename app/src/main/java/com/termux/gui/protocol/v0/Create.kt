@@ -16,6 +16,7 @@ import android.view.inputmethod.InputConnectionWrapper
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.termux.gui.*
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
@@ -269,6 +270,37 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createProgressBar") {
+                        var id = -1
+                        V0.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = ProgressBar(it, null, android.R.attr.progressBarStyleHorizontal)
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
+                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createSwipeRefreshLayout") {
+                        var id = -1
+                        V0.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = SwipeRefreshLayout(it)
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
+                            val args = HashMap<String, Any>()
+                            args["aid"] = aid
+                            args["id"] = v.id
+                            val ev = ConnectionHandler.Event("refresh", ConnectionHandler.gson.toJsonTree(args))
+                            v.setOnRefreshListener {
+                                if (v.isRefreshing) {
+                                    eventQueue.offer(ev)
+                                }
+                            }
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))

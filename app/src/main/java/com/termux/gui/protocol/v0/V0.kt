@@ -337,12 +337,60 @@ class V0(val app: Context) {
                                     if (m.method == "sendTouchEvent") {
                                         if (a != null) {
                                             runOnUIThreadActivityStarted(a) {
-                                                it.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setTouchListener(it, aid, send, eventQueue) }
+                                                it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setTouchListener(it, aid, send, eventQueue) }
                                             }
                                         }
                                         if (o != null) {
                                             runOnUIThreadBlocking {
                                                 o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setTouchListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                    }
+                                    if (m.method == "sendFocusChangeEvent") {
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setFocusChangeListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                        if (o != null) {
+                                            runOnUIThreadBlocking {
+                                                o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setFocusChangeListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                    }
+                                    if (m.method == "sendLongClickEvent") {
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setLongClickListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                        if (o != null) {
+                                            runOnUIThreadBlocking {
+                                                o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setLongClickListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                    }
+                                    if (m.method == "sendClickEvent") {
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setClickListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                        if (o != null) {
+                                            runOnUIThreadBlocking {
+                                                o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let { Util.setClickListener(it, aid, send, eventQueue) }
+                                            }
+                                        }
+                                    }
+                                    if (m.method == "sendTextEvent") {
+                                        if (a != null) {
+                                            runOnUIThreadActivityStarted(a) {
+                                                it.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let {Util.setTextWatcher(it, aid, send, eventQueue)}
+                                            }
+                                        }
+                                        if (o != null) {
+                                            runOnUIThreadBlocking {
+                                                o.root.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.let {Util.setTextWatcher(it, aid, send, eventQueue)}
                                             }
                                         }
                                     }
