@@ -40,7 +40,7 @@ import kotlin.collections.HashMap
 class V0(val app: Context) {
     data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory?, val buff: ByteBuffer, val fd: Int?)
     data class WidgetRepresentation(val usedIds: TreeSet<Int> = TreeSet(), var root: RemoteViews?, var theme: GUIActivity.GUITheme?)
-    data class ActivityState(var a: GUIActivity?, @Volatile var saved: Boolean = false, val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(10000))
+    data class ActivityState(var a: GUIActivity?, @Volatile var saved: Boolean = false, val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(100))
     data class Overlay(val context: Context) {
         val usedIds: TreeSet<Int> = TreeSet()
         val recyclerviews = HashMap<Int, GUIRecyclerViewAdapter>()
