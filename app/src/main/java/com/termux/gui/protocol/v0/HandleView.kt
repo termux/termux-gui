@@ -1,6 +1,7 @@
 package com.termux.gui.protocol.v0
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.TypedValue
@@ -284,12 +285,12 @@ class HandleView {
                         if (id != null && color != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setBackgroundColor(color)
+                                    it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.backgroundTintList = ColorStateList.valueOf(color)
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setBackgroundColor(color)
+                                    o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.backgroundTintList = ColorStateList.valueOf(color)
                                 }
                             }
                         }
@@ -328,12 +329,12 @@ class HandleView {
                         if (id != null && progress != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setProgress(progress)
+                                    it.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.progress = progress
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setProgress(progress)
+                                    o.root.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.progress = progress
                                 }
                             }
                         }
