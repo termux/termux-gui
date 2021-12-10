@@ -5,21 +5,16 @@ import android.app.*
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.PixelFormat
 import android.net.LocalSocket
 import android.net.Uri
 import android.os.Build
-import android.os.ParcelFileDescriptor
 import android.os.SharedMemory
 import android.provider.Settings
-import android.util.Base64
-import android.util.TypedValue
 import android.view.*
 import android.widget.*
-import androidx.recyclerview.widget.SortedList
-import androidx.viewpager2.widget.ViewPager2
 import com.termux.gui.*
 import com.termux.gui.Util.Companion.runOnUIThreadBlocking
 import com.termux.gui.protocol.v0.HandleActivityAndTask.Companion.handleActivityTaskMessage
@@ -109,6 +104,13 @@ class V0(val app: Context) {
         
         val lifecycleCallbacks = LifecycleListener(eventQueue, activities, tasks, am)
         App.APP?.registerActivityLifecycleCallbacks(lifecycleCallbacks)
+        val sysrec = SystemBroadcastReceiver(eventQueue)
+        val filter = IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+        filter.addAction(Intent.ACTION_SCREEN_OFF)
+        filter.addAction(Intent.ACTION_SCREEN_ON)
+        filter.addAction(Intent.ACTION_LOCALE_CHANGED)
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        App.APP?.registerReceiver(sysrec, filter)
         try {
             var msgbytes = ByteArray(0)
             
@@ -411,6 +413,7 @@ class V0(val app: Context) {
             for (o in overlays.values) {
                 wm.removeView(o.root)
             }
+            App.APP?.unregisterReceiver(sysrec)
             App.APP?.unregisterActivityLifecycleCallbacks(lifecycleCallbacks)
             for (t in tasks) {
                 try {
@@ -591,11 +594,7 @@ class V0(val app: Context) {
             Thread.sleep(1)
         }
         return if (ptid == null) {
-            ConnectionHandler.gson.toJson(arrayOf(aid, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                task?.taskInfo?.taskId ?: 0
-            } else {
-                task?.taskInfo?.id ?: 0
-            }))
+            ConnectionHandler.gson.toJson(arrayOf(aid, activities[aid]?.a?.taskId ?: 0))
         } else {
             ConnectionHandler.gson.toJson(aid)
         }
