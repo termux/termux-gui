@@ -129,7 +129,7 @@ class V0(val app: Context) {
                         val m = ConnectionHandler.gson.fromJson(msg, ConnectionHandler.Message::class.java)
                         //println(m?.method)
                         if (m?.method != null) {
-                            if (handleActivityTaskMessage(m, activities, tasks, widgets, overlays, app, wm)) continue
+                            if (handleActivityTaskMessage(m, activities, tasks, widgets, overlays, app, wm, out)) continue
                             if (handleView(m, activities, widgets, overlays, rand, out, app, eventQueue)) continue
                         }
                         when (m?.method) {

@@ -6,10 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.KeyEvent
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
@@ -17,7 +14,10 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.termux.gui.*
+import com.termux.gui.ConnectionHandler
+import com.termux.gui.R
+import com.termux.gui.Util
+import com.termux.gui.WidgetButtonReceiver
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
 import java.io.DataOutputStream
@@ -169,7 +169,13 @@ class Create {
                     if (m.method == "createNestedScrollView") {
                         var id = -1
                         V0.runOnUIThreadActivityStartedBlocking(a) {
-                            val v = if (m.params?.get("snap")?.asBoolean == true) SnappingNestedScrollView(it) else NestedScrollView(it)
+                            val v = if (m.params?.get("snapping")?.asBoolean == true) SnappingNestedScrollView(it) else NestedScrollView(it)
+                            if (m.params?.get("fillviewport")?.asBoolean == true) {
+                                v.isFillViewport = true
+                            }
+                            if (m.params?.get("nobar")?.asBoolean == true) {
+                                v.scrollBarSize = 0
+                            }
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
@@ -177,10 +183,16 @@ class Create {
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
                     }
-                    if (m.method == "HorizontalScrollView") {
+                    if (m.method == "createHorizontalScrollView") {
                         var id = -1
                         V0.runOnUIThreadActivityStartedBlocking(a) {
-                            val v = if (m.params?.get("snap")?.asBoolean == true) SnappingHorizontalScrollView(it) else HorizontalScrollView(it)
+                            val v = if (m.params?.get("snapping")?.asBoolean == true) SnappingHorizontalScrollView(it) else HorizontalScrollView(it)
+                            if (m.params?.get("fillviewport")?.asBoolean == true) {
+                                v.isFillViewport = true
+                            }
+                            if (m.params?.get("nobar")?.asBoolean == true) {
+                                v.scrollBarSize = 0
+                            }
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
@@ -194,13 +206,7 @@ class Create {
                             val v = RadioGroup(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            val args = HashMap<String, Any>()
-                            args["aid"] = aid
-                            args["id"] = v.id
-                            v.setOnCheckedChangeListener { _, checked ->
-                                args["selected"] = checked
-                                eventQueue.offer(ConnectionHandler.Event("selected", ConnectionHandler.gson.toJsonTree(args)))
-                            }
+                            Util.setCheckedListener(v, aid, eventQueue)
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -226,21 +232,7 @@ class Create {
                             val v = Spinner(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            v.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-                                val args = HashMap<String, Any?>()
-                                init {
-                                    args["aid"] = aid
-                                    args["id"] = id
-                                }
-                                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                                    args["selected"] = (view as? TextView)?.text?.toString()
-                                    eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
-                                }
-                                override fun onNothingSelected(parent: AdapterView<*>?) {
-                                    args["selected"] = null
-                                    eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
-                                }
-                            }
+                            Util.setSpinnerListener(v, aid, eventQueue)
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -292,15 +284,7 @@ class Create {
                             val v = SwipeRefreshLayout(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            val args = HashMap<String, Any>()
-                            args["aid"] = aid
-                            args["id"] = v.id
-                            val ev = ConnectionHandler.Event("refresh", ConnectionHandler.gson.toJsonTree(args))
-                            v.setOnRefreshListener {
-                                if (v.isRefreshing) {
-                                    eventQueue.offer(ev)
-                                }
-                            }
+                            Util.setRefreshListener(v, aid, eventQueue)
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -411,16 +395,28 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
+                            if (m.params?.get("fillviewport")?.asBoolean == true) {
+                                v.isFillViewport = true
+                            }
+                            if (m.params?.get("nobar")?.asBoolean == true) {
+                                v.scrollBarSize = 0
+                            }
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
                     }
-                    if (m.method == "HorizontalScrollView") {
+                    if (m.method == "createHorizontalScrollView") {
                         val v = HorizontalScrollView(app)
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
+                            if (m.params?.get("fillviewport")?.asBoolean == true) {
+                                v.isFillViewport = true
+                            }
+                            if (m.params?.get("nobar")?.asBoolean == true) {
+                                v.scrollBarSize = 0
+                            }
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -431,13 +427,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
-                            val args = HashMap<String, Any>()
-                            args["aid"] = aid
-                            args["id"] = v.id
-                            v.setOnCheckedChangeListener { _, checked ->
-                                args["selected"] = checked
-                                eventQueue.offer(ConnectionHandler.Event("selected", ConnectionHandler.gson.toJsonTree(args)))
-                            }
+                            Util.setCheckedListener(v, aid, eventQueue)
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -461,21 +451,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
-                            v.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-                                val args = HashMap<String, Any?>()
-                                init {
-                                    args["aid"] = aid
-                                    args["id"] = id
-                                }
-                                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                                    args["selected"] = (view as? TextView)?.text?.toString()
-                                    eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
-                                }
-                                override fun onNothingSelected(parent: AdapterView<*>?) {
-                                    args["selected"] = null
-                                    eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
-                                }
-                            }
+                            Util.setSpinnerListener(v, aid, eventQueue)
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))

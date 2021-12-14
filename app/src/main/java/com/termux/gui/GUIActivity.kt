@@ -1,14 +1,21 @@
 package com.termux.gui
 
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
+import android.hardware.HardwareBuffer
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.gson.JsonElement
 import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import java.io.Serializable
 import java.util.*
@@ -77,6 +84,8 @@ open class GUIActivity : AppCompatActivity() {
             if (d != null) {
                 data = d
             }
+            // Disabled the view saving and restoring for now, because it's unstable
+            /*
             val tree = savedInstanceState.getSerializable(VIEWS_KEY) as? Node
             if (tree != null) {
                 findViewById<FrameLayout>(R.id.root).addView(buildHierarchyFromTree(tree))
@@ -92,9 +101,38 @@ open class GUIActivity : AppCompatActivity() {
                     rec.importViewList(r.value.first)
                 }
             }
+            */
         }
     }
-
+    
+    fun configToJson(conf: Configuration?): JsonElement? {
+        val c: Configuration = conf ?: resources.configuration ?: return ConnectionHandler.gson.toJsonTree(emptyArray<Any>())
+        val m = HashMap<String, Any>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            m["dark_mode"] = c.isNightModeActive
+        }
+        val l = c.locales.get(0)
+        m["country"] = l.country
+        m["language"] = l.language
+        m["orientation"] = when (c.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> "landscape"
+            Configuration.ORIENTATION_PORTRAIT -> "portrait"
+            else -> ""
+        }
+        m["keyboardHidden"] = when (c.keyboardHidden) {
+            Configuration.KEYBOARDHIDDEN_NO -> false
+            Configuration.KEYBOARDHIDDEN_YES -> true
+            else -> true
+        }
+        return ConnectionHandler.gson.toJsonTree(m)
+    }
+    
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        eventQueue?.offer(ConnectionHandler.Event("config", configToJson(newConfig)))
+    }
+    
+    
     private fun buildHierarchyFromTree(tree: Node): View {
         val v = tree.claz.getConstructor(Context::class.java).newInstance(this)
         v.id = tree.id
@@ -104,6 +142,20 @@ open class GUIActivity : AppCompatActivity() {
                 v.addView(buildHierarchyFromTree(n))
             }
         }
+        
+        if (v is Button || v is CheckBox || v is SwitchCompat || v is ToggleButton) {
+            eventQueue?.let { Util.setClickListener(v, data.toString(), true, it) }
+        }
+        if (v is RadioGroup) {
+            eventQueue?.let { Util.setCheckedListener(v, data.toString(), it) }
+        }
+        if (v is Spinner) {
+            eventQueue?.let { Util.setSpinnerListener(v, data.toString(), it) }
+        }
+        if (v is SwipeRefreshLayout) {
+            eventQueue?.let { Util.setRefreshListener(v, data.toString(), it) }
+        }
+        
         return v
     }
 
@@ -167,7 +219,11 @@ open class GUIActivity : AppCompatActivity() {
         }
         val tree = Node(parent, start.id, start::class.java, children)
         for (i in 0 until start.childCount) {
-            children.add(createViewTree(start.getChildAt(i), tree))
+            val c = start.getChildAt(i)
+            if (Class.forName("androidx.swiperefreshlayout.widget.CircleImageView").isInstance(c)) {
+                continue
+            }
+            children.add(createViewTree(c, tree))
         }
         //println("tree-ed ${start::class}")
         return tree

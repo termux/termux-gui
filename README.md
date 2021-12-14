@@ -13,7 +13,7 @@ In the examples directory you can find demo videos and sample code.
 [Installation notes](https://github.com/termux/termux-app#installation)  
 There is currently no release on f-droid, so the only method to install this plugin is to use the apk from the [releases](https://github.com/tareksander/termux-gui/releases) and the [Termux apk from Github Actions](https://github.com/termux/termux-app/actions).  
 Releases on f-droid will be provided as soon as possible. When there is a release, the f-droid badge at the top will show a version number.  
-
+[See this comment for links to install Termux and its plugins from Github](https://github.com/tareksander/termux-gui-python-bindings/issues/1#issuecomment-983797979).  
 
 Protocol.md describes the Protocol used and the available functions you can use.  
 If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  

@@ -6,7 +6,7 @@ import termuxgui as tg
 
 with tg.Connection() as c:
     
-    a = tg.Activity(c, lockscreen=True)
+    a = tg.Activity(c)
     
     ref = tg.SwipeRefreshLayout(a)
     
@@ -35,16 +35,10 @@ with tg.Connection() as c:
     pb.setprogress(25)
     pb.setbackgroundcolor(0xffffffff)
     
+    print(t.getdimensions())
     
-    time.sleep(3)
     
-    print(a.getconfiguration())
     
-    c.turnscreenon()
-    
-    print("locked: ", c.islocked())
-    
-    a.requestunlock()
     
     
     
@@ -53,5 +47,5 @@ with tg.Connection() as c:
         if ev.type == tg.Event.refresh:
             ref.setrefreshing(False)
             t.setvisibility(2)
-        if ev.type == "destroy" and ev.value["finishing"] == True:
+        if ev.type == "destroy":
             sys.exit()

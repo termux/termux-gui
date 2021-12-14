@@ -2,6 +2,7 @@ package com.termux.gui
 
 import android.app.ActivityManager
 import android.app.Application
+import android.content.ComponentName
 
 class App : Application() {
     companion object {
@@ -13,7 +14,8 @@ class App : Application() {
         // clean up any old task stacks
         getSystemService(ActivityManager::class.java).let {
             for (t in it.appTasks) {
-                t.finishAndRemoveTask()
+                if (t.taskInfo.baseIntent.component == ComponentName(this, GUIActivity::class.java))
+                    t.finishAndRemoveTask()
             }
         }
         Thread.setDefaultUncaughtExceptionHandler { _, e -> e.printStackTrace() }

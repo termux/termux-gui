@@ -2,8 +2,10 @@
 
 If you don't want to implement a custom library for using the protocol, you can skip to the [protocol methods](#methods)<!-- @IGNORE PREVIOUS: anchor -->
 
-### WARNING: The protocol is not yet stable and could change anytime, and parts are not implemented yet.
 
+Due to Android limitations, methods that return a value fail when the Activity isn't visible and up to 100 methods that don't return a value will be queued up to run when the Activity is visible again.  
+If onCreate gets called again for an Activity (because it was destroyed and re-created by the system (this shouldn't happen often because the Activities ignore all configuration changes), all state in that Activity like registered listeners, and views is lost.  
+You should always store state you care about yourself, because Android reserves the right to terminate an Activity or a process at any time, and rebuild the layout when you see that a second onCreate is triggered for one of your activities.  
 
 ## Connection
 
@@ -64,7 +66,7 @@ These methods control Android [Activities](https://developer.android.com/referen
 - moveTaskToBack: Makes the Task go into the background.
   - Parameters:
     - aid: The id of an Activity in the Task.
-- setTheme: Sets the theme for the activity. It only applies to newly created Views, so this should be set before any Views are added. The color has to be specified as an RGBA888 integer (in hex literals 0xaabbggrr).
+- setTheme: Sets the theme for the activity. It only applies to newly created Views, so this should be set before any Views are added. The color has to be specified as an RGBA8888 integer (in hex literals 0xaabbggrr).
   - Parameters:
     - aid: The Activity id.
     - statusBarColor
@@ -111,15 +113,31 @@ These methods control Android [Activities](https://developer.android.com/referen
     - aid: The id of the Activity.
     - x
     - y
+- getConfiguration: Get the current configuration of an Activity.
+  - Returns:
+    - dark_mode: boolean. Only on Android 10+.
+    - country: The country as a 2-letter string.
+    - language: The language as a 2-letter string.
+    - orientation: The screen orientation, either "landscape" or "portrait".
+    - keyboardHidden: boolean whether a keyboard is currently available.
+  - Parameters:
+    - aid: The id of the Activity.
+- turnScreenOn: Turns the screen on. Note that this does not unlock the lockscreen.
+- isLocked: Check if the device is locked. Returns true if the device is locked, false if not.
+  - Returns:
+    - locked: Whether the device is locked.
+- requestUnlock: If the lockscreen isn't protected by a PIN, pattern or password, unlocks it immediately. If it is, brings up the UI to let the user unlock it. Only available on Android 8.0 and higher, on lower versions it's a no-op.
+  - Parameters:
+    - aid: The Activity id of the Activity that wants to unlock the screen.
 
 
 
 Layout and View control:  
-These methods create and Manipulate [Views](https://developer.android.com/reference/android/view/View), [Layouts](https://developer.android.com/guide/topics/ui/declaring-layout) and the Layout hierarchy.
+These methods create and Manipulate [Views](https://developer.android.com/reference/android/view/View), [Layouts](https://developer.android.com/guide/topics/ui/declaring-layout) and the Layout hierarchy.  
+Due to Android limitations, methods that return a value fail when the Activity isn't visible and up to 100 methods that don't return a value will be queued up to run when the Activity is visible again.
 - create*: Creates a View and places it in the Layout hierarchy. It returns the View id or -1 in case of an error. The main cause of an error is a stopped Activity, as it's state isa already saved and can't be changed until it is resumed.
   - The following Views and Layouts are supported:
     - [LinearLayout](https://developer.android.com/guide/topics/ui/layout/linear)
-    - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
     - [FrameLayout](https://developer.android.com/reference/android/widget/FrameLayout)
     - [SwipeRefreshLayout](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout)
     - [TextView](https://developer.android.com/reference/android/widget/TextView)
@@ -129,27 +147,32 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - [Space](https://developer.android.com/reference/android/widget/Space)
     - [NestedScrollView](https://developer.android.com/reference/androidx/core/widget/NestedScrollView)
     - [HorizontalScrollView](https://developer.android.com/reference/android/widget/HorizontalScrollView)
-    - [RecyclerView](https://developer.android.com/guide/topics/ui/layout/recyclerview)
-    - [AutocompleteTextView](https://developer.android.com/reference/android/widget/AutoCompleteTextView)
     - [RadioButton](https://developer.android.com/guide/topics/ui/controls/radiobutton)
     - [RadioGroup](https://developer.android.com/reference/android/widget/RadioGroup)
     - [Checkbox](https://developer.android.com/guide/topics/ui/controls/checkbox)
     - [ToggleButton](https://developer.android.com/guide/topics/ui/controls/togglebutton)
     - [Switch](https://developer.android.com/reference/android/widget/Switch.html)
-    - [ImageButton](https://developer.android.com/reference/android/widget/ImageButton)
     - [Spinner](https://developer.android.com/guide/topics/ui/controls/spinner)
-    - [GridLayout](https://developer.android.com/reference/android/widget/GridLayout)
     - [ProgressBar](https://developer.android.com/reference/android/widget/ProgressBar)
-    - [ViewPager2](https://developer.android.com/guide/navigation/navigation-swipe-view-2)
     - [TabLayout](https://developer.android.com/reference/com/google/android/material/tabs/TabLayout)
     - [Tab](https://developer.android.com/reference/com/google/android/material/tabs/TabLayout.Tab)
+  - The following Views will be supported in the future:
+    - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
+    - [AutocompleteTextView](https://developer.android.com/reference/android/widget/AutoCompleteTextView)
+    - [ImageButton](https://developer.android.com/reference/android/widget/ImageButton)
+    - [GridLayout](https://developer.android.com/reference/android/widget/GridLayout)
     - [WebView](https://developer.android.com/reference/android/webkit/WebView)
+  - The following Views may be supported in the future:
+    - [RecyclerView](https://developer.android.com/guide/topics/ui/layout/recyclerview)
+    - [ViewPager2](https://developer.android.com/guide/navigation/navigation-swipe-view-2)
   - Parameters:
     - parent: The View id of the parent in the Layout hierarchy. if not specified, this will replace the root of the hierarchy and delete all existing views.
     - aid: The id of the Activity in which to create the View.
     - text: For Button, TextView and EditText, this is the initial Text.
     - vertical: For LinearLayout, this specifies if the Layout is vertical or horizontal. If not specified, vertical is assumed.
-    - snap: NestedScrollView and HorizontalScrollView snap to the nearest item if this is set to true.
+    - snapping: NestedScrollView and HorizontalScrollView snap to the nearest item if this is set to true. Default is false.
+    - fillviewport: Makes the child of a HorizontalScrollView or a NestedScrollView automatically expand to the ScrollView size. Default is false.
+    - nobar: Hides the scroll bar for HorizontalScrollView and NestedScrollView. Default is false.
     - checked: Whether a RadioButton, CheckBox, Switch or ToggleButton should be checked. Defaults to false.
     - singleline: Whether an EditText should enable multiple lines to be entered.
     - line: Whether the line below an EditText should be shown.
@@ -170,7 +193,6 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
   - Parameters:
     - parent: The View id of the parent in the Layout hierarchy.
     - aid: The id of the Activity the View is in.
-    - 
 - setVisibility: Sets the visibility of a Vew.
   - Parameters:
     - vis: 0 = gone, 1 = hidden, 2 = visible. While hidden, views are not visible but still take up space in the layout. Gone views do not take up layout space.
@@ -247,9 +269,9 @@ These methods create and Manipulate [Views](https://developer.android.com/refere
     - checked: Whether a RadioButton, CheckBox, Switch or ToggleButton should be checked.
 - setList: Set the list of a Spinner.
   - Parameters:
-    - id: The View id of a TextView, Button or EditText.
+    - id: The View id of a Spinner.
     - aid: The id of the Activity the View is in.
-    - list: An array containing the available Spinner options as strings
+    - list: An array containing the available Spinner options as strings.
 - inflateJSON: Creates a View hierarchy from a [JSON object](https://github.com/flipkart-incubator/proteus). Warning: you must take care to not have duplicate View ids.
   - Parameters:
     - aid: The id of the Activity the View is in.
@@ -294,7 +316,7 @@ These limitations are there so that searching for a View doesn't lead to the who
 
 
 
-Event control:
+Event control:  
 - send*Event: Sets whether events are send or not for a specific View.
   - Supported Events:
     - Click
@@ -307,6 +329,13 @@ Event control:
     - id: The View id.
     - aid: The id of the Activity the View is in.
     - send: Whether to send the event ot not, a boolean.
+
+
+RemoteViews:  
+
+
+
+
 
 Widgets:  
 App widget support only a subset of Views. See [remote views](https://developer.android.com/reference/android/widget/RemoteViews#public-constructors).  
@@ -376,15 +405,23 @@ Event types:
   - start
   - resume
   - pause
-    - value: whether or not the Activity is finishing
+    - value: finish: whether or not the Activity is finishing
   - stop
-    - value: whether or not the Activity is finishing
+    - value: finish: whether or not the Activity is finishing
   - destroy:
-    - value: finish whether or not the Activity is finishing. Only for destroy this is guaranteed to be accurate. The previous events may not report that. So if you want to save state when the Activity is destroyed, request that state when it is stopped instead.
+    - value: finish: whether or not the Activity is finishing. Only for destroy this is guaranteed to be accurate. The previous events may not report that. So if you want to save state when the Activity is destroyed, request that state when it is stopped instead.
+  - config: The current configuration changed. The additional values are the same as for getConfiguration.
 - Custom events:
   - UserLeaveHint: Gets fired when the user leaves an Activity. Can be used to then make the Activity go into pip mode.
   - pipchanged: Gets fired when the Activity enters or exits pip mode.
     - value: Whether the Activity is now in pip mode or not.
+  - airplane: Gets fired when the Airplane mode is changed.
+    - value: Boolean of the new Airplane mode.
+  - locale: Gets fired when the user changes the locale:
+    - value: The language code as a ISO 639 string.
+  - screen_on: Gets fired when the screen is turned on.
+  - screen_off: Gets fired when the screen is turned off.
+  - timezone: Gets fired when the time zone changes.
   - overlayTouch: Like touch, but is dispatched for every touch in an overlay window. The coordinates are the absolute screen coordinates
   - overlayScale: 
 

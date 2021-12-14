@@ -1,60 +1,95 @@
 
 
 Roadmap:
-    - 0.1.3
-        [x] Spinner
-        [x] RadioGroup, RadioButton
-        [x] use /dev/ashmem with the ndk to create ashmem for android 9-, Android 10 only allows creating ashmem from the API.
-            That makes shared memory buffers usable event pre api 27
-        [x] SwipeRefreshLayout
-        [x] Text watching event for EditText
-        [x] Input Types for EditText
-        [x] ProgressBar
-        [x] Event control methods
-        [x] method to get dimensions of Views in the layout
-        [x] method to set dimensions in pixels instead of dp
-        [x] ToggleButton
-        [x] set visibility
-        [x] setting View background and text color
     - 0.1.4
-        [ ] NestedScrollView with item snapping
-        [ ] HorizontalScrollView
-        [ ] a configuration activity as the launcher activity, where you can set settings:
+        [ ] requestFocus for EditText
+            [ ] flag to also show the virtual keyboard
+        [ ] method to hide the virtual keyboard
+        [x] NestedScrollView with item snapping
+        [x] HorizontalScrollView
+        [ ] method to scroll to a specific position
+        [ ] method to get the scrolling position
+        [x] a configuration activity as the launcher activity, where you can set settings:
             - how long the plugin should stay active after all connections are closed:
                 - a negative number will make the plugin inactive only when you click the close option in the notification
             - option to make the plugin go into the background (no notification shown) when no programs are connected. That will shorten the startup time. Can only be used when the timeout setting above is set to negative.
-        [ ] Input catching for ImageView
-        [ ] configuration change events
-        [ ] screen un/locked event, so lockscreen apps can enable more functionality when the screen isn't locked
+        [x] configuration change events
+        [x] screen un/locked event, so lockscreen apps can enable more functionality when the screen isn't locked
+            [x] method to turn the screen on: https://stackoverflow.com/questions/30090589/turn-on-screen-programmatically-on-android
+        [x] broadcast events:
+            [x] airplane mode
+            [x] screen on/off
+            [x] timezone
+            [x] locale
         [ ] TabLayout
-        [ ] Action Bar
-        [ ] clipboard
-        [ ] brightness
-        [ ] notifications
-        [ ] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
-        [ ] Rework the widgets
-    - 1.0.0
-        [ ] fragment connections
-        [ ] implement RecyclerView native or as a component in the python library (custom class with methods around a NestedScrollView)
-        [ ] implement ViewPager native or as a component in the python library (custom class with methods around a HorizontalScrollView)
-        [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
-        [ ] broadcast events:
-            [ ] airplane mode
-            [ ] screen on/off
-            [ ] timezone
-            [ ] locale
+    - 0.1.5:
+        [ ] inflating from JSON
+        [ ] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
+        [ ] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
         [ ] GridLayout
         [ ] WebView
+            - catch all WebChromeClient and WebViewClient events
             - Run javascript in the WebView with user consent.
             - setting: always allow javascript in WebViews
+        [ ] add everything to the python library
+        [ ] add the python library docs into termux-gui-package and add a program to open the docs in a WebView
+    - 0.1.6:
+        [ ] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
+            [ ] Also give the option to receive events for notifications set via termux-api, by setting the command to an am command that invokes the notification receiver
+        [ ] Rework the widgets
+        [ ] option to set an executable as a onClick handler in widgets, that then gets started sa a Termux task. That should work even when no program is connected to listen to widget events.
+        [ ] add everything to the python library
+        [ ] add a small helper script to termux-gui-packages, that can be used as a daemon for small stateful widgets.
+            [ ] registers itself to start at boot with Termux:Boot, so the widget state can be restored at startup
+            [ ] watches with inotify on ~/.image-shortcuts
+            [ ] text files should contain:
+                [ ] in the first line only the widget id
+                [ ] in the second line the path to the executable to be run (newlines in paths not supported)
+            [ ] A .png file matching the rest of the filename will be set as the icon displayed in the widget.
+            [ ] A .txt file matching the rest of the filename will be set as the text displayed in the widget.
+            [ ] only connect to the plugin to make changes, so the notification isn't always there
+    - 1.0.0: !!! start semantic versioning from here !!!
+        [ ] fragment connections
+            [ ] make a method to check if it's a fragment connection
+            [ ] use 0-0 as the dummy activity id for the activity the fragment connection is in.
+        [ ] implement RecyclerView native or as a component in the python library (custom class with methods around a NestedScrollView)
+        [ ] implement ViewPager native or as a component in the python library (custom class with methods around a HorizontalScrollView)
+            [ ] the component in the library needs to listen to configuration change updates, to change the item size if the screen size changes
+                [ ] implement event listeners for Views with a WeakSet containing the View. A view can then add itself to receive events.
+                    [ ] Or make a WeakValueDictionary to filter the event type.
+        [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
         [ ] RelativeLayout
         [ ] ConstraintLayout
         [ ] the rest of the views in the protocol
-    - 1.0.1
-        [ ] option to expose the api to javascript running in a WebView with user consent.
+        [ ] add everything to the python library
+    - 1.1.0
         [ ] SurfaceView with EGL buffers for accelerated graphics
+            [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
+            [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard an can be focused with requestFocus
+                [ ] Also for ImageView
+        [ ] add everything to the python library
+        [ ] finish the C/C++ library
+            [ ] just handle the aid as a simple struct with 2 ints
+    - 1.2.0:
+        [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .
+            The id get looked up once and cached in a weakref Hashmap.
+            Future methods with the same subtree argument can then use the cached value and don't have to traverse the whole View tree.
+        [ ] enable all methods to operate on a list of view ids rather than a specific view. A lot of time is spend waiting for the UI thread, so clustering
+            the methods should improve performance
+            [ ] You should also be able to replace the arguments with arrays, in case you want that argument to have a different value for each view, like the text for TextViews
+            [ ] think about creating a batch api to group multiple messages together into one runnable for the ui thread
+        [ ] 
         
-        
+
+
+
+
+interesting ideas for the future:
+- QTile is a tiling window manager and wayland compositor, it may be possible to adapt it to Termux:GUI
+
+
+
+
 idea: use vulkan to create a buffer and create a file descriptor for it, use the buffer in opengl to draw to a GL SurfaceView and pass the file descriptor to the program, so it can also map it.
 That consumes no cpu memory and allows the program to use accelerated graphics in the buffer.
 
@@ -65,9 +100,11 @@ https://www.khronos.org/registry/OpenGL/specs/es/2.0/es_full_spec_2.0.pdf
 
 Turns out sharing between processes isn't in the scope of EGL.
 Look at the android-specific interfaces instead.
-You can use hardware buffers with the ndk and even
+You can use hardware buffers with the ndk
+To make a c program use AHardwareBuffer: -target arch-linux-android26 -landroid
 https://developer.android.com/ndk/reference/group/a-hardware-buffer#ahardwarebuffer_recvhandlefromunixsocket
-
+https://medium.com/@spencerfricke/android-ahardwarebuffer-shared-memory-over-unix-domain-sockets-7b27b1271b36
+https://github.com/sjfricke/NDK-Socket-IPC
 
 https://developer.android.com/guide/topics/graphics/opengl
 https://developer.android.com/ndk/guides/graphics/getting-started
@@ -140,38 +177,6 @@ https://developer.android.com/ndk/guides/graphics/getting-started
 [ ] methods to get the size of Views and to set the scroll position in a NestedScrollView
     [ ] also a scroll change event. But that should only fire after a minimum amount of pixel moved, 5 should be good
 
-
-[ ] finish Python bindings when the plugin is available on f-droid and upload them to pypi
-
-Implement Views:
-[ ] password field (method for EditText to replace every displayed character with *)
-[ ] RelativeLayout
-[ ] RecyclerView: Maybe don't support RecyclerView, but instead expose enough method to build one with a NestedScrollView and a LinearLayout
-    ViewPager2 is more important, as you can't do the smooth transitions normally.
-    [ ] use the paging library to get good performance. When a new page is needed, send an event to the program.
-        Then the program has to send back a list of json layouts to populate the view.
-        To update existing items, the program can send a page unrequested.
-[x] ToggleButton
-[ ] ImageButton
-[x] Spinner
-[ ] SwipeRefreshLayout
-[ ] GridLayout
-[ ] ProgressBar
-[ ] ViewPager2
-[ ] CardLayout
-[ ] TabLayout
-[ ] Tab
-[ ] WebView
-
-
-Implement Events:
-[x] Methods to set and unset Listeners
-[x] Click
-[x] LongClick
-[x] FocusChange
-[x] Touch
-[ ] Refresh (SwipeRefreshLayout)
-[ ] 
 
 
 

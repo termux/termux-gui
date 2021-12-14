@@ -7,7 +7,6 @@
 #include <sys/mman.h>
 #include <linux/ashmem.h>
 #include <android/log.h>
-#include <android/hardware_buffer.h>
 
 extern "C"
 JNIEXPORT jint JNICALL

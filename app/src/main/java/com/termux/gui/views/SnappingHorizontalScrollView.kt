@@ -16,14 +16,13 @@ class SnappingHorizontalScrollView(c: Context) : HorizontalScrollView(c) {
     private val SWIPE_MIN_DISTANCE = 5
     private val SWIPE_THRESHOLD_VELOCITY = 300
     
-    private var mGestureDetector: GestureDetectorCompat? = null
     private var mActiveFeature = 0
     
     
     init {
-        mGestureDetector = GestureDetectorCompat(c, MyGestureDetector())
+        val mGestureDetector = GestureDetectorCompat(c, MyGestureDetector())
         setOnTouchListener { v, event -> //If the user swipes
-            if (mGestureDetector!!.onTouchEvent(event)) {
+            if (mGestureDetector.onTouchEvent(event)) {
                 true
             } else if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
                 val scrollX = scrollX
@@ -39,7 +38,10 @@ class SnappingHorizontalScrollView(c: Context) : HorizontalScrollView(c) {
     }
 
     internal inner class MyGestureDetector : SimpleOnGestureListener() {
-        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+            if (e1 == null || e2 == null) {
+                return false
+            }
             try {
                 val layout = getChildAt(0) as? ViewGroup ?: return false
                 //right to left

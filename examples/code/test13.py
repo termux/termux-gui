@@ -183,7 +183,7 @@ def render():
             im.refresh()
         t2 = time.time()
         #print("drawing finished")
-        time.sleep(max(0, 0.030-abs(t2-t1))) # target 30 fps
+        time.sleep(max(0, 0.016-abs(t2-t1))) # target 60 fps
     
 renderer = threading.Thread(target=render, daemon=True)
 renderer.start()

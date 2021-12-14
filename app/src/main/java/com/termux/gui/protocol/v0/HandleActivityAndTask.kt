@@ -1,26 +1,25 @@
 package com.termux.gui.protocol.v0
 
 import android.app.ActivityManager
+import android.app.KeyguardManager
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.graphics.BitmapFactory
 import android.os.Build
+import android.os.PowerManager
 import android.util.Base64
 import android.util.Rational
 import android.view.WindowManager
 import android.widget.Toast
-import com.termux.gui.ConnectionHandler
-import com.termux.gui.GUIActivity
-import com.termux.gui.R
-import com.termux.gui.Util
+import com.termux.gui.*
+import java.io.DataOutputStream
 import java.util.*
 
 class HandleActivityAndTask {
     companion object {
         @Suppress("DEPRECATION")
-        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>,
-                                      widgets: MutableMap<Int, V0.WidgetRepresentation>, overlays: MutableMap<String, V0.Overlay>, app: Context, wm: WindowManager) : Boolean {
+        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>, widgets: MutableMap<Int, V0.WidgetRepresentation>, overlays: MutableMap<String, V0.Overlay>, app: Context, wm: WindowManager, out: DataOutputStream) : Boolean {
             when (m.method) {
                 "finishTask" -> {
                     tasks.find { t -> Util.getTaskInfo(tasks, t)?.let { it1 -> Util.getTaskId(it1) } == m.params?.get("tid")?.asInt }?.finishAndRemoveTask()
@@ -37,6 +36,42 @@ class HandleActivityAndTask {
                         V0.runOnUIThreadActivityStarted(a) {
                             it.moveTaskToBack(true)
                         }
+                    }
+                    return true
+                }
+                "turnScreenOn" -> {
+                    val pm = App.APP?.getSystemService(Context.POWER_SERVICE) as? PowerManager
+                    if (pm != null) {
+                        val lock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, "com.termux.gui:wake")
+                        lock.acquire(0)
+                        lock.release()
+                    }
+                    return true
+                }
+                "isLocked" -> {
+                    val kg = App.APP?.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+                    if (kg != null && ! kg.isKeyguardLocked) {
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(false))
+                    } else {
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(true))
+                    }
+                    return true
+                }
+                "requestUnlock" -> {
+                    val aid = m.params?.get("aid")?.asString
+                    val a = activities[aid]
+                    val kg = App.APP?.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        kg?.let { a?.a?.let { kg.requestDismissKeyguard(it, null) } }
+                    }
+                    return true
+                }
+                "getConfiguration" -> {
+                    val aid = m.params?.get("aid")?.asString
+                    val a = activities[aid]?.a
+                    if (a != null) {
+                        println(ConnectionHandler.gson.toJson(a.configToJson(a.resources.configuration)))
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(a.configToJson(a.resources.configuration)))
                     }
                     return true
                 }

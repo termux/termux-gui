@@ -14,22 +14,21 @@ import kotlin.math.abs
 class SnappingNestedScrollView(c: Context) : NestedScrollView(c) {
     private val SWIPE_MIN_DISTANCE = 5
     private val SWIPE_THRESHOLD_VELOCITY = 300
-    
-    private var mGestureDetector: GestureDetectorCompat? = null
+
     private var mActiveFeature = 0
-    
-    
+
+
     init {
-        mGestureDetector = GestureDetectorCompat(c, MyGestureDetector())
+        val mGestureDetector = GestureDetectorCompat(c, MyGestureDetector())
         setOnTouchListener { v, event -> //If the user swipes
-            if (mGestureDetector!!.onTouchEvent(event)) {
+            if (mGestureDetector.onTouchEvent(event)) {
                 true
             } else if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
-                val scrollX = scrollX
-                val featureWidth = v.measuredWidth
-                mActiveFeature = (scrollX + featureWidth / 2) / featureWidth
-                val scrollTo = mActiveFeature * featureWidth
-                smoothScrollTo(scrollTo, 0)
+                val scrollY = scrollY
+                val featureHeight = v.measuredHeight
+                mActiveFeature = (scrollY + featureHeight / 2) / featureHeight
+                val scrollTo = mActiveFeature * featureHeight
+                smoothScrollTo(0, scrollTo)
                 true
             } else {
                 false
@@ -38,22 +37,25 @@ class SnappingNestedScrollView(c: Context) : NestedScrollView(c) {
     }
 
     internal inner class MyGestureDetector : SimpleOnGestureListener() {
-        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+            if (e1 == null || e2 == null) {
+                return false
+            }
             try {
                 val layout = getChildAt(0) as? ViewGroup ?: return false
-                //right to left
-                if (e1.x - e2.x > SWIPE_MIN_DISTANCE && abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    val featureWidth: Int = measuredWidth
+                if (e1.y - e2.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                    val featureHeight: Int = measuredHeight
                     mActiveFeature = if (mActiveFeature < layout.childCount - 1) mActiveFeature + 1 else layout.childCount - 1
-                    smoothScrollTo(mActiveFeature * featureWidth, 0)
+                    println(mActiveFeature)
+                    smoothScrollTo(0, mActiveFeature * featureHeight)
                     return true
-                } else if (e2.x - e1.x > SWIPE_MIN_DISTANCE && abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    val featureWidth: Int = measuredWidth
+                } else if (e2.y - e1.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                    val featureHeight: Int = measuredHeight
                     mActiveFeature = if (mActiveFeature > 0) mActiveFeature - 1 else 0
-                    smoothScrollTo(mActiveFeature * featureWidth, 0)
+                    smoothScrollTo(0, mActiveFeature * featureHeight)
                     return true
                 }
-            } catch (ignored: Exception) {}
+            } catch (ignored: Exception) {ignored.printStackTrace()}
             return false
         }
     }

@@ -15,7 +15,7 @@ android {
         versionName "0.1.4"
         externalNativeBuild {
             cmake {
-                cppFlags ''
+                arguments ''
             }
         }
 
@@ -68,7 +68,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2-native-mt'
-    
+
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
     
     implementation 'com.github.flipkart-incubator.proteus:proteus-core:5.0.1'
     implementation 'com.github.flipkart-incubator.proteus:gson-adapter:5.0.1'
@@ -78,5 +79,7 @@ dependencies {
     implementation 'com.github.flipkart-incubator.proteus:support-v4:5.0.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation project(path: ':hbuffers')
 
 }

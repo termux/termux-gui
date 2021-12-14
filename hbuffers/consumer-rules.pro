@@ -1,0 +1,1 @@
+-keep class com.termux.gui.hbuffers.** { *; }

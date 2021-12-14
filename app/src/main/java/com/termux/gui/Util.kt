@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -172,6 +173,47 @@ class Util {
                 v.onFocusChangeListener = null
             }
         }
+        
+        fun setCheckedListener(v: RadioGroup, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            val args = HashMap<String, Any>()
+            args["aid"] = aid
+            args["id"] = v.id
+            v.setOnCheckedChangeListener { _, checked ->
+                args["selected"] = checked
+                eventQueue.offer(ConnectionHandler.Event("selected", ConnectionHandler.gson.toJsonTree(args)))
+            }
+        }
+
+        fun setSpinnerListener(v: Spinner, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            v.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+                val args = HashMap<String, Any?>()
+                init {
+                    args["aid"] = aid
+                    args["id"] = v.id
+                }
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    args["selected"] = (view as? TextView)?.text?.toString()
+                    eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    args["selected"] = null
+                    eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
+                }
+            }
+        }
+
+        fun setRefreshListener(v: SwipeRefreshLayout, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            val args = HashMap<String, Any>()
+            args["aid"] = aid
+            args["id"] = v.id
+            val ev = ConnectionHandler.Event("refresh", ConnectionHandler.gson.toJsonTree(args))
+            v.setOnRefreshListener {
+                if (v.isRefreshing) {
+                    eventQueue.offer(ev)
+                }
+            }
+        }
+        
         
         private val TOUCH_EVENT_MAP: Map<Int, String>
         init {
