@@ -25,7 +25,7 @@ import kotlin.collections.HashMap
 open class GUIActivity : AppCompatActivity() {
     
     
-    // a Tree to store the view hierarchy. The existence of View s isn't stored by android itself
+    // a Tree to store the view hierarchy. The existence of Views isn't stored by android itself
     private data class Node(val parent: Node?, val id: Int, val claz: Class<out View>, val children: LinkedList<Node> = LinkedList<Node>()) : Serializable
     
     
@@ -72,14 +72,16 @@ open class GUIActivity : AppCompatActivity() {
         setContentView(R.layout.activity_gui)
         if (savedInstanceState != null) {
             theme = savedInstanceState.getSerializable(THEME_KEY) as? GUITheme?
+            /*
             val ids = savedInstanceState.getSerializable(IDS_KEY) as? TreeSet<*>
             if (ids != null) {
-                val l = ids.filterIsInstance(Int::class.java)
                 usedIds.clear()
+                val l = ids.filterIsInstance(Int::class.java)
                 for (id in l) {
                     usedIds.add(id)
                 }
             }
+             */
             val d = savedInstanceState.getSerializable(DATA_KEY) as? ActivityData
             if (d != null) {
                 data = d
@@ -136,7 +138,6 @@ open class GUIActivity : AppCompatActivity() {
     private fun buildHierarchyFromTree(tree: Node): View {
         val v = tree.claz.getConstructor(Context::class.java).newInstance(this)
         v.id = tree.id
-        //println("untree-ed ${v::class}")
         if (v is ViewGroup) {
             for (n in tree.children) {
                 v.addView(buildHierarchyFromTree(n))
@@ -187,6 +188,7 @@ open class GUIActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putSerializable(THEME_KEY, theme)
+        /*
         outState.putSerializable(IDS_KEY, usedIds)
         val root = findViewById<FrameLayout>(R.id.root).getChildAt(0)
         if (root != null) {
@@ -208,13 +210,13 @@ open class GUIActivity : AppCompatActivity() {
             recs[r.key] = Pair(l, Pair(n, pl))
         }
         outState.putSerializable(RECYCLERVIEWS_KEY, recs)
+         */
         outState.putSerializable(DATA_KEY, data)
     }
     
     private fun createViewTree(start: View, parent: Node?) : Node {
         val children = LinkedList<Node>()
         if (start !is ViewGroup) {
-            //println("tree-ed ${start::class}")
             return Node(parent, start.id, start::class.java, children)
         }
         val tree = Node(parent, start.id, start::class.java, children)
@@ -225,7 +227,6 @@ open class GUIActivity : AppCompatActivity() {
             }
             children.add(createViewTree(c, tree))
         }
-        //println("tree-ed ${start::class}")
         return tree
     }
     

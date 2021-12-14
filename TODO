@@ -1,5 +1,12 @@
 
 
+
+[ ] Termux:GUI is now merged to f-droid, upload the python bindings to pipy
+    [ ] is there a pipy version badge on shields.io?
+[ ] try to add termux-gui-package to termux-packages
+[ ] update the readme when the f-droid build is finished
+[ ] add the "get it on f-droid" badge with the link to the app
+
 Roadmap:
     - 0.1.4
         [ ] requestFocus for EditText
@@ -22,6 +29,10 @@ Roadmap:
             [x] timezone
             [x] locale
         [ ] TabLayout
+        [ ] update the f-droid metadata
+            [ ] write a changelog
+        [ ] try to make the programs in termux-gui-package robust to destroyed Activities
+            [ ] also update the python bindings tutorial for that
     - 0.1.5:
         [ ] inflating from JSON
         [ ] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
@@ -31,7 +42,6 @@ Roadmap:
             - catch all WebChromeClient and WebViewClient events
             - Run javascript in the WebView with user consent.
             - setting: always allow javascript in WebViews
-        [ ] add everything to the python library
         [ ] add the python library docs into termux-gui-package and add a program to open the docs in a WebView
     - 0.1.6:
         [ ] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
@@ -61,13 +71,11 @@ Roadmap:
         [ ] RelativeLayout
         [ ] ConstraintLayout
         [ ] the rest of the views in the protocol
-        [ ] add everything to the python library
     - 1.1.0
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard an can be focused with requestFocus
                 [ ] Also for ImageView
-        [ ] add everything to the python library
         [ ] finish the C/C++ library
             [ ] just handle the aid as a simple struct with 2 ints
     - 1.2.0:
