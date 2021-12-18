@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.net.URLClassLoader
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
@@ -99,7 +100,6 @@ class V0(val app: Context) {
         val buffers: MutableMap<Int, SharedBuffer> = HashMap()
         val widgets: MutableMap<Int,WidgetRepresentation> = HashMap()
         val overlays = Collections.synchronizedMap(HashMap<String,Overlay>())
-        
         val lifecycleCallbacks = LifecycleListener(eventQueue, activities, tasks, am)
         App.APP?.registerActivityLifecycleCallbacks(lifecycleCallbacks)
         val sysrec = SystemBroadcastReceiver(eventQueue)

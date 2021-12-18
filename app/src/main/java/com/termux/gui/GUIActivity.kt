@@ -126,6 +126,10 @@ open class GUIActivity : AppCompatActivity() {
             Configuration.KEYBOARDHIDDEN_YES -> true
             else -> true
         }
+        m["screenwidth"] = c.screenWidthDp
+        m["screenheight"] = c.screenHeightDp
+        m["fontscale"] = c.fontScale
+        m["density"] = resources.displayMetrics.density
         return ConnectionHandler.gson.toJsonTree(m)
     }
     

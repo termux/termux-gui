@@ -10,7 +10,9 @@ import android.os.Build
 import android.os.PowerManager
 import android.util.Base64
 import android.util.Rational
+import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.termux.gui.*
 import java.io.DataOutputStream
@@ -242,6 +244,24 @@ class HandleActivityAndTask {
                             p.x = x
                             p.y = y
                             wm.updateViewLayout(o.root, p)
+                        }
+                    }
+                    return true
+                }
+                "hideSoftKeyboard" -> {
+                    val aid = m.params?.get("aid")?.asString
+                    val a = activities[aid]
+                    val o = overlays[aid]
+                    if (a != null) {
+                        V0.runOnUIThreadActivityStarted(a) {
+                            val im = it.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                            im?.hideSoftInputFromWindow(it.findViewById<View>(R.id.root).windowToken, 0)
+                        }
+                    }
+                    if (o != null) {
+                        Util.runOnUIThreadBlocking {
+                            val im = App.APP?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                            im?.hideSoftInputFromWindow(o.root.windowToken, 0)
                         }
                     }
                     return true

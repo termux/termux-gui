@@ -7,10 +7,14 @@ import android.util.Base64
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.tabs.TabLayout
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
+import com.termux.gui.App
 import com.termux.gui.ConnectionHandler
 import com.termux.gui.R
 import com.termux.gui.Util
@@ -409,6 +413,110 @@ class HandleView {
                     }
                     return true
                 }
+                "requestFocus" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v != null) {
+                                        v.requestFocus()
+                                        if (m.params?.get("forcesoft")?.asBoolean == true) {
+                                            val im = it.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                                            im?.showSoftInput(v, 0)
+                                        }
+                                    }
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v != null) {
+                                        v.requestFocus()
+                                        if (m.params?.get("forcesoft")?.asBoolean == true) {
+                                            val im = App.APP?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                                            im?.showSoftInput(v, 0)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setScrollPosition" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val x = m.params?.get("x")?.asInt
+                        val y = m.params?.get("y")?.asInt
+                        val soft = m.params?.get("soft")?.asBoolean
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && x != null && y != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v is NestedScrollView || v is HorizontalScrollView) {
+                                        if (soft == true && v is NestedScrollView) {
+                                            v.smoothScrollTo(x, y)
+                                        } else {
+                                            v.scrollTo(x, y)
+                                        }
+                                    }
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v is NestedScrollView || v is HorizontalScrollView) {
+                                        if (soft == true && v is NestedScrollView) {
+                                            v.smoothScrollTo(x, y)
+                                        } else {
+                                            v.scrollTo(x, y)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "getScrollPosition" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null) {
+                            if (a != null) {
+                                V0.runOnUIThreadActivityStarted(a) {
+                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v is NestedScrollView || v is HorizontalScrollView) {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.scrollX, v.scrollY)))
+                                    } else {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(0, 0)))
+                                    }
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v is NestedScrollView || v is HorizontalScrollView) {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.scrollX, v.scrollY)))
+                                    } else {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(0, 0)))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
                 "setList" -> {
                     if (m.params != null) {
                         val aid = m.params?.get("aid")?.asString
@@ -431,12 +539,32 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStartedBlocking(a) {
-                                    it.findViewReimplemented<Spinner>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.adapter = ArrayAdapter(it, R.layout.spinner_text, options)
+                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v is Spinner)
+                                        v.adapter = ArrayAdapter(it, R.layout.spinner_text, options)
+                                    if (v is TabLayout) {
+                                        v.removeAllTabs();
+                                        for (tab in options) {
+                                            val t = v.newTab()
+                                            t.text = tab
+                                            v.addTab(t)
+                                        }
+                                    }
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<Spinner>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.adapter = ArrayAdapter(app, R.layout.spinner_text, options)
+                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    if (v is Spinner)
+                                        v.adapter = ArrayAdapter(app, R.layout.spinner_text, options)
+                                    if (v is TabLayout) {
+                                        v.removeAllTabs();
+                                        for (tab in options) {
+                                            val t = TabLayout.Tab()
+                                            t.text = tab
+                                            v.addTab(t)
+                                        }
+                                    }
                                 }
                             }
                         }

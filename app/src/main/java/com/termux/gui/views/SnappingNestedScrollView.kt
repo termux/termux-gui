@@ -46,7 +46,6 @@ class SnappingNestedScrollView(c: Context) : NestedScrollView(c) {
                 if (e1.y - e2.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                     val featureHeight: Int = measuredHeight
                     mActiveFeature = if (mActiveFeature < layout.childCount - 1) mActiveFeature + 1 else layout.childCount - 1
-                    println(mActiveFeature)
                     smoothScrollTo(0, mActiveFeature * featureHeight)
                     return true
                 } else if (e2.y - e1.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {

@@ -12,7 +12,7 @@
     <string name="settings_service">These settings are for the foreground service with the notification and only apply once it restarts.\nIf you want to apply these settings now, click the button to kill the service. That will also disconnect all programs using the plugin at the moment.</string>
     <string name="service_restart">Restart service</string>
     <string name="setting_service_timeout">How many seconds the service stays active when there are no connections. If a program wants to connect and the service is still active, the startup time is shorter. A negative value means the service is never shut down automatically.</string>
-    <string name="service_background">If enabled, this makes the service go into the background and hide the notification if there are no active connections. Use this with a negative value above to let the servic always be ready in the background.</string>
+    <string name="service_background">If enabled, this makes the service go into the background and hide the notification if there are no active connections. Use this with a negative value above to let the service always be ready in the background.</string>
     
     
     

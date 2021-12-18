@@ -1,0 +1,9 @@
+Added screen on/off events
+Added events for airplane mode, locale, timezone and configuration changes
+Added requestFocus to focus an EditText and display the soft keyboard
+Added HorizontalScrollView
+Added item snapping for HorizontalScrollView and NestedScrollView
+Added a settings screen
+Added a method to turn the screen on
+Added a method to request the user to unlock the screen
+Added TabLayout

@@ -14,6 +14,7 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.tabs.TabLayout
 import com.termux.gui.ConnectionHandler
 import com.termux.gui.R
 import com.termux.gui.Util
@@ -290,6 +291,18 @@ class Create {
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
                     }
+                    if (m.method == "createTabLayout") {
+                        var id = -1
+                        V0.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = TabLayout(it)
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
+                            Util.setTabSelectedListener(v, aid, eventQueue)
+                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
                 }
                 if (o != null) {
                     if (m.method == "createTextView") {
@@ -481,6 +494,41 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
+                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createProgressBar") {
+                        var id = -1
+                        Util.runOnUIThreadBlocking {
+                            val v = ProgressBar(app, null, android.R.attr.progressBarStyleHorizontal)
+                            id = Util.generateViewIDRaw(rand, o.usedIds)
+                            v.id = id
+                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createSwipeRefreshLayout") {
+                        var id = -1
+                        Util.runOnUIThreadBlocking {
+                            val v = SwipeRefreshLayout(app)
+                            id = Util.generateViewIDRaw(rand, o.usedIds)
+                            v.id = id
+                            Util.setRefreshListener(v, aid, eventQueue)
+                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createTabLayout") {
+                        var id = -1
+                        Util.runOnUIThreadBlocking {
+                            val v = TabLayout(app)
+                            id = Util.generateViewIDRaw(rand, o.usedIds)
+                            v.id = id
+                            Util.setTabSelectedListener(v, aid, eventQueue)
                             V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))

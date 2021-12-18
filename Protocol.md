@@ -120,6 +120,10 @@ These methods control Android [Activities](https://developer.android.com/referen
     - language: The language as a 2-letter string.
     - orientation: The screen orientation, either "landscape" or "portrait".
     - keyboardHidden: boolean whether a keyboard is currently available.
+    - screenwidth: The current window width in dp.
+    - screenheight: The current window height in dp.
+    - fontscale: The current font scale value as a floating point number.
+    - density: The display density as a float, such that screenwidth * density = screenwidth_in_px.
   - Parameters:
     - aid: The id of the Activity.
 - turnScreenOn: Turns the screen on. Note that this does not unlock the lockscreen.
@@ -129,6 +133,9 @@ These methods control Android [Activities](https://developer.android.com/referen
 - requestUnlock: If the lockscreen isn't protected by a PIN, pattern or password, unlocks it immediately. If it is, brings up the UI to let the user unlock it. Only available on Android 8.0 and higher, on lower versions it's a no-op.
   - Parameters:
     - aid: The Activity id of the Activity that wants to unlock the screen.
+- hideSoftKeyboard: Forces to soft keyboard to hide.
+  - Parameters:
+    - aid: The Activity id of the Activity that wants to hide the soft keyboard.
 
 
 
@@ -155,7 +162,6 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - [Spinner](https://developer.android.com/guide/topics/ui/controls/spinner)
     - [ProgressBar](https://developer.android.com/reference/android/widget/ProgressBar)
     - [TabLayout](https://developer.android.com/reference/com/google/android/material/tabs/TabLayout)
-    - [Tab](https://developer.android.com/reference/com/google/android/material/tabs/TabLayout.Tab)
   - The following Views will be supported in the future:
     - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
     - [AutocompleteTextView](https://developer.android.com/reference/android/widget/AutoCompleteTextView)
@@ -267,11 +273,23 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - id: The View id.
     - aid: The id of the Activity the View is in.
     - checked: Whether a RadioButton, CheckBox, Switch or ToggleButton should be checked.
-- setList: Set the list of a Spinner.
-  - Parameters:
-    - id: The View id of a Spinner.
+- requestFocus: Focuses a View and opens the soft keyboard if the View has Keyboard input.
+    - id: The View id.
     - aid: The id of the Activity the View is in.
-    - list: An array containing the available Spinner options as strings.
+    - forcesoft: Forces the soft keyboard to show.
+- getScrollPosition: Gets the x and y scroll position of an NestedScrollView or HorizontalScrollView.
+  - Returns:
+    - The x and y scroll positions.
+- setScrollPosition: Sets the x and y scroll position of an NestedScrollView or HorizontalScrollView.
+  - Parameters:
+    - x
+    - y
+    - soft: if true, scrolls with an animation instead of jumping to the destination.
+- setList: Set the list of a Spinner or TabLayout.
+  - Parameters:
+    - id: The View id of a Spinner  or TabLayout..
+    - aid: The id of the Activity the View is in.
+    - list: An array containing the available Spinner options / TabLayout tab titles as strings.
 - inflateJSON: Creates a View hierarchy from a [JSON object](https://github.com/flipkart-incubator/proteus). Warning: you must take care to not have duplicate View ids.
   - Parameters:
     - aid: The id of the Activity the View is in.
@@ -373,7 +391,7 @@ Events that are enabled by default:
 - click for Buttons, Checkboxes, Switches, ToggleButtons
 - refresh for SwipeRefreshLayout
 - selected for RadioGroup
-- itemselected for Spinner
+- itemselected for Spinner/TabLayout
 - 
 
 Event types:  
@@ -391,8 +409,8 @@ Event types:
   - refresh: Refresh triggered in a SwipeRefreshLayout
   - selected: A RadioButton in a RadioButtonGroup has been selected
     - Additional values: selected: The id of the now selected RadioButton
-  - itemselected: When a Item is selected in a Spinner
-    - Additional values: selected: The item as a String, or null if no item was selected
+  - itemselected: When a Item is selected in a Spinner / a tab clicked in TabLayout
+    - Additional values: selected: The item as a String, or null if no item was selected, or the tab id that was selected for TabLayout.
   - input: Send from EditText where you set the input to blocked
   - cut: Send from EditText where you set the input to blocked
   - paste: Send from EditText where you set the input to blocked

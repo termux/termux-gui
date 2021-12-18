@@ -1,7 +1,7 @@
 
 
 
-[ ] Termux:GUI is now merged to f-droid, upload the python bindings to pipy
+[x] Termux:GUI is now merged to f-droid, upload the python bindings to pipy
     [ ] is there a pipy version badge on shields.io?
 [ ] try to add termux-gui-package to termux-packages
 [ ] update the readme when the f-droid build is finished
@@ -9,13 +9,13 @@
 
 Roadmap:
     - 0.1.4
-        [ ] requestFocus for EditText
-            [ ] flag to also show the virtual keyboard
-        [ ] method to hide the virtual keyboard
+        [x] requestFocus for EditText
+            [x] flag to also show the virtual keyboard
+        [x] method to hide the virtual keyboard
         [x] NestedScrollView with item snapping
         [x] HorizontalScrollView
-        [ ] method to scroll to a specific position
-        [ ] method to get the scrolling position
+        [x] method to scroll to a specific position
+        [x] method to get the scrolling position
         [x] a configuration activity as the launcher activity, where you can set settings:
             - how long the plugin should stay active after all connections are closed:
                 - a negative number will make the plugin inactive only when you click the close option in the notification
@@ -28,9 +28,11 @@ Roadmap:
             [x] screen on/off
             [x] timezone
             [x] locale
-        [ ] TabLayout
+        [x] TabLayout
         [ ] update the f-droid metadata
-            [ ] write a changelog
+            [x] write a changelog
+            [ ] more screenshots
+            [x] update description and readme
         [ ] try to make the programs in termux-gui-package robust to destroyed Activities
             [ ] also update the python bindings tutorial for that
     - 0.1.5:

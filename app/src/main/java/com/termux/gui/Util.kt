@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.tabs.TabLayout
 import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -214,6 +215,21 @@ class Util {
             }
         }
         
+        fun setTabSelectedListener(v: TabLayout, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+            val args = HashMap<String, Any>()
+            args["aid"] = aid
+            args["id"] = v.id
+            v.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    if (tab != null) {
+                        args["selected"] = tab.position
+                        eventQueue.offer(ConnectionHandler.Event("itemselected", ConnectionHandler.gson.toJsonTree(args)))
+                    }
+                }
+                override fun onTabUnselected(tab: TabLayout.Tab?) {}
+                override fun onTabReselected(tab: TabLayout.Tab?) {}
+            })
+        }
         
         private val TOUCH_EVENT_MAP: Map<Int, String>
         init {

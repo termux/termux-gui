@@ -2,7 +2,7 @@ With this plugin you can make GUI applications in <a href="https://f-droid.org/e
 This plugin uses the native Android GUI components to display everything.
 That means it seamlessly integrates into the Android experience, but standard applications written for X11 don't work.
 Also it requires a minimum of knowledge of how the Android GUI works.
-See <a href="https://github.com/tareksander/termux-gui/blob/main/README.md">the README</a> for a crash course.
+See <a href="https://github.com/termux/termux-gui/blob/main/README.md">the README</a> for a crash course.
 
 Features:
 * Display content in a task with its own back stack
@@ -18,11 +18,11 @@ Using the plugin:
 
 <a href="https://github.com/tareksander/termux-gui-package">There are also prepackaged programs you can use.</a>
 
-There are currently only <a href="https://github.com/tareksander/termux-gui-python-bindings">Python bindings</a>, but the <a href="https://github.com/tareksander/termux-gui/blob/main/README.md">protocol</a> used is fully documented.
+There are currently only <a href="https://github.com/tareksander/termux-gui-python-bindings">Python bindings</a>, but the <a href="https://github.com/termux/termux-gui/blob/main/Protocol.md">protocol</a> used is fully documented.
 Implementing the protocol only requires the ability to use unix sockets, JSON handling and reading and writing 4 byte big endian integers.
 The python bindings should provide further clarification in case the protocol didn't specify something.
 The python bindings also have a tutorial.
 
-Example code is provided in <a href="https://github.com/tareksander/termux-gui/tree/main/examples">examples/code</a>.
+Example code is provided in <a href="https://github.com/termux/termux-gui/tree/main/examples">examples/code</a>, but it's not commented and more used for testing features.
 
 
