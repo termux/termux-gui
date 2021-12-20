@@ -1,8 +1,6 @@
 # Termux:GUI
 
-<img src="https://img.shields.io/github/v/release/termux/termux-gui?include_prereleases"/>
-<img src="https://img.shields.io/f-droid/v/com.termux.gui"/>
-
+<img src="https://img.shields.io/github/v/release/termux/termux-gui?include_prereleases"/> <img src="https://img.shields.io/f-droid/v/com.termux.gui"/>
 
 This is a plugin for [Termux](https://github.com/termux/termux-app) that enables command line programs to use the native android GUI.  
   
@@ -11,9 +9,11 @@ In the examples directory you can find demo videos and sample code.
 [There are also prepackaged programs you can use](https://github.com/tareksander/termux-gui-package).
 
 [Installation notes](https://github.com/termux/termux-app#installation)  
-There is currently no release on f-droid, so the only method to install this plugin is to use the apk from the [releases](https://github.com/termux/termux-gui/releases) and the [Termux apk from Github Actions](https://github.com/termux/termux-app/actions).  
-Releases on f-droid will be provided as soon as possible. When there is a release, the f-droid badge at the top will show a version number.  
-[See this comment for links to install Termux and its plugins from Github](https://github.com/tareksander/termux-gui-python-bindings/issues/1#issuecomment-983797979).  
+One method to install this plugin is to use the apk from the [releases](https://github.com/termux/termux-gui/releases) and the [Termux apk from Github Actions](https://github.com/termux/termux-app/actions).  
+ 
+[See this comment for links to install Termux and its plugins from Github](https://github.com/tareksander/termux-gui-python-bindings/issues/1#issuecomment-983797979).
+
+The plugin is also available on F-Droid [here](https://f-droid.org/packages/com.termux.gui/).
 
 Protocol.md describes the Protocol used and the available functions you can use.  
 If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  
@@ -61,8 +61,4 @@ EditText can get text input from the user.
 Buttons can be clicked.  
 ImageViews can display images.  
   
-With these fundamentals you can go ahead and use this plugin.  If you need more sophisticated Views or Layouts look into Protocol.md for what's available.
-
-
-
-
+With these fundamentals you can go ahead and use this plugin. If you need more sophisticated Views or Layouts look into Protocol.md for what's available.
