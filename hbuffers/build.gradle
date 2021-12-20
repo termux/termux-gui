@@ -10,8 +10,6 @@ android {
         // this is set to 24 so gradle doesn't complain when merging the manifest. The library is for API 26, and the Kotlin part is responsible the functions are never called on a lower api level
         minSdk 24
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -28,7 +26,6 @@ android {
             minifyEnabled false
         }
         debugMinify {
-            debuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release {
