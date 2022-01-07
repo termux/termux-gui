@@ -44,7 +44,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, val s
     
     
     override fun run() {
-        println("Socket address: " + request.mainSocket)
+        //println("Socket address: " + request.mainSocket)
         
         val main = LocalSocket(LocalSocket.SOCKET_STREAM)
         val event = LocalSocket(LocalSocket.SOCKET_STREAM)
@@ -92,7 +92,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, val s
                         }
                     }
                     eventWorker!!.start()
-                    println("listening")
+                    //println("listening")
                     when (pversion) {
                         0 -> V0(app).handleConnection(ptype, main, eventQueue)
                     }

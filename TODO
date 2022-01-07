@@ -29,6 +29,9 @@ Roadmap:
             [x] timezone
             [x] locale
         [x] TabLayout
+        [x] add the ability to make text selectable in a TextView and hyperlinks clickable
+            [x] https://stackoverflow.com/questions/6025818/select-copy-text-in-a-textview
+            [x] https://stackoverflow.com/questions/2734270/how-to-make-links-in-a-textview-clickable
         [ ] update the f-droid metadata
             [x] write a changelog
             [ ] more screenshots
@@ -51,6 +54,7 @@ Roadmap:
         [ ] Rework the widgets
         [ ] option to set an executable as a onClick handler in widgets, that then gets started sa a Termux task. That should work even when no program is connected to listen to widget events.
         [ ] add everything to the python library
+        [ ] add the ability to intercept touch events in layouts
         [ ] add a small helper script to termux-gui-packages, that can be used as a daemon for small stateful widgets.
             [ ] registers itself to start at boot with Termux:Boot, so the widget state can be restored at startup
             [ ] watches with inotify on ~/.image-shortcuts
@@ -88,7 +92,7 @@ Roadmap:
             the methods should improve performance
             [ ] You should also be able to replace the arguments with arrays, in case you want that argument to have a different value for each view, like the text for TextViews
             [ ] think about creating a batch api to group multiple messages together into one runnable for the ui thread
-        [ ] 
+        [ ] add the binary protocol type using protobuf
         
 
 

@@ -43,12 +43,12 @@ class HandleView {
                     val o = overlays[aid]
                     if (a != null && id != null) {
                         V0.runOnUIThreadActivityStarted(a) {
-                            it.findViewReimplemented<EditText>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isCursorVisible = show
+                            it.findViewReimplemented<EditText>(id)?.isCursorVisible = show
                         }
                     }
                     if (o != null && id != null) {
                         Util.runOnUIThreadBlocking {
-                            o.root.findViewReimplemented<EditText>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isCursorVisible = show
+                            o.root.findViewReimplemented<EditText>(id)?.isCursorVisible = show
                         }
                     }
                     return true
@@ -61,12 +61,12 @@ class HandleView {
                     if (a != null && id != null) {
                         V0.runOnUIThreadActivityStarted(a) {
                             
-                            Util.removeViewRecursive(it.findViewReimplemented(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt), it.usedIds, it.recyclerviews)
+                            Util.removeViewRecursive(it.findViewReimplemented(id), it.usedIds)
                         }
                     }
                     if (o != null && id != null) {
                         Util.runOnUIThreadBlocking {
-                            Util.removeViewRecursive(o.root.findViewReimplemented(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt), o.usedIds, o.recyclerviews)
+                            Util.removeViewRecursive(o.root.findViewReimplemented(id), o.usedIds)
                         }
                     }
                     return true
@@ -78,20 +78,20 @@ class HandleView {
                     val o = overlays[aid]
                     if (a != null && id != null) {
                         V0.runOnUIThreadActivityStarted(a) {
-                            val v = it.findViewReimplemented<ViewGroup>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            val v = it.findViewReimplemented<ViewGroup>(id)
                             if (v != null) {
                                 while (v.childCount > 0) {
-                                    Util.removeViewRecursive(v.getChildAt(0), it.usedIds, it.recyclerviews)
+                                    Util.removeViewRecursive(v.getChildAt(0), it.usedIds)
                                 }
                             }
                         }
                     }
                     if (o != null && id != null) {
                         Util.runOnUIThreadBlocking {
-                            val v = o.root.findViewReimplemented<ViewGroup>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            val v = o.root.findViewReimplemented<ViewGroup>(id)
                             if (v != null) {
                                 while (v.childCount > 0) {
-                                    Util.removeViewRecursive(v.getChildAt(0), o.usedIds, o.recyclerviews)
+                                    Util.removeViewRecursive(v.getChildAt(0), o.usedIds)
                                 }
                             }
                         }
@@ -108,13 +108,13 @@ class HandleView {
                         if (id != null && size != null && size > 0) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    val tv = it.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val tv = it.findViewReimplemented<TextView>(id)
                                     tv?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
+                                    o.root.findViewReimplemented<TextView>(id)?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
                                 }
                             }
                         }
@@ -132,14 +132,14 @@ class HandleView {
                             V0.runOnUIThreadActivityStarted(a) {
                                 val bin = Base64.decode(img, Base64.DEFAULT)
                                 val bitmap = BitmapFactory.decodeByteArray(bin, 0, bin.size)
-                                it.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setImageBitmap(bitmap)
+                                it.findViewReimplemented<ImageView>(id)?.setImageBitmap(bitmap)
                             }
                         }
                         if (o != null) {
                             val bin = Base64.decode(img, Base64.DEFAULT)
                             val bitmap = BitmapFactory.decodeByteArray(bin, 0, bin.size)
                             Util.runOnUIThreadBlocking {
-                                o.root.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setImageBitmap(bitmap)
+                                o.root.findViewReimplemented<ImageView>(id)?.setImageBitmap(bitmap)
                             }
                         }
                     }
@@ -156,7 +156,7 @@ class HandleView {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
                                     val mar = Util.toPX(it, margin)
-                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = it.findViewReimplemented<View>(id)
                                     val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
                                     when (m.params?.get("dir")?.asString) {
                                         "top" -> p?.topMargin = mar
@@ -171,7 +171,7 @@ class HandleView {
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
                                     val mar = Util.toPX(app, margin)
-                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = o.root.findViewReimplemented<View>(id)
                                     val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
                                     when (m.params?.get("dir")?.asString) {
                                         "top" -> p?.topMargin = mar
@@ -196,7 +196,7 @@ class HandleView {
                     if (id != null && weight != null) {
                         if (a != null) {
                             V0.runOnUIThreadActivityStarted(a) {
-                                val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                val v = it.findViewReimplemented<View>(id)
                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                 if (p != null) {
                                     p.weight = weight.toFloat()
@@ -206,7 +206,7 @@ class HandleView {
                         }
                         if (o != null) {
                             Util.runOnUIThreadBlocking {
-                                val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                val v = o.root.findViewReimplemented<View>(id)
                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                 if (p != null) {
                                     p.weight = weight.toFloat()
@@ -234,7 +234,7 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = it.findViewReimplemented<View>(id)
                                     if (v != null) {
                                         Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.width, v.height)))
                                     } else {
@@ -244,7 +244,7 @@ class HandleView {
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = o.root.findViewReimplemented<View>(id)
                                     if (v != null) {
                                         Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.width, v.height)))
                                     } else {
@@ -266,13 +266,13 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    val tv = it.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val tv = it.findViewReimplemented<TextView>(id)
                                     tv?.text = text
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.text = text
+                                    o.root.findViewReimplemented<TextView>(id)?.text = text
                                 }
                             }
                         }
@@ -289,12 +289,12 @@ class HandleView {
                         if (id != null && color != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.backgroundTintList = ColorStateList.valueOf(color)
+                                    it.findViewReimplemented<View>(id)?.backgroundTintList = ColorStateList.valueOf(color)
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.backgroundTintList = ColorStateList.valueOf(color)
+                                    o.root.findViewReimplemented<View>(id)?.backgroundTintList = ColorStateList.valueOf(color)
                                 }
                             }
                         }
@@ -311,12 +311,12 @@ class HandleView {
                         if (id != null && color != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setTextColor(color)
+                                    it.findViewReimplemented<TextView>(id)?.setTextColor(color)
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setTextColor(color)
+                                    o.root.findViewReimplemented<TextView>(id)?.setTextColor(color)
                                 }
                             }
                         }
@@ -333,12 +333,12 @@ class HandleView {
                         if (id != null && progress != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.progress = progress
+                                    it.findViewReimplemented<ProgressBar>(id)?.progress = progress
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<ProgressBar>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.progress = progress
+                                    o.root.findViewReimplemented<ProgressBar>(id)?.progress = progress
                                 }
                             }
                         }
@@ -355,12 +355,12 @@ class HandleView {
                         if (id != null && refresh != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<SwipeRefreshLayout>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isRefreshing = refresh
+                                    it.findViewReimplemented<SwipeRefreshLayout>(id)?.isRefreshing = refresh
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<SwipeRefreshLayout>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isRefreshing = refresh
+                                    o.root.findViewReimplemented<SwipeRefreshLayout>(id)?.isRefreshing = refresh
                                 }
                             }
                         }
@@ -377,12 +377,12 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStartedBlocking(a) {
-                                    text = it.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.text?.toString()
+                                    text = it.findViewReimplemented<TextView>(id)?.text?.toString()
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    text = o.root.findViewReimplemented<TextView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.text?.toString()
+                                    text = o.root.findViewReimplemented<TextView>(id)?.text?.toString()
                                 }
                             }
                         }
@@ -401,12 +401,12 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<CompoundButton>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                                    it.findViewReimplemented<CompoundButton>(id)?.isChecked = m.params?.get("checked")?.asBoolean ?: false
                                 }
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<CompoundButton>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                                    o.root.findViewReimplemented<CompoundButton>(id)?.isChecked = m.params?.get("checked")?.asBoolean ?: false
                                 }
                             }
                         }
@@ -422,7 +422,7 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = it.findViewReimplemented<View>(id)
                                     if (v != null) {
                                         v.requestFocus()
                                         if (m.params?.get("forcesoft")?.asBoolean == true) {
@@ -434,7 +434,7 @@ class HandleView {
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = o.root.findViewReimplemented<View>(id)
                                     if (v != null) {
                                         v.requestFocus()
                                         if (m.params?.get("forcesoft")?.asBoolean == true) {
@@ -460,7 +460,7 @@ class HandleView {
                         if (id != null && x != null && y != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = it.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
                                         if (soft == true && v is NestedScrollView) {
                                             v.smoothScrollTo(x, y)
@@ -472,7 +472,7 @@ class HandleView {
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = o.root.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
                                         if (soft == true && v is NestedScrollView) {
                                             v.smoothScrollTo(x, y)
@@ -495,7 +495,7 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = it.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
                                         Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.scrollX, v.scrollY)))
                                     } else {
@@ -505,7 +505,7 @@ class HandleView {
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = o.root.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
                                         Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.scrollX, v.scrollY)))
                                     } else {
@@ -539,11 +539,11 @@ class HandleView {
                         if (id != null) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStartedBlocking(a) {
-                                    val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = it.findViewReimplemented<View>(id)
                                     if (v is Spinner)
                                         v.adapter = ArrayAdapter(it, R.layout.spinner_text, options)
                                     if (v is TabLayout) {
-                                        v.removeAllTabs();
+                                        v.removeAllTabs()
                                         for (tab in options) {
                                             val t = v.newTab()
                                             t.text = tab
@@ -554,11 +554,11 @@ class HandleView {
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                                    val v = o.root.findViewReimplemented<View>(id)
                                     if (v is Spinner)
                                         v.adapter = ArrayAdapter(app, R.layout.spinner_text, options)
                                     if (v is TabLayout) {
-                                        v.removeAllTabs();
+                                        v.removeAllTabs()
                                         for (tab in options) {
                                             val t = TabLayout.Tab()
                                             t.text = tab
@@ -581,7 +581,7 @@ class HandleView {
                         if (id != null && vis != null && vis >= 0 && vis <= 2) {
                             if (a != null) {
                                 V0.runOnUIThreadActivityStarted(a) {
-                                    it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.visibility = when (vis) {
+                                    it.findViewReimplemented<View>(id)?.visibility = when (vis) {
                                         0 -> View.GONE
                                         1 -> View.INVISIBLE
                                         2 -> View.VISIBLE
@@ -591,7 +591,7 @@ class HandleView {
                             }
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
-                                    o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.visibility = when (vis) {
+                                    o.root.findViewReimplemented<View>(id)?.visibility = when (vis) {
                                         0 -> View.GONE
                                         1 -> View.INVISIBLE
                                         2 -> View.VISIBLE
@@ -645,7 +645,7 @@ class HandleView {
                 val p = el.asJsonPrimitive
                 if (a != null) {
                     V0.runOnUIThreadActivityStarted(a) {
-                        val v = it.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        val v = it.findViewReimplemented<View>(id)
                         val pa = v?.layoutParams
                         if (pa != null) {
                             set(pa, p)
@@ -655,7 +655,7 @@ class HandleView {
                 }
                 if (o != null) {
                     Util.runOnUIThreadBlocking {
-                        val v = o.root.findViewReimplemented<View>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                        val v = o.root.findViewReimplemented<View>(id)
                         val pa = v?.layoutParams
                         if (pa != null) {
                             set(pa, p)

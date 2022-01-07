@@ -175,6 +175,8 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - parent: The View id of the parent in the Layout hierarchy. if not specified, this will replace the root of the hierarchy and delete all existing views.
     - aid: The id of the Activity in which to create the View.
     - text: For Button, TextView and EditText, this is the initial Text.
+    - selectableText: For TextViews, this specifies whether the text can be selected. Default is false.
+    - clickableLinks: For TextViews, this specifies whether links can be clicked or not. Default is false.
     - vertical: For LinearLayout, this specifies if the Layout is vertical or horizontal. If not specified, vertical is assumed.
     - snapping: NestedScrollView and HorizontalScrollView snap to the nearest item if this is set to true. Default is false.
     - fillviewport: Makes the child of a HorizontalScrollView or a NestedScrollView automatically expand to the ScrollView size. Default is false.
@@ -450,7 +452,7 @@ The additional values are:
 - action: one of "up", "down", "pointer_up", "pointer_down", "cancel", "move", corresponding to [MotionEvent values](https://developer.android.com/reference/android/view/MotionEvent#constants_1) for ACTION_DOWN etc.
 - index: for "pointer_up" and "pointer_down" this is the index of the pointer removed/added.
 - time: The time of the event in milliseconds since boot excluding sleep. Use this when checking for gestures or other time-sensitive things.
-- pointers: An array of pointer data objects, each containing:
+- pointers: An array of arrays of pointer data objects. The first dimension is for grouping multiple move events together. The second dimension is for the pointer positions in each event. The elements in the array are:
   - x, y: The coordinates of the pointer inside the View (not in the window). For ImageView, these are the coordinates of the pixel in the displayed image or buffer, so you don't need to convert the position yourself.
   - id: The pointer id. This stays consistent for each pointer in the frame between "up" and "down" events
 

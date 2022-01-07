@@ -135,12 +135,12 @@ class HandleBuffer {
                     if (buffer != null && id != null) {
                         if (a != null) {
                             V0.runOnUIThreadActivityStarted(a) {
-                                it.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setImageBitmap(buffer.btm)
+                                it.findViewReimplemented<ImageView>(id)?.setImageBitmap(buffer.btm)
                             }
                         }
                         if (o != null) {
                             Util.runOnUIThreadBlocking {
-                                o.root.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.setImageBitmap(buffer.btm)
+                                o.root.findViewReimplemented<ImageView>(id)?.setImageBitmap(buffer.btm)
                             }
                         }
                     }
@@ -154,12 +154,12 @@ class HandleBuffer {
                     if (id != null) {
                         if (a != null) {
                             V0.runOnUIThreadActivityStarted(a) {
-                                it.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.invalidate()
+                                it.findViewReimplemented<ImageView>(id)?.invalidate()
                             }
                         }
                         if (o != null) {
                             Util.runOnUIThreadBlocking {
-                                o.root.findViewReimplemented<ImageView>(id, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)?.invalidate()
+                                o.root.findViewReimplemented<ImageView>(id)?.invalidate()
                             }
                         }
                     }

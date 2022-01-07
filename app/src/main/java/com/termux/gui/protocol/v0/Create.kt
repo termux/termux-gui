@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.method.LinkMovementMethod
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -47,6 +48,10 @@ class Create {
                             v.id = id
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
+                            v.setTextIsSelectable(m.params?.get("selectableText")?.asBoolean ?: false)
+                            if (m.params?.get("clickableLinks")?.asBoolean == true) {
+                                v.movementMethod = LinkMovementMethod.getInstance()
+                            }
                             Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -312,7 +317,11 @@ class Create {
                             v.id = id
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            v.setTextIsSelectable(m.params?.get("selectableText")?.asBoolean ?: false)
+                            if (m.params?.get("clickableLinks")?.asBoolean == true) {
+                                v.movementMethod = LinkMovementMethod.getInstance()
+                            }
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -326,7 +335,7 @@ class Create {
                                 v.setBackgroundResource(android.R.color.transparent)
                             }
                             v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -341,7 +350,7 @@ class Create {
                             } else {
                                 LinearLayout.HORIZONTAL
                             }
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -354,7 +363,7 @@ class Create {
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -364,7 +373,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -374,7 +383,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -384,7 +393,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -398,7 +407,7 @@ class Create {
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -414,7 +423,7 @@ class Create {
                             if (m.params?.get("nobar")?.asBoolean == true) {
                                 v.scrollBarSize = 0
                             }
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -430,7 +439,7 @@ class Create {
                             if (m.params?.get("nobar")?.asBoolean == true) {
                                 v.scrollBarSize = 0
                             }
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -441,7 +450,7 @@ class Create {
                         Util.runOnUIThreadBlocking {
                             v.id = id
                             Util.setCheckedListener(v, aid, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -454,7 +463,7 @@ class Create {
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -465,7 +474,7 @@ class Create {
                         Util.runOnUIThreadBlocking {
                             v.id = id
                             Util.setSpinnerListener(v, aid, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -479,7 +488,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -494,7 +503,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -505,7 +514,7 @@ class Create {
                             val v = ProgressBar(app, null, android.R.attr.progressBarStyleHorizontal)
                             id = Util.generateViewIDRaw(rand, o.usedIds)
                             v.id = id
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -517,7 +526,7 @@ class Create {
                             id = Util.generateViewIDRaw(rand, o.usedIds)
                             v.id = id
                             Util.setRefreshListener(v, aid, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -529,7 +538,7 @@ class Create {
                             id = Util.generateViewIDRaw(rand, o.usedIds)
                             v.id = id
                             Util.setTabSelectedListener(v, aid, eventQueue)
-                            V0.setViewOverlay(o, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            V0.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return

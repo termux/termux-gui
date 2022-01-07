@@ -13,10 +13,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
-import com.termux.gui.protocol.v0.GUIRecyclerViewAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -109,11 +107,11 @@ class Util {
                 if (t != null) {
                     v.setBackgroundColor(t.windowBackground)
                 }
-                val fl = a.findViewReimplemented(R.id.root, recid, recindex) as? FrameLayout
+                val fl = a.findViewReimplemented(R.id.root) as? FrameLayout
                 fl?.removeAllViews()
                 fl?.addView(v)
             } else {
-                val g = a.findViewReimplemented<ViewGroup>(parent, recid, recindex)
+                val g = a.findViewReimplemented<ViewGroup>(parent)
                 if (g is LinearLayout) {
                     val p = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1F)
                     if (g.orientation == LinearLayout.VERTICAL) {
@@ -322,19 +320,11 @@ class Util {
         }
         
         
-        fun removeViewRecursive(v: View?, usedIds: MutableSet<Int>, recyclerviews: HashMap<Int, GUIRecyclerViewAdapter>) {
+        fun removeViewRecursive(v: View?, usedIds: MutableSet<Int>) {
             if (v != null) {
                 if (v is ViewGroup) {
-                    if (v is RecyclerView) {
-                        val rv = recyclerviews[v.id]
-                        if (rv != null) {
-                            usedIds.removeAll(rv.exportViewList().map { it.id }.toSet())
-                            recyclerviews.remove(v.id)
-                        }
-                    } else {
-                        while (v.childCount > 0) {
-                            removeViewRecursive(v.getChildAt(0), usedIds, recyclerviews)
-                        }
+                    while (v.childCount > 0) {
+                        removeViewRecursive(v.getChildAt(0), usedIds)
                     }
                 }
                 val p = v.parent

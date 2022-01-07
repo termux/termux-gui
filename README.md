@@ -18,6 +18,19 @@ Releases on f-droid will be provided as soon as possible. When there is a releas
 Protocol.md describes the Protocol used and the available functions you can use.  
 If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  
 
+### Comparison with native apps
+
+| Native app                                                | With Termux:GUI                                                             |
+|-----------------------------------------------------------|-----------------------------------------------------------------------------|
+| Has to be installed                                       | Program can be run in Termux                                                |
+| Full access to the Android API                            | Access to the Android API through Termux:GUI and Termux:API                 |
+| Limited to C, C++, Kotlin and Java for native development | Any programming language can be used, prebuilt library for python available |
+|                                                           | Lower performance caused by IPC                                             |
+| Accessing files in Termux only possible via SAF           | Direct access to files in Termux                                            |
+| Has to be started with `am` from Termux                   | Can be started like any other program in Termux                             |
+|                                                           | Can receive command line arguments and output back to the Terminal          |
+
+
 ## Language Bindings
 
 - [Python](https://github.com/tareksander/termux-gui-python-bindings)
