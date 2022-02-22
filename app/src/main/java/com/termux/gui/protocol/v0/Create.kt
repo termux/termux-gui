@@ -52,7 +52,7 @@ class Create {
                             if (m.params?.get("clickableLinks")?.asBoolean == true) {
                                 v.movementMethod = LinkMovementMethod.getInstance()
                             }
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -89,7 +89,7 @@ class Create {
                                 v.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_FILTER or EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                             }
                             v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -105,7 +105,7 @@ class Create {
                             } else {
                                 LinearLayout.HORIZONTAL
                             }
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -119,7 +119,7 @@ class Create {
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -130,7 +130,7 @@ class Create {
                             val v = ImageView(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -141,7 +141,7 @@ class Create {
                             val v = Space(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -152,7 +152,7 @@ class Create {
                             val v = FrameLayout(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -167,7 +167,7 @@ class Create {
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -184,7 +184,7 @@ class Create {
                             }
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -201,7 +201,7 @@ class Create {
                             }
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -213,7 +213,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setCheckedListener(v, aid, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -227,7 +227,7 @@ class Create {
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -239,7 +239,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setSpinnerListener(v, aid, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -253,7 +253,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -268,7 +268,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -279,7 +279,7 @@ class Create {
                             val v = ProgressBar(it, null, android.R.attr.progressBarStyleHorizontal)
                             id = Util.generateViewID(rand, it)
                             v.id = id
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -291,7 +291,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setRefreshListener(v, aid, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
@@ -303,7 +303,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setTabSelectedListener(v, aid, eventQueue)
-                            Util.setViewActivity(it, v, parent, m.params?.get("recyclerview")?.asInt, m.params?.get("recyclerindex")?.asInt)
+                            Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return

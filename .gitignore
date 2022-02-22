@@ -17,3 +17,4 @@ local.properties
 /bindings/Python/dist/
 /bindings/Python/src/termuxgui.egg-info/
 /.idea/
+/app/debugMinify/

@@ -197,6 +197,7 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - aid: The id of the Activity the View is in.
     - id: The id of the View.
     - weight: Sets the Layout weight.
+    - position: The index of the element. If null, the position is kept.
 - setRelativeLayoutParams: Sets the RelativeLayout parameters for a View in a RelativeLayout.
   - Parameters:
     - parent: The View id of the parent in the Layout hierarchy.
@@ -289,16 +290,9 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - soft: if true, scrolls with an animation instead of jumping to the destination.
 - setList: Set the list of a Spinner or TabLayout.
   - Parameters:
-    - id: The View id of a Spinner  or TabLayout..
+    - id: The View id of a Spinner or TabLayout.
     - aid: The id of the Activity the View is in.
     - list: An array containing the available Spinner options / TabLayout tab titles as strings.
-- inflateJSON: Creates a View hierarchy from a [JSON object](https://github.com/flipkart-incubator/proteus). Warning: you must take care to not have duplicate View ids.
-  - Parameters:
-    - aid: The id of the Activity the View is in.
-    - parent: The View id of the parent in the Layout hierarchy. if not specified, this will replace the root of the hierarchy and delete all existing views.
-- generateIDs: Generates and reserves View ids. Use them to set the ids for the JSON Layout in inflateJSON.
-  - Parameters:
-    - n: The number of ids to generate
 - setImage: Sets the image for an ImageView.
   - Parameters:
     - id: The View id of a ImageView.

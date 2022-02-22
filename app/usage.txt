@@ -7966,7 +7966,32 @@ androidx.core.view.NestedScrollingChildHelper:
     public void onStopNestedScroll(android.view.View)
 androidx.core.view.NestedScrollingParent:
     public abstract int getNestedScrollAxes()
-androidx.core.view.PointerIconCompat
+androidx.core.view.PointerIconCompat:
+    public static final int TYPE_ALIAS
+    public static final int TYPE_ALL_SCROLL
+    public static final int TYPE_ARROW
+    public static final int TYPE_CELL
+    public static final int TYPE_CONTEXT_MENU
+    public static final int TYPE_COPY
+    public static final int TYPE_CROSSHAIR
+    public static final int TYPE_DEFAULT
+    public static final int TYPE_GRAB
+    public static final int TYPE_GRABBING
+    public static final int TYPE_HAND
+    public static final int TYPE_HELP
+    public static final int TYPE_HORIZONTAL_DOUBLE_ARROW
+    public static final int TYPE_NO_DROP
+    public static final int TYPE_NULL
+    public static final int TYPE_TEXT
+    public static final int TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW
+    public static final int TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW
+    public static final int TYPE_VERTICAL_DOUBLE_ARROW
+    public static final int TYPE_VERTICAL_TEXT
+    public static final int TYPE_WAIT
+    public static final int TYPE_ZOOM_IN
+    public static final int TYPE_ZOOM_OUT
+    public static androidx.core.view.PointerIconCompat create(android.graphics.Bitmap,float,float)
+    public static androidx.core.view.PointerIconCompat load(android.content.res.Resources,int)
 androidx.core.view.ScaleGestureDetectorCompat
 androidx.core.view.ScrollingView
 androidx.core.view.VelocityTrackerCompat
@@ -7986,7 +8011,8 @@ androidx.core.view.ViewCompat$Api21Impl:
     private void <init>()
 androidx.core.view.ViewCompat$Api23Impl:
     private void <init>()
-androidx.core.view.ViewCompat$Api24Impl
+androidx.core.view.ViewCompat$Api24Impl:
+    private void <init>()
 androidx.core.view.ViewCompat$Api26Impl:
     private void <init>()
 androidx.core.view.ViewCompat$Api28Impl:
@@ -8126,7 +8152,6 @@ androidx.core.view.ViewCompat:
     public static void setOverScrollMode(android.view.View,int)
     public static void setPivotX(android.view.View,float)
     public static void setPivotY(android.view.View,float)
-    public static void setPointerIcon(android.view.View,androidx.core.view.PointerIconCompat)
     public static void setRotation(android.view.View,float)
     public static void setRotationX(android.view.View,float)
     public static void setRotationY(android.view.View,float)
@@ -8495,7 +8520,6 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public static androidx.core.view.accessibility.AccessibilityNodeInfoCompat obtain(android.view.View,int)
     public boolean performAction(int)
     public boolean refresh()
-    public boolean removeAction(androidx.core.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityActionCompat)
     public boolean removeChild(android.view.View)
     public boolean removeChild(android.view.View,int)
     public void setCanOpenPopup(boolean)
@@ -8516,7 +8540,6 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public void setMultiLine(boolean)
     public void setPassword(boolean)
     public void setRangeInfo(androidx.core.view.accessibility.AccessibilityNodeInfoCompat$RangeInfoCompat)
-    public void setRoleDescription(java.lang.CharSequence)
     public void setSelected(boolean)
     public void setSource(android.view.View)
     public void setTextEntryKey(boolean)
@@ -8739,10 +8762,6 @@ androidx.core.widget.TextViewCompat:
     public static final int AUTO_SIZE_TEXT_TYPE_UNIFORM
     private static final int LINES
     private static final java.lang.String LOG_TAG
-    private static java.lang.reflect.Field sMaxModeField
-    private static boolean sMaxModeFieldFetched
-    private static java.lang.reflect.Field sMaximumField
-    private static boolean sMaximumFieldFetched
     private static java.lang.reflect.Field sMinModeField
     private static boolean sMinModeFieldFetched
     private static java.lang.reflect.Field sMinimumField
@@ -8755,10 +8774,7 @@ androidx.core.widget.TextViewCompat:
     public static int getAutoSizeTextType(android.widget.TextView)
     public static android.content.res.ColorStateList getCompoundDrawableTintList(android.widget.TextView)
     public static android.graphics.PorterDuff$Mode getCompoundDrawableTintMode(android.widget.TextView)
-    public static int getMaxLines(android.widget.TextView)
     public static int getMinLines(android.widget.TextView)
-    private static java.lang.reflect.Field retrieveField(java.lang.String)
-    private static int retrieveIntFromField(java.lang.reflect.Field,android.widget.TextView)
     public static void setAutoSizeTextTypeUniformWithConfiguration(android.widget.TextView,int,int,int,int)
     public static void setAutoSizeTextTypeUniformWithPresetSizes(android.widget.TextView,int[],int)
     public static void setAutoSizeTextTypeWithDefaults(android.widget.TextView,int)
@@ -10125,6 +10141,10 @@ androidx.recyclerview.widget.AdapterHelper:
     static final int POSITION_TYPE_NEW_OR_LAID_OUT
     private static final java.lang.String TAG
     varargs androidx.recyclerview.widget.AdapterHelper addUpdateOp(androidx.recyclerview.widget.AdapterHelper$UpdateOp[])
+    boolean onItemRangeChanged(int,int,java.lang.Object)
+    boolean onItemRangeInserted(int,int)
+    boolean onItemRangeMoved(int,int,int)
+    boolean onItemRangeRemoved(int,int)
 androidx.recyclerview.widget.AdapterListUpdateCallback
 androidx.recyclerview.widget.AsyncDifferConfig$Builder
 androidx.recyclerview.widget.AsyncDifferConfig
@@ -10139,12 +10159,7 @@ androidx.recyclerview.widget.AsyncListUtil$2
 androidx.recyclerview.widget.AsyncListUtil$DataCallback
 androidx.recyclerview.widget.AsyncListUtil$ViewCallback
 androidx.recyclerview.widget.AsyncListUtil
-androidx.recyclerview.widget.BatchingListUpdateCallback:
-    private static final int TYPE_ADD
-    private static final int TYPE_CHANGE
-    private static final int TYPE_NONE
-    private static final int TYPE_REMOVE
-    public void onMoved(int,int)
+androidx.recyclerview.widget.BatchingListUpdateCallback
 androidx.recyclerview.widget.ChildHelper$Bucket:
     static final int BITS_PER_WORD
     static final long LAST_BIT
@@ -10264,8 +10279,7 @@ androidx.recyclerview.widget.LinearSmoothScroller:
 androidx.recyclerview.widget.LinearSnapHelper
 androidx.recyclerview.widget.ListAdapter$1
 androidx.recyclerview.widget.ListAdapter
-androidx.recyclerview.widget.ListUpdateCallback:
-    public abstract void onMoved(int,int)
+androidx.recyclerview.widget.ListUpdateCallback
 androidx.recyclerview.widget.MessageThreadUtil$1$1
 androidx.recyclerview.widget.MessageThreadUtil$1
 androidx.recyclerview.widget.MessageThreadUtil$2$1
@@ -10285,6 +10299,28 @@ androidx.recyclerview.widget.OrientationHelper:
     public abstract void offsetChild(android.view.View,int)
 androidx.recyclerview.widget.PagerSnapHelper:
     private static final int MAX_SCROLL_ON_FLING_DURATION
+androidx.recyclerview.widget.RecyclerView$Adapter:
+    public final void notifyItemChanged(int)
+    public final void notifyItemChanged(int,java.lang.Object)
+    public final void notifyItemInserted(int)
+    public final void notifyItemMoved(int,int)
+    public final void notifyItemRangeChanged(int,int)
+    public final void notifyItemRangeChanged(int,int,java.lang.Object)
+    public final void notifyItemRangeInserted(int,int)
+    public final void notifyItemRangeRemoved(int,int)
+    public final void notifyItemRemoved(int)
+androidx.recyclerview.widget.RecyclerView$AdapterDataObservable:
+    public void notifyItemMoved(int,int)
+    public void notifyItemRangeChanged(int,int)
+    public void notifyItemRangeChanged(int,int,java.lang.Object)
+    public void notifyItemRangeInserted(int,int)
+    public void notifyItemRangeRemoved(int,int)
+androidx.recyclerview.widget.RecyclerView$AdapterDataObserver:
+    public void onItemRangeChanged(int,int)
+    public void onItemRangeChanged(int,int,java.lang.Object)
+    public void onItemRangeInserted(int,int)
+    public void onItemRangeMoved(int,int,int)
+    public void onItemRangeRemoved(int,int)
 androidx.recyclerview.widget.RecyclerView$EdgeEffectFactory$EdgeDirection
 androidx.recyclerview.widget.RecyclerView$EdgeEffectFactory:
     public static final int DIRECTION_BOTTOM
@@ -10344,6 +10380,12 @@ androidx.recyclerview.widget.RecyclerView$RecycledViewPool:
 androidx.recyclerview.widget.RecyclerView$Recycler:
     static final int DEFAULT_CACHE_SIZE
     public void bindViewToPosition(android.view.View,int)
+androidx.recyclerview.widget.RecyclerView$RecyclerViewDataObserver:
+    public void onItemRangeChanged(int,int,java.lang.Object)
+    public void onItemRangeInserted(int,int)
+    public void onItemRangeMoved(int,int,int)
+    public void onItemRangeRemoved(int,int)
+    void triggerUpdateProcessor()
 androidx.recyclerview.widget.RecyclerView$SimpleOnItemTouchListener
 androidx.recyclerview.widget.RecyclerView$SmoothScroller$Action:
     public static final int UNDEFINED_DURATION
@@ -10372,6 +10414,23 @@ androidx.recyclerview.widget.RecyclerView$State:
     public boolean willRunSimpleAnimations()
 androidx.recyclerview.widget.RecyclerView$ViewCacheExtension:
     public void <init>()
+androidx.recyclerview.widget.RecyclerView$ViewHolder:
+    static final int FLAG_ADAPTER_FULLUPDATE
+    static final int FLAG_ADAPTER_POSITION_UNKNOWN
+    static final int FLAG_APPEARED_IN_PRE_LAYOUT
+    static final int FLAG_BOUNCED_FROM_HIDDEN_LIST
+    static final int FLAG_BOUND
+    static final int FLAG_IGNORE
+    static final int FLAG_INVALID
+    static final int FLAG_MOVED
+    static final int FLAG_NOT_RECYCLABLE
+    static final int FLAG_REMOVED
+    static final int FLAG_RETURNED_FROM_SCRAP
+    static final int FLAG_TMP_DETACHED
+    static final int FLAG_UPDATE
+    static final int PENDING_ACCESSIBILITY_STATE_NOT_SET
+    public final int getPosition()
+    void stopIgnoring()
 androidx.recyclerview.widget.RecyclerView:
     static final boolean DEBUG
     static final int DEFAULT_ORIENTATION
@@ -10433,29 +10492,9 @@ androidx.recyclerview.widget.SnapHelper$2
 androidx.recyclerview.widget.SnapHelper:
     static final float MILLISECONDS_PER_INCH
     public int[] calculateScrollDistance(int,int)
-androidx.recyclerview.widget.SortedList$BatchedCallback:
-    public void onMoved(int,int)
-androidx.recyclerview.widget.SortedList:
-    private static final int CAPACITY_GROWTH
-    private static final int DELETION
-    private static final int INSERTION
-    public static final int INVALID_POSITION
-    private static final int LOOKUP
-    private static final int MIN_CAPACITY
-    public varargs void addAll(java.lang.Object[])
-    public int indexOf(java.lang.Object)
-    public void recalculatePositionOfItemAt(int)
-    public boolean remove(java.lang.Object)
-    private boolean remove(java.lang.Object,boolean)
-    public java.lang.Object removeItemAt(int)
-    private void removeItemAtIndex(int,boolean)
-    public void replaceAll(java.util.Collection)
-    public varargs void replaceAll(java.lang.Object[])
-    public void replaceAll(java.lang.Object[],boolean)
-    private void replaceAllInsert(java.lang.Object)
-    private void replaceAllInternal(java.lang.Object[])
-    private void replaceAllRemove()
-    public void updateItemAt(int,java.lang.Object)
+androidx.recyclerview.widget.SortedList$BatchedCallback
+androidx.recyclerview.widget.SortedList$Callback
+androidx.recyclerview.widget.SortedList
 androidx.recyclerview.widget.SortedListAdapterCallback
 androidx.recyclerview.widget.StaggeredGridLayoutManager$LayoutParams:
     public static final int INVALID_SPAN_ID
@@ -11286,30 +11325,58 @@ androidx.viewpager.R$string
 androidx.viewpager.R$style
 androidx.viewpager.R$styleable
 androidx.viewpager.R
-androidx.viewpager.widget.PagerAdapter
+androidx.viewpager.widget.PagerAdapter:
+    public static final int POSITION_NONE
+    public static final int POSITION_UNCHANGED
+    private final android.database.DataSetObservable mObservable
+    private android.database.DataSetObserver mViewPagerObserver
+    public void <init>()
+    public void destroyItem(android.view.View,int,java.lang.Object)
+    public void finishUpdate(android.view.View)
+    public java.lang.Object instantiateItem(android.view.View,int)
+    public void notifyDataSetChanged()
+    public void setPrimaryItem(android.view.View,int,java.lang.Object)
+    public void startUpdate(android.view.View)
 androidx.viewpager.widget.PagerTabStrip$1
 androidx.viewpager.widget.PagerTabStrip$2
 androidx.viewpager.widget.PagerTabStrip
 androidx.viewpager.widget.PagerTitleStrip$PageListener
 androidx.viewpager.widget.PagerTitleStrip$SingleLineAllCapsTransform
 androidx.viewpager.widget.PagerTitleStrip
-androidx.viewpager.widget.ViewPager$1
-androidx.viewpager.widget.ViewPager$2
 androidx.viewpager.widget.ViewPager$3
 androidx.viewpager.widget.ViewPager$4
-androidx.viewpager.widget.ViewPager$DecorView
-androidx.viewpager.widget.ViewPager$ItemInfo
-androidx.viewpager.widget.ViewPager$LayoutParams
 androidx.viewpager.widget.ViewPager$MyAccessibilityDelegate
-androidx.viewpager.widget.ViewPager$OnAdapterChangeListener
-androidx.viewpager.widget.ViewPager$OnPageChangeListener
-androidx.viewpager.widget.ViewPager$PageTransformer
-androidx.viewpager.widget.ViewPager$PagerObserver
-androidx.viewpager.widget.ViewPager$SavedState$1
-androidx.viewpager.widget.ViewPager$SavedState
 androidx.viewpager.widget.ViewPager$SimpleOnPageChangeListener
-androidx.viewpager.widget.ViewPager$ViewPositionComparator
-androidx.viewpager.widget.ViewPager
+androidx.viewpager.widget.ViewPager:
+    private static final int CLOSE_ENOUGH
+    private static final boolean DEBUG
+    private static final int DEFAULT_GUTTER_SIZE
+    private static final int DEFAULT_OFFSCREEN_PAGES
+    private static final int DRAW_ORDER_DEFAULT
+    private static final int DRAW_ORDER_FORWARD
+    private static final int DRAW_ORDER_REVERSE
+    private static final int INVALID_POINTER
+    private static final int MAX_SETTLE_DURATION
+    private static final int MIN_DISTANCE_FOR_FLING
+    private static final int MIN_FLING_VELOCITY
+    public static final int SCROLL_STATE_DRAGGING
+    public static final int SCROLL_STATE_IDLE
+    public static final int SCROLL_STATE_SETTLING
+    private static final java.lang.String TAG
+    private static final boolean USE_CACHE
+    private long mFakeDragBeginTime
+    public void <init>(android.content.Context)
+    public void <init>(android.content.Context,android.util.AttributeSet)
+    public boolean beginFakeDrag()
+    public void clearOnPageChangeListeners()
+    public void endFakeDrag()
+    public void fakeDragBy(float)
+    void initViewPager()
+    public boolean isFakeDragging()
+    androidx.viewpager.widget.ViewPager$OnPageChangeListener setInternalPageChangeListener(androidx.viewpager.widget.ViewPager$OnPageChangeListener)
+    public void setPageTransformer(boolean,androidx.viewpager.widget.ViewPager$PageTransformer)
+    public void setPageTransformer(boolean,androidx.viewpager.widget.ViewPager$PageTransformer,int)
+    void smoothScrollTo(int,int)
 androidx.viewpager2.R$attr
 androidx.viewpager2.R$color
 androidx.viewpager2.R$dimen
@@ -12010,7 +12077,6 @@ com.google.android.material.R$attr:
     public static final int backgroundTint
     public static final int backgroundTintMode
     public static final int badgeGravity
-    public static final int badgeStyle
     public static final int badgeTextColor
     public static final int barLength
     public static final int barrierAllowsGoneWidgets
@@ -12692,7 +12758,6 @@ com.google.android.material.R$attr:
     public static final int tabPaddingTop
     public static final int tabRippleColor
     public static final int tabSelectedTextColor
-    public static final int tabStyle
     public static final int tabTextAppearance
     public static final int tabTextColor
     public static final int tabUnboundedRipple
@@ -13146,9 +13211,7 @@ com.google.android.material.R$dimen:
     public static final int design_snackbar_padding_horizontal
     public static final int design_snackbar_text_size
     public static final int design_tab_max_width
-    public static final int design_tab_scrollable_min_width
     public static final int design_tab_text_size
-    public static final int design_tab_text_size_2line
     public static final int disabled_alpha_material_dark
     public static final int disabled_alpha_material_light
     public static final int fastscroll_default_thickness
@@ -13188,14 +13251,9 @@ com.google.android.material.R$dimen:
     public static final int mtrl_alert_dialog_background_inset_start
     public static final int mtrl_alert_dialog_background_inset_top
     public static final int mtrl_alert_dialog_picker_background_inset
-    public static final int mtrl_badge_horizontal_edge_offset
-    public static final int mtrl_badge_long_text_horizontal_padding
-    public static final int mtrl_badge_radius
-    public static final int mtrl_badge_text_horizontal_edge_offset
     public static final int mtrl_badge_text_size
     public static final int mtrl_badge_toolbar_action_menu_item_horizontal_offset
     public static final int mtrl_badge_toolbar_action_menu_item_vertical_offset
-    public static final int mtrl_badge_with_text_radius
     public static final int mtrl_bottomappbar_fabOffsetEndMode
     public static final int mtrl_bottomappbar_fab_cradle_margin
     public static final int mtrl_bottomappbar_fab_cradle_rounded_corner_radius
@@ -13699,7 +13757,6 @@ com.google.android.material.R$id:
     public static final int mini
     public static final int month_navigation_bar
     public static final int motion_base
-    public static final int mtrl_anchor_parent
     public static final int mtrl_calendar_selection_frame
     public static final int mtrl_calendar_text_input_frame
     public static final int mtrl_card_checked_layer_id
@@ -13904,8 +13961,6 @@ com.google.android.material.R$layout:
     public static final int design_bottom_sheet_dialog
     public static final int design_layout_snackbar
     public static final int design_layout_snackbar_include
-    public static final int design_layout_tab_icon
-    public static final int design_layout_tab_text
     public static final int design_menu_item_action_area
     public static final int design_navigation_item
     public static final int design_navigation_item_header
@@ -13967,7 +14022,8 @@ com.google.android.material.R$layout:
     public static final int text_view_with_theme_line_height
     public static final int text_view_without_line_height
     private void <init>()
-com.google.android.material.R$plurals
+com.google.android.material.R$plurals:
+    private void <init>()
 com.google.android.material.R$string:
     public static final int abc_action_bar_home_description
     public static final int abc_action_bar_up_description
@@ -14003,7 +14059,6 @@ com.google.android.material.R$string:
     public static final int fab_transformation_sheet_behavior
     public static final int hide_bottom_view_on_scroll_behavior
     public static final int icon_content_description
-    public static final int item_view_role_description
     public static final int material_clock_display_divider
     public static final int material_clock_toggle_content_description
     public static final int material_hour_selection
@@ -14024,9 +14079,6 @@ com.google.android.material.R$string:
     public static final int material_timepicker_pm
     public static final int material_timepicker_select_time
     public static final int material_timepicker_text_input_mode_description
-    public static final int mtrl_badge_numberless_content_description
-    public static final int mtrl_exceed_max_badge_number_content_description
-    public static final int mtrl_exceed_max_badge_number_suffix
     public static final int mtrl_picker_a11y_next_month
     public static final int mtrl_picker_a11y_prev_month
     public static final int mtrl_picker_cancel
@@ -14426,8 +14478,6 @@ com.google.android.material.R$style:
     public static final int TextAppearance_Design_Prefix
     public static final int TextAppearance_Design_Snackbar_Message
     public static final int TextAppearance_Design_Suffix
-    public static final int TextAppearance_Design_Tab
-    public static final int TextAppearance_MaterialComponents_Badge
     public static final int TextAppearance_MaterialComponents_Body1
     public static final int TextAppearance_MaterialComponents_Body2
     public static final int TextAppearance_MaterialComponents_Button
@@ -14652,7 +14702,6 @@ com.google.android.material.R$style:
     public static final int Widget_Design_NavigationView
     public static final int Widget_Design_ScrimInsetsFrameLayout
     public static final int Widget_Design_Snackbar
-    public static final int Widget_Design_TabLayout
     public static final int Widget_MaterialComponents_ActionBar_Primary
     public static final int Widget_MaterialComponents_ActionBar_PrimarySurface
     public static final int Widget_MaterialComponents_ActionBar_Solid
@@ -14664,7 +14713,6 @@ com.google.android.material.R$style:
     public static final int Widget_MaterialComponents_AutoCompleteTextView_FilledBox_Dense
     public static final int Widget_MaterialComponents_AutoCompleteTextView_OutlinedBox
     public static final int Widget_MaterialComponents_AutoCompleteTextView_OutlinedBox_Dense
-    public static final int Widget_MaterialComponents_Badge
     public static final int Widget_MaterialComponents_BottomAppBar_Colored
     public static final int Widget_MaterialComponents_BottomAppBar_PrimarySurface
     public static final int Widget_MaterialComponents_BottomNavigationView
@@ -14998,13 +15046,6 @@ com.google.android.material.R$styleable:
     public static final int AppCompatTheme_windowMinWidthMajor
     public static final int AppCompatTheme_windowMinWidthMinor
     public static final int AppCompatTheme_windowNoTitle
-    public static final int Badge_backgroundColor
-    public static final int Badge_badgeGravity
-    public static final int Badge_badgeTextColor
-    public static final int Badge_horizontalOffset
-    public static final int Badge_maxCharacterCount
-    public static final int Badge_number
-    public static final int Badge_verticalOffset
     public static final int BaseProgressIndicator_android_indeterminate
     public static final int BaseProgressIndicator_hideAnimationBehavior
     public static final int BaseProgressIndicator_indicatorColor
@@ -15977,32 +16018,6 @@ com.google.android.material.R$styleable:
     public static final int TabItem_android_icon
     public static final int TabItem_android_layout
     public static final int TabItem_android_text
-    public static final int TabLayout_tabBackground
-    public static final int TabLayout_tabContentStart
-    public static final int TabLayout_tabGravity
-    public static final int TabLayout_tabIconTint
-    public static final int TabLayout_tabIconTintMode
-    public static final int TabLayout_tabIndicator
-    public static final int TabLayout_tabIndicatorAnimationDuration
-    public static final int TabLayout_tabIndicatorAnimationMode
-    public static final int TabLayout_tabIndicatorColor
-    public static final int TabLayout_tabIndicatorFullWidth
-    public static final int TabLayout_tabIndicatorGravity
-    public static final int TabLayout_tabIndicatorHeight
-    public static final int TabLayout_tabInlineLabel
-    public static final int TabLayout_tabMaxWidth
-    public static final int TabLayout_tabMinWidth
-    public static final int TabLayout_tabMode
-    public static final int TabLayout_tabPadding
-    public static final int TabLayout_tabPaddingBottom
-    public static final int TabLayout_tabPaddingEnd
-    public static final int TabLayout_tabPaddingStart
-    public static final int TabLayout_tabPaddingTop
-    public static final int TabLayout_tabRippleColor
-    public static final int TabLayout_tabSelectedTextColor
-    public static final int TabLayout_tabTextAppearance
-    public static final int TabLayout_tabTextColor
-    public static final int TabLayout_tabUnboundedRipple
     public static final int TextAppearance_android_textFontWeight
     public static final int TextAppearance_fontVariationSettings
     public static final int TextAppearance_textLocale
@@ -16090,7 +16105,6 @@ com.google.android.material.R$xml
 com.google.android.material.R
 com.google.android.material.animation.AnimationUtils:
     public void <init>()
-    public static int lerp(int,int,float)
 com.google.android.material.animation.AnimatorSetCompat:
     public void <init>()
 com.google.android.material.animation.MatrixEvaluator:
@@ -16193,13 +16207,58 @@ com.google.android.material.appbar.ViewUtilsLollipop:
     void <init>()
     static void setBoundsViewOutlineProvider(android.view.View)
     static void setStateListAnimatorFromAttrs(android.view.View,android.util.AttributeSet,int,int)
-com.google.android.material.badge.BadgeDrawable$1
 com.google.android.material.badge.BadgeDrawable$BadgeGravity
-com.google.android.material.badge.BadgeDrawable$SavedState$1
-com.google.android.material.badge.BadgeDrawable$SavedState
-com.google.android.material.badge.BadgeDrawable
+com.google.android.material.badge.BadgeDrawable$SavedState:
+    static synthetic boolean access$000(com.google.android.material.badge.BadgeDrawable$SavedState)
+    static synthetic boolean access$002(com.google.android.material.badge.BadgeDrawable$SavedState,boolean)
+    static synthetic java.lang.CharSequence access$1102(com.google.android.material.badge.BadgeDrawable$SavedState,java.lang.CharSequence)
+    static synthetic int access$1202(com.google.android.material.badge.BadgeDrawable$SavedState,int)
+    static synthetic int access$1302(com.google.android.material.badge.BadgeDrawable$SavedState,int)
+    static synthetic int access$300(com.google.android.material.badge.BadgeDrawable$SavedState)
+    static synthetic int access$400(com.google.android.material.badge.BadgeDrawable$SavedState)
+    static synthetic int access$802(com.google.android.material.badge.BadgeDrawable$SavedState,int)
+    static synthetic int access$902(com.google.android.material.badge.BadgeDrawable$SavedState,int)
+com.google.android.material.badge.BadgeDrawable:
+    private static final int BADGE_NUMBER_NONE
+    public static final int BOTTOM_END
+    public static final int BOTTOM_START
+    static final java.lang.String DEFAULT_EXCEED_MAX_BADGE_NUMBER_SUFFIX
+    private static final int DEFAULT_MAX_BADGE_CHARACTER_COUNT
+    private static final int MAX_CIRCULAR_BADGE_NUMBER_COUNT
+    public static final int TOP_END
+    public static final int TOP_START
+    public void clearNumber()
+    public static com.google.android.material.badge.BadgeDrawable createFromResource(android.content.Context,int)
+    static com.google.android.material.badge.BadgeDrawable createFromSavedState(android.content.Context,com.google.android.material.badge.BadgeDrawable$SavedState)
+    int getAdditionalHorizontalOffset()
+    int getAdditionalVerticalOffset()
+    public int getBackgroundColor()
+    public int getBadgeGravity()
+    public int getBadgeTextColor()
+    public int getHorizontalOffset()
+    public com.google.android.material.badge.BadgeDrawable$SavedState getSavedState()
+    public int getVerticalOffset()
+    private void restoreFromSavedState(com.google.android.material.badge.BadgeDrawable$SavedState)
+    void setAdditionalHorizontalOffset(int)
+    void setAdditionalVerticalOffset(int)
+    public void setContentDescriptionExceedsMaxBadgeNumberStringResource(int)
+    public void setContentDescriptionNumberless(java.lang.CharSequence)
+    public void setContentDescriptionQuantityStringsResource(int)
+    public void setVisible(boolean)
+    public void updateBadgeCoordinates(android.view.View)
+    public void updateBadgeCoordinates(android.view.View,android.view.ViewGroup)
 com.google.android.material.badge.BadgeUtils$1
-com.google.android.material.badge.BadgeUtils
+com.google.android.material.badge.BadgeUtils:
+    private static final java.lang.String LOG_TAG
+    private void <init>()
+    public static void attachBadgeDrawable(com.google.android.material.badge.BadgeDrawable,android.view.View)
+    public static void attachBadgeDrawable(com.google.android.material.badge.BadgeDrawable,androidx.appcompat.widget.Toolbar,int)
+    public static void attachBadgeDrawable(com.google.android.material.badge.BadgeDrawable,androidx.appcompat.widget.Toolbar,int,android.widget.FrameLayout)
+    public static android.util.SparseArray createBadgeDrawablesFromSavedStates(android.content.Context,com.google.android.material.internal.ParcelableSparseArray)
+    public static com.google.android.material.internal.ParcelableSparseArray createParcelableBadgeStates(android.util.SparseArray)
+    public static void detachBadgeDrawable(com.google.android.material.badge.BadgeDrawable,androidx.appcompat.widget.Toolbar,int)
+    static void removeToolbarOffset(com.google.android.material.badge.BadgeDrawable)
+    static void setToolbarOffset(com.google.android.material.badge.BadgeDrawable,android.content.res.Resources)
 com.google.android.material.badge.ExperimentalBadgeUtils
 com.google.android.material.behavior.HideBottomViewOnScrollBehavior:
     protected static final int ENTER_ANIMATION_DURATION
@@ -17045,9 +17104,6 @@ com.google.android.material.ripple.RippleDrawableCompat:
     public com.google.android.material.shape.ShapeAppearanceModel getShapeAppearanceModel()
 com.google.android.material.ripple.RippleUtils:
     static final java.lang.String TRANSPARENT_DEFAULT_COLOR_WARNING
-    public static android.content.res.ColorStateList convertToRippleDrawableColor(android.content.res.ColorStateList)
-    private static int doubleAlpha(int)
-    private static int getColorForState(android.content.res.ColorStateList,int[])
 com.google.android.material.shadow.ShadowDrawableWrapper
 com.google.android.material.shadow.ShadowRenderer:
     private static final int COLOR_ALPHA_END
@@ -17091,7 +17147,6 @@ com.google.android.material.shape.MaterialShapeDrawable:
     public boolean isElevationOverlayInitialized()
     public boolean isPointInTransparentRegion(int,int)
     public boolean isShadowEnabled()
-    public void setCornerSize(float)
     public void setEdgeIntersectionCheckEnable(boolean)
     public void setPaintStyle(android.graphics.Paint$Style)
     public void setScale(float)
@@ -17225,28 +17280,68 @@ com.google.android.material.snackbar.SnackbarManager:
     public void show(int,com.google.android.material.snackbar.SnackbarManager$Callback)
     private void showNextSnackbarLocked()
 com.google.android.material.switchmaterial.SwitchMaterial
-com.google.android.material.tabs.ElasticTabIndicatorInterpolator
-com.google.android.material.tabs.TabIndicatorInterpolator
-com.google.android.material.tabs.TabItem
-com.google.android.material.tabs.TabLayout$1
-com.google.android.material.tabs.TabLayout$AdapterChangeListener
-com.google.android.material.tabs.TabLayout$BaseOnTabSelectedListener
+com.google.android.material.tabs.TabIndicatorInterpolator:
+    private static final int MIN_INDICATOR_WIDTH
+com.google.android.material.tabs.TabItem:
+    public void <init>(android.content.Context)
+    public void <init>(android.content.Context,android.util.AttributeSet)
 com.google.android.material.tabs.TabLayout$LabelVisibility
 com.google.android.material.tabs.TabLayout$Mode
-com.google.android.material.tabs.TabLayout$OnTabSelectedListener
-com.google.android.material.tabs.TabLayout$PagerAdapterObserver
-com.google.android.material.tabs.TabLayout$SlidingTabIndicator$1
-com.google.android.material.tabs.TabLayout$SlidingTabIndicator$2
-com.google.android.material.tabs.TabLayout$SlidingTabIndicator
-com.google.android.material.tabs.TabLayout$Tab
+com.google.android.material.tabs.TabLayout$SlidingTabIndicator:
+    float getIndicatorPosition()
+com.google.android.material.tabs.TabLayout$Tab:
+    public static final int INVALID_POSITION
+    public com.google.android.material.badge.BadgeDrawable getBadge()
+    public java.lang.CharSequence getContentDescription()
+    public int getId()
+    public com.google.android.material.badge.BadgeDrawable getOrCreateBadge()
+    public java.lang.Object getTag()
+    public void removeBadge()
+    public com.google.android.material.tabs.TabLayout$Tab setContentDescription(int)
+    public com.google.android.material.tabs.TabLayout$Tab setIcon(int)
+    public com.google.android.material.tabs.TabLayout$Tab setId(int)
+    public com.google.android.material.tabs.TabLayout$Tab setTabLabelVisibility(int)
+    public com.google.android.material.tabs.TabLayout$Tab setTag(java.lang.Object)
+    public com.google.android.material.tabs.TabLayout$Tab setText(int)
 com.google.android.material.tabs.TabLayout$TabGravity
 com.google.android.material.tabs.TabLayout$TabIndicatorAnimationMode
 com.google.android.material.tabs.TabLayout$TabIndicatorGravity
-com.google.android.material.tabs.TabLayout$TabLayoutOnPageChangeListener
-com.google.android.material.tabs.TabLayout$TabView$1
-com.google.android.material.tabs.TabLayout$TabView
-com.google.android.material.tabs.TabLayout$ViewPagerOnTabSelectedListener
-com.google.android.material.tabs.TabLayout
+com.google.android.material.tabs.TabLayout$TabView:
+    static synthetic com.google.android.material.badge.BadgeDrawable access$700(com.google.android.material.tabs.TabLayout$TabView)
+    static synthetic void access$800(com.google.android.material.tabs.TabLayout$TabView)
+    static synthetic com.google.android.material.badge.BadgeDrawable access$900(com.google.android.material.tabs.TabLayout$TabView)
+    private void removeBadge()
+com.google.android.material.tabs.TabLayout:
+    private static final int ANIMATION_DURATION
+    static final int DEFAULT_GAP_TEXT_ICON
+    private static final int DEFAULT_HEIGHT
+    private static final int DEFAULT_HEIGHT_WITH_TEXT_ICON
+    static final int FIXED_WRAP_GUTTER_MIN
+    public static final int GRAVITY_CENTER
+    public static final int GRAVITY_FILL
+    public static final int GRAVITY_START
+    public static final int INDICATOR_ANIMATION_MODE_ELASTIC
+    public static final int INDICATOR_ANIMATION_MODE_LINEAR
+    public static final int INDICATOR_GRAVITY_BOTTOM
+    public static final int INDICATOR_GRAVITY_CENTER
+    public static final int INDICATOR_GRAVITY_STRETCH
+    public static final int INDICATOR_GRAVITY_TOP
+    private static final int INVALID_WIDTH
+    private static final java.lang.String LOG_TAG
+    public static final int MODE_AUTO
+    public static final int MODE_FIXED
+    public static final int MODE_SCROLLABLE
+    public static final int TAB_LABEL_VISIBILITY_LABELED
+    public static final int TAB_LABEL_VISIBILITY_UNLABELED
+    private static final int TAB_MIN_WIDTH_MARGIN
+    public void addTab(com.google.android.material.tabs.TabLayout$Tab,int)
+    public void clearOnTabSelectedListeners()
+    public boolean hasUnboundedRipple()
+    public boolean isInlineLabel()
+    public void removeOnTabSelectedListener(com.google.android.material.tabs.TabLayout$OnTabSelectedListener)
+    public void removeTab(com.google.android.material.tabs.TabLayout$Tab)
+    public void removeTabAt(int)
+    public void setTabTextColors(int,int)
 com.google.android.material.tabs.TabLayoutMediator$PagerAdapterObserver
 com.google.android.material.tabs.TabLayoutMediator$TabConfigurationStrategy
 com.google.android.material.tabs.TabLayoutMediator$TabLayoutOnPageChangeCallback
@@ -23043,6 +23138,7 @@ kotlin.collections.CollectionsKt__MutableCollectionsJVMKt:
     public static final void sort(java.util.List)
     private static final void sort(java.util.List,java.util.Comparator)
     private static final void sort(java.util.List,kotlin.jvm.functions.Function2)
+    public static final void sortWith(java.util.List,java.util.Comparator)
 kotlin.collections.CollectionsKt__MutableCollectionsKt:
     public void <init>()
     public static final boolean addAll(java.util.Collection,kotlin.sequences.Sequence)
@@ -23303,6 +23399,7 @@ kotlin.collections.CollectionsKt___CollectionsKt:
     public static final java.util.List sortedBy(java.lang.Iterable,kotlin.jvm.functions.Function1)
     public static final java.util.List sortedByDescending(java.lang.Iterable,kotlin.jvm.functions.Function1)
     public static final java.util.List sortedDescending(java.lang.Iterable)
+    public static final java.util.List sortedWith(java.lang.Iterable,java.util.Comparator)
     public static final java.util.Set subtract(java.lang.Iterable,java.lang.Iterable)
     public static final int sumBy(java.lang.Iterable,kotlin.jvm.functions.Function1)
     public static final double sumByDouble(java.lang.Iterable,kotlin.jvm.functions.Function1)
@@ -28668,6 +28765,13 @@ androidx.core.widget.PopupWindowCompat:
     public static boolean sOverlapAnchorFieldAttempted
     public static java.lang.reflect.Method sSetWindowLayoutTypeMethod
     public static boolean sSetWindowLayoutTypeMethodAttempted
+androidx.core.widget.TextViewCompat:
+    public static java.lang.reflect.Field sMaxModeField
+    public static boolean sMaxModeFieldFetched
+    public static java.lang.reflect.Field sMaximumField
+    public static boolean sMaximumFieldFetched
+    public static java.lang.reflect.Field retrieveField(java.lang.String)
+    public static int retrieveIntFromField(java.lang.reflect.Field,android.widget.TextView)
 androidx.core.widget.TextViewOnReceiveContentListener$ApiImpl
 androidx.core.widget.TintableCheckedTextView
 androidx.core.widget.TintableCompoundButton
@@ -28952,7 +29056,9 @@ androidx.recyclerview.widget.RecyclerView$State:
 androidx.recyclerview.widget.RecyclerView$ViewCacheExtension:
     public abstract android.view.View getViewForPositionAndType(androidx.recyclerview.widget.RecyclerView$Recycler,int,int)
 androidx.recyclerview.widget.RecyclerView:
+    public static final boolean POST_UPDATES_ON_ANIMATION
     public java.util.List mOnChildAttachStateListeners
+    public final java.lang.Runnable mUpdateChildViewsRunnable
 androidx.recyclerview.widget.SnapHelper:
     public android.widget.Scroller mGravityScroller
 androidx.recyclerview.widget.StaggeredGridLayoutManager$LayoutParams:
@@ -29145,6 +29251,78 @@ androidx.vectordrawable.graphics.drawable.VectorDrawableCompat:
     public void unscheduleSelf(java.lang.Runnable)
     public final void updateStateFromTypedArray(android.content.res.TypedArray,org.xmlpull.v1.XmlPullParser,android.content.res.Resources$Theme)
     public android.graphics.PorterDuffColorFilter updateTintFilter(android.content.res.ColorStateList,android.graphics.PorterDuff$Mode)
+androidx.viewpager.widget.PagerAdapter:
+    public abstract void destroyItem(android.view.ViewGroup,int,java.lang.Object)
+    public abstract void finishUpdate(android.view.ViewGroup)
+    public abstract int getCount()
+    public abstract int getItemPosition(java.lang.Object)
+    public abstract java.lang.CharSequence getPageTitle(int)
+    public abstract float getPageWidth(int)
+    public abstract java.lang.Object instantiateItem(android.view.ViewGroup,int)
+    public abstract boolean isViewFromObject(android.view.View,java.lang.Object)
+    public abstract void restoreState(android.os.Parcelable,java.lang.ClassLoader)
+    public abstract android.os.Parcelable saveState()
+    public abstract void setPrimaryItem(android.view.ViewGroup,int,java.lang.Object)
+    public abstract void setViewPagerObserver(android.database.DataSetObserver)
+    public abstract void startUpdate(android.view.ViewGroup)
+    public abstract void unregisterDataSetObserver(android.database.DataSetObserver)
+androidx.viewpager.widget.ViewPager$ItemInfo:
+    public java.lang.Object object
+    public float offset
+    public boolean scrolling
+    public float widthFactor
+androidx.viewpager.widget.ViewPager$LayoutParams:
+    public int childIndex
+    public int position
+androidx.viewpager.widget.ViewPager$OnPageChangeListener:
+    public abstract void onPageScrolled(int,float,int)
+    public abstract void onPageSelected(int)
+androidx.viewpager.widget.ViewPager$PageTransformer
+androidx.viewpager.widget.ViewPager$PagerObserver
+androidx.viewpager.widget.ViewPager:
+    public androidx.viewpager.widget.PagerAdapter mAdapter
+    public boolean mCalledSuper
+    public int mChildWidthMeasureSpec
+    public int mCloseEnough
+    public int mDefaultGutterSize
+    public int mDrawingOrder
+    public java.util.ArrayList mDrawingOrderedChildren
+    public final java.lang.Runnable mEndScrollRunnable
+    public boolean mFakeDragging
+    public float mFirstOffset
+    public int mFlingDistance
+    public androidx.viewpager.widget.ViewPager$OnPageChangeListener mInternalPageChangeListener
+    public final java.util.ArrayList mItems
+    public float mLastOffset
+    public android.widget.EdgeEffect mLeftEdge
+    public int mMaximumVelocity
+    public int mMinimumVelocity
+    public boolean mNeedCalculatePageOffsets
+    public androidx.viewpager.widget.ViewPager$PagerObserver mObserver
+    public androidx.viewpager.widget.ViewPager$PageTransformer mPageTransformer
+    public int mPageTransformerLayerType
+    public android.widget.EdgeEffect mRightEdge
+    public android.widget.Scroller mScroller
+    public final androidx.viewpager.widget.ViewPager$ItemInfo mTempItem
+    public final android.graphics.Rect mTempRect
+    public int mTouchSlop
+    public static final android.view.animation.Interpolator sInterpolator
+    public androidx.viewpager.widget.ViewPager$ItemInfo addNewItem(int,int)
+    public final void calculatePageOffsets(androidx.viewpager.widget.ViewPager$ItemInfo,int,androidx.viewpager.widget.ViewPager$ItemInfo)
+    public final void completeScroll(boolean)
+    public void dataSetChanged()
+    public final int determineTargetPage(int,float,int,int)
+    public final void dispatchOnPageScrolled(int,float,int)
+    public final void dispatchOnPageSelected(int)
+    public float distanceInfluenceForSnapDuration(float)
+    public final void enableLayers(boolean)
+    public androidx.viewpager.widget.ViewPager$ItemInfo infoForAnyChild(android.view.View)
+    public final androidx.viewpager.widget.ViewPager$ItemInfo infoForCurrentScrollPosition()
+    public void onPageScrolled(int,float,int)
+    public final boolean pageScrolled(int)
+    public final void removeNonDecorViews()
+    public void setCurrentItem(int,boolean)
+    public void smoothScrollTo(int,int,int)
 androidx.viewpager2.adapter.FragmentStateAdapter$2:
     public final synthetic androidx.viewpager2.adapter.FragmentStateAdapter this$0
     public final synthetic androidx.viewpager2.adapter.FragmentViewHolder val$holder
@@ -29167,6 +29345,7 @@ com.google.android.material.R$drawable
 com.google.android.material.R$id
 com.google.android.material.R$integer
 com.google.android.material.R$layout
+com.google.android.material.R$plurals
 com.google.android.material.R$string
 com.google.android.material.R$style
 com.google.android.material.R$styleable:
@@ -29189,7 +29368,13 @@ com.google.android.material.R$styleable:
     public static final int[] AppCompatTextHelper
     public static final int[] AppCompatTextView
     public static final int[] AppCompatTheme
-    public static final int[] Badge
+    public static final int Badge_backgroundColor
+    public static final int Badge_badgeGravity
+    public static final int Badge_badgeTextColor
+    public static final int Badge_horizontalOffset
+    public static final int Badge_maxCharacterCount
+    public static final int Badge_number
+    public static final int Badge_verticalOffset
     public static final int[] BaseProgressIndicator
     public static final int[] BottomAppBar
     public static final int[] BottomNavigationView
@@ -29417,7 +29602,32 @@ com.google.android.material.R$styleable:
     public static final int[] SwitchCompat
     public static final int[] SwitchMaterial
     public static final int[] TabItem
-    public static final int[] TabLayout
+    public static final int TabLayout_tabBackground
+    public static final int TabLayout_tabContentStart
+    public static final int TabLayout_tabGravity
+    public static final int TabLayout_tabIconTint
+    public static final int TabLayout_tabIconTintMode
+    public static final int TabLayout_tabIndicator
+    public static final int TabLayout_tabIndicatorAnimationDuration
+    public static final int TabLayout_tabIndicatorAnimationMode
+    public static final int TabLayout_tabIndicatorColor
+    public static final int TabLayout_tabIndicatorFullWidth
+    public static final int TabLayout_tabIndicatorGravity
+    public static final int TabLayout_tabIndicatorHeight
+    public static final int TabLayout_tabInlineLabel
+    public static final int TabLayout_tabMaxWidth
+    public static final int TabLayout_tabMinWidth
+    public static final int TabLayout_tabMode
+    public static final int TabLayout_tabPadding
+    public static final int TabLayout_tabPaddingBottom
+    public static final int TabLayout_tabPaddingEnd
+    public static final int TabLayout_tabPaddingStart
+    public static final int TabLayout_tabPaddingTop
+    public static final int TabLayout_tabRippleColor
+    public static final int TabLayout_tabSelectedTextColor
+    public static final int TabLayout_tabTextAppearance
+    public static final int TabLayout_tabTextColor
+    public static final int TabLayout_tabUnboundedRipple
     public static final int TextAppearance_android_fontFamily
     public static final int TextAppearance_android_shadowColor
     public static final int TextAppearance_android_shadowDx
@@ -29526,6 +29736,9 @@ com.google.android.material.appbar.AppBarLayout:
 com.google.android.material.appbar.ViewUtilsLollipop:
     public static final int[] STATE_LIST_ANIM_ATTRS
     public static void <clinit>()
+com.google.android.material.badge.BadgeDrawable$1
+com.google.android.material.badge.BadgeDrawable:
+    public final void tryWrapAnchorInCompatParent(android.view.View)
 com.google.android.material.behavior.HideBottomViewOnScrollBehavior:
     public void setAdditionalHiddenOffsetY(android.view.View,int)
 com.google.android.material.behavior.SwipeDismissBehavior$OnDismissListener
@@ -29695,16 +29908,6 @@ com.google.android.material.resources.TextAppearanceConfig:
 com.google.android.material.ripple.RippleDrawableCompat$1
 com.google.android.material.ripple.RippleDrawableCompat$RippleDrawableCompatState
 com.google.android.material.ripple.RippleDrawableCompat
-com.google.android.material.ripple.RippleUtils:
-    public static final int[] FOCUSED_STATE_SET
-    public static final int[] HOVERED_FOCUSED_STATE_SET
-    public static final int[] HOVERED_STATE_SET
-    public static final int[] PRESSED_STATE_SET
-    public static final int[] SELECTED_FOCUSED_STATE_SET
-    public static final int[] SELECTED_HOVERED_FOCUSED_STATE_SET
-    public static final int[] SELECTED_HOVERED_STATE_SET
-    public static final int[] SELECTED_PRESSED_STATE_SET
-    public static final int[] SELECTED_STATE_SET
 com.google.android.material.shadow.ShadowViewDelegate:
     public abstract boolean isCompatPaddingEnabled()
     public abstract void setBackgroundDrawable(android.graphics.drawable.Drawable)
@@ -29736,6 +29939,25 @@ com.google.android.material.snackbar.SnackbarManager:
     public com.google.android.material.snackbar.SnackbarManager$SnackbarRecord currentSnackbar
     public com.google.android.material.snackbar.SnackbarManager$SnackbarRecord nextSnackbar
     public final void scheduleTimeoutLocked(com.google.android.material.snackbar.SnackbarManager$SnackbarRecord)
+com.google.android.material.tabs.TabItem:
+    public final int customLayout
+    public final android.graphics.drawable.Drawable icon
+    public final java.lang.CharSequence text
+com.google.android.material.tabs.TabLayout$Tab:
+    public java.lang.Object tag
+    public com.google.android.material.tabs.TabLayout$Tab setCustomView(int)
+    public com.google.android.material.tabs.TabLayout$Tab setCustomView(android.view.View)
+    public com.google.android.material.tabs.TabLayout$Tab setIcon(android.graphics.drawable.Drawable)
+com.google.android.material.tabs.TabLayout$TabLayoutOnPageChangeListener:
+    public void onPageScrolled(int,float,int)
+    public void onPageSelected(int)
+com.google.android.material.tabs.TabLayout$TabView:
+    public static synthetic boolean access$500(com.google.android.material.tabs.TabLayout$TabView)
+    public static synthetic com.google.android.material.badge.BadgeDrawable access$600(com.google.android.material.tabs.TabLayout$TabView)
+    public final android.widget.FrameLayout createPreApi18BadgeAnchorRoot()
+com.google.android.material.tabs.TabLayout:
+    public androidx.viewpager.widget.PagerAdapter pagerAdapter
+    public com.google.android.material.tabs.TabLayout$Tab getTabAt(int)
 com.google.android.material.textfield.TextInputEditText:
     public final java.lang.String getAccessibilityNodeInfoText(com.google.android.material.textfield.TextInputLayout)
 com.google.android.material.timepicker.ChipTextInputComboView:
@@ -30223,6 +30445,8 @@ kotlin.KotlinNothingValueException
 kotlin.Result:
     public static final boolean isSuccess-impl(java.lang.Object)
 kotlin.collections.ArraysKt
+kotlin.collections.ArraysKt___ArraysJvmKt:
+    public static final void sortWith(java.lang.Object[],java.util.Comparator)
 kotlin.collections.ArraysKt___ArraysKt:
     public static final java.lang.Object[] sortedArrayWith(java.lang.Object[],java.util.Comparator)
     public static final java.util.List sortedWith(java.lang.Object[],java.util.Comparator)
@@ -30232,16 +30456,25 @@ kotlin.collections.CollectionsKt__CollectionsKt:
     public static final void throwIndexOverflow()
 kotlin.collections.CollectionsKt__MutableCollectionsKt:
     public static final boolean addAll(java.util.Collection,java.lang.Iterable)
+kotlin.collections.CollectionsKt___CollectionsKt:
+    public static final java.util.Collection toCollection(java.lang.Iterable,java.util.Collection)
+    public static final java.util.List toList(java.lang.Iterable)
+    public static final java.util.List toMutableList(java.lang.Iterable)
+    public static final java.util.List toMutableList(java.util.Collection)
+    public static final java.util.Set toSet(java.lang.Iterable)
 kotlin.collections.EmptyMap
+kotlin.collections.EmptySet
 kotlin.collections.MapsKt
-kotlin.collections.MapsKt__MapsJVMKt:
-    public static final java.util.Map mapOf(kotlin.Pair)
-    public static final java.util.Map toSingletonMap(java.util.Map)
+kotlin.collections.MapsKt__MapWithDefaultKt
+kotlin.collections.MapsKt__MapsJVMKt
 kotlin.collections.MapsKt__MapsKt
 kotlin.collections.MapsKt___MapsKt
 kotlin.collections.SetsKt
+kotlin.collections.SetsKt__SetsJVMKt
+kotlin.collections.SetsKt__SetsKt
 kotlin.collections.SetsKt___SetsKt
 kotlin.comparisons.ComparisonsKt
+kotlin.comparisons.ComparisonsKt__ComparisonsKt
 kotlin.comparisons.ComparisonsKt___ComparisonsJvmKt
 kotlin.comparisons.ComparisonsKt___ComparisonsKt
 kotlin.coroutines.intrinsics.IntrinsicsKt

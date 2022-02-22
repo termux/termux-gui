@@ -1,58 +1,31 @@
 
 
 
-[x] Termux:GUI is now merged to f-droid, upload the python bindings to pipy
-    [ ] is there a pipy version badge on shields.io?
 [ ] try to add termux-gui-package to termux-packages
 [ ] update the readme when the f-droid build is finished
 [ ] add the "get it on f-droid" badge with the link to the app
 
 Roadmap:
-    - 0.1.4
-        [x] requestFocus for EditText
-            [x] flag to also show the virtual keyboard
-        [x] method to hide the virtual keyboard
-        [x] NestedScrollView with item snapping
-        [x] HorizontalScrollView
-        [x] method to scroll to a specific position
-        [x] method to get the scrolling position
-        [x] a configuration activity as the launcher activity, where you can set settings:
-            - how long the plugin should stay active after all connections are closed:
-                - a negative number will make the plugin inactive only when you click the close option in the notification
-            - option to make the plugin go into the background (no notification shown) when no programs are connected. That will shorten the startup time. Can only be used when the timeout setting above is set to negative.
-        [x] configuration change events
-        [x] screen un/locked event, so lockscreen apps can enable more functionality when the screen isn't locked
-            [x] method to turn the screen on: https://stackoverflow.com/questions/30090589/turn-on-screen-programmatically-on-android
-        [x] broadcast events:
-            [x] airplane mode
-            [x] screen on/off
-            [x] timezone
-            [x] locale
-        [x] TabLayout
-        [x] add the ability to make text selectable in a TextView and hyperlinks clickable
-            [x] https://stackoverflow.com/questions/6025818/select-copy-text-in-a-textview
-            [x] https://stackoverflow.com/questions/2734270/how-to-make-links-in-a-textview-clickable
+    - 0.1.5:
+        [ ] GridLayout
+        [ ] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
+        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
+        [ ] WebView
+            - catch all WebChromeClient and WebViewClient events
+            - Run javascript in the WebView with user consent.
+            - setting: always allow javascript in WebViews
         [ ] update the f-droid metadata
             [x] write a changelog
             [ ] more screenshots
             [x] update description and readme
         [ ] try to make the programs in termux-gui-package robust to destroyed Activities
             [ ] also update the python bindings tutorial for that
-    - 0.1.5:
-        [ ] inflating from JSON
-        [ ] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
-        [ ] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
-        [ ] GridLayout
-        [ ] WebView
-            - catch all WebChromeClient and WebViewClient events
-            - Run javascript in the WebView with user consent.
-            - setting: always allow javascript in WebViews
-        [ ] add the python library docs into termux-gui-package and add a program to open the docs in a WebView
     - 0.1.6:
         [ ] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
             [ ] Also give the option to receive events for notifications set via termux-api, by setting the command to an am command that invokes the notification receiver
+        [ ] idea: AppReceiver, where programs can register themselves to filter intents on the receiver with a appname string extra, so programs can use intents to communicate
         [ ] Rework the widgets
-        [ ] option to set an executable as a onClick handler in widgets, that then gets started sa a Termux task. That should work even when no program is connected to listen to widget events.
+        [ ] option to set an executable as a onClick handler in widgets, that then gets started as a Termux task. That should work even when no program is connected to listen to widget events.
         [ ] add everything to the python library
         [ ] add the ability to intercept touch events in layouts
         [ ] add a small helper script to termux-gui-packages, that can be used as a daemon for small stateful widgets.
@@ -77,11 +50,15 @@ Roadmap:
         [ ] RelativeLayout
         [ ] ConstraintLayout
         [ ] the rest of the views in the protocol
+        [ ] make the readme nicer
     - 1.1.0
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard an can be focused with requestFocus
                 [ ] Also for ImageView
+        [ ] add the binary protocol type using protobuf, use that for the C/C++ library
+            [ ] https://stackoverflow.com/questions/38406211/how-to-convert-from-json-to-protobuf
+                convert the JSON messages to protobuf, so there aren't 2 implementations to maintain
         [ ] finish the C/C++ library
             [ ] just handle the aid as a simple struct with 2 ints
     - 1.2.0:
@@ -92,7 +69,7 @@ Roadmap:
             the methods should improve performance
             [ ] You should also be able to replace the arguments with arrays, in case you want that argument to have a different value for each view, like the text for TextViews
             [ ] think about creating a batch api to group multiple messages together into one runnable for the ui thread
-        [ ] add the binary protocol type using protobuf
+        
         
 
 

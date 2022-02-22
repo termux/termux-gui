@@ -193,14 +193,22 @@ class HandleView {
                     val id = m.params?.get("id")?.asInt
                     val weight = m.params?.get("weight")?.asInt
                     val o = overlays[aid]
-                    if (id != null && weight != null) {
+                    val position = m.params?.get("position")?.asInt
+                    if (id != null && (weight != null || position != null)) {
                         if (a != null) {
                             V0.runOnUIThreadActivityStarted(a) {
                                 val v = it.findViewReimplemented<View>(id)
                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                 if (p != null) {
-                                    p.weight = weight.toFloat()
+                                    if (weight != null) {
+                                        p.weight = weight.toFloat()
+                                    }
                                     v.layoutParams = p
+                                    if (position != null) {
+                                        val parent = v.parent as? LinearLayout
+                                        parent?.removeView(v)
+                                        parent?.addView(v, position)
+                                    }
                                 }
                             }
                         }
@@ -209,8 +217,15 @@ class HandleView {
                                 val v = o.root.findViewReimplemented<View>(id)
                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                 if (p != null) {
-                                    p.weight = weight.toFloat()
+                                    if (weight != null) {
+                                        p.weight = weight.toFloat()
+                                    }
                                     v.layoutParams = p
+                                    if (position != null) {
+                                        val parent = v.parent as? LinearLayout
+                                        parent?.removeView(v)
+                                        parent?.addView(v, position)
+                                    }
                                 }
                             }
                         }

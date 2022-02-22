@@ -96,7 +96,7 @@ class Util {
             }
         }
         
-        fun setViewActivity(a: GUIActivity, v: View, parent: Int?, recid: Int?, recindex: Int?) {
+        fun setViewActivity(a: GUIActivity, v: View, parent: Int?) {
             val t = a.theme
             if (t != null) {
                 if (v is TextView) {
