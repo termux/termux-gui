@@ -26,3 +26,7 @@
 -printmapping mapping.txt
 
 -keep class com.termux.gui.** { *; }
+
+# for protocol buffers
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+

@@ -56,7 +56,7 @@ Roadmap:
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard an can be focused with requestFocus
                 [ ] Also for ImageView
-        [ ] add the binary protocol type using protobuf, use that for the C/C++ library
+        [ ] add the binary protocol type using protobuf (and gRPC?), use that for the C/C++ library
             [ ] https://stackoverflow.com/questions/38406211/how-to-convert-from-json-to-protobuf
                 convert the JSON messages to protobuf, so there aren't 2 implementations to maintain
         [ ] finish the C/C++ library
