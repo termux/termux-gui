@@ -543,6 +543,21 @@ class Create {
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
                     }
+                    if (m.method == "createGridLayout") {
+                        var id = -1
+                        Util.runOnUIThreadBlocking {
+                            val v = GridLayout(app)
+                            val rows: Int = m.params!!["rows"]!!.asInt
+                            val cols: Int = m.params!!["cols"]!!.asInt
+                            v.rowCount = rows
+                            v.columnCount = cols
+                            id = Util.generateViewIDRaw(rand, o.usedIds)
+                            v.id = id
+                            V0.setViewOverlay(o, v, parent)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
                 }
             }
             

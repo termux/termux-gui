@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.util.Half.toFloat
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -226,6 +227,44 @@ class HandleView {
                                         parent?.removeView(v)
                                         parent?.addView(v, position)
                                     }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setViewLocation" -> {
+                    val aid = m.params?.get("aid")?.asString
+                    val a = activities[aid]
+                    val id = m.params?.get("id")?.asInt
+                    val x = m.params?.get("x")?.asInt
+                    val y = m.params?.get("y")?.asInt
+                    val dp = m.params?.get("dp")?.asBoolean
+                    val top = m.params?.get("top")?.asBoolean
+                    val o = overlays[aid]
+                    val position = m.params?.get("position")?.asInt
+                    if (id != null) {
+                        if (a != null) {
+                            V0.runOnUIThreadActivityStarted(a) {
+                                val v = it.findViewReimplemented<View>(id)
+                                if (x != null && y != null) {
+                                    v?.x = x.toFloat()
+                                    v?.y = y.toFloat()
+                                }
+                                if (top == true) {
+                                    v?.bringToFront()
+                                }
+                            }
+                        }
+                        if (o != null) {
+                            Util.runOnUIThreadBlocking {
+                                val v = o.root.findViewReimplemented<View>(id)
+                                if (x != null && y != null) {
+                                    v?.x = x.toFloat()
+                                    v?.y = y.toFloat()
+                                }
+                                if (top == true) {
+                                    v?.bringToFront()
                                 }
                             }
                         }

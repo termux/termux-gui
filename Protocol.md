@@ -186,6 +186,7 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - line: Whether the line below an EditText should be shown.
     - blockinput: Disables adding the typed key automatically to a EditText and instead sends a key event.
     - type: For EditText this specifies the [input type](https://developer.android.com/reference/android/widget/TextView#attr_android:inputType) : can be one of "text", "textMultiLine", "phone", "date", "time", "datetime", "number", "numberDecimal", "numberPassword", "numberSigned", "numberDecimalSigned", "textEmailAddress", "textPassword". "text" is the default. Specifying singleline as true sets this to "text".
+    - rows, cols: Row and column count for GridLayout
 - showCursor: Sets whether or not a cursor is shown in the EditText.
   - Parameters:
     - aid: The id of the Activity the View is in.
@@ -193,15 +194,21 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - show: A boolean.
 - setLinearLayoutParams: Sets the LinearLayout parameters for a View in a LinearLayout.
   - Parameters:
-    - parent: The View id of the parent in the Layout hierarchy.
     - aid: The id of the Activity the View is in.
     - id: The id of the View.
     - weight: Sets the Layout weight.
     - position: The index of the element. If null, the position is kept.
+- setViewLocation: Sets the LinearLayout parameters for a View in a LinearLayout.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the View.
+    - x, y: The new position.
+    - dp: the position is in dp if true, else in pixels.
+    - top: If true, the View will be on top of all sibling Views.
 - setRelativeLayoutParams: Sets the RelativeLayout parameters for a View in a RelativeLayout.
   - Parameters:
-    - parent: The View id of the parent in the Layout hierarchy.
     - aid: The id of the Activity the View is in.
+    - id: The id of the View.
 - setVisibility: Sets the visibility of a Vew.
   - Parameters:
     - vis: 0 = gone, 1 = hidden, 2 = visible. While hidden, views are not visible but still take up space in the layout. Gone views do not take up layout space.
@@ -458,6 +465,22 @@ Binary data (like images) has to be transmitted base64 encoded as a JSON string.
 If a method returns only one value, it is returned as a single JSON value.  
 If multiple values are returned, they are placed in a JSON array.  
 Events are a JSON object with the field "type" denoting the event type and the field "value" that depends on the event type.  
+
+
+## Binary Protocol
+
+The binary protocol is/will be implemented with protocol buffers.  
+See app/src/proto for the definitions and documentation.  
+The general flow after establishing a connection is this:
+- The client sends a Method message with the *Request set for the method it would like to call
+- The plugin sends back the corresponding *Response message.
+
+The only exception to this is the addBuffer method:  
+Instead of a response message the plugin just sends one byte with a file descriptor as ancillary data.  
+If there is no ancillary data, the request failed. The value of the byte can be discarded.  
+
+The events are a stream of Event messages with the actual Event inside the event oneof.
+
 
 
 

@@ -1,0 +1,236 @@
+syntax = "proto3";
+
+option java_package = "com.termux.gui.protocol.protobuf.v0";
+
+
+
+
+
+message NewActivityRequest {
+  string tid = 1;
+  enum ActivityType {
+    normal = 0;
+    dialog = 1;
+    dialogCancelOutside = 2;
+    pip = 3;
+    lockscreen = 4;
+    overlay = 5;
+  }
+  ActivityType type = 2;
+}
+
+message NewActivityResponse {
+  string aid = 1;
+  string tid = 2;
+}
+
+
+message FinishActivityRequest {
+  string aid = 1;
+}
+
+message FinishActivityResponse {
+  bool success = 1;
+}
+
+
+message FinishTaskRequest {
+  string tid = 1;
+}
+message FinishTaskResponse {
+  bool success = 1;
+}
+
+
+message BringTaskToFrontRequest {
+  string tid = 1;
+}
+
+message BringTaskToFrontResponse {
+  bool success = 1;
+}
+
+
+message MoveTaskToBackRequest {
+  string aid = 1;
+}
+
+message MoveTaskToBackResponse {
+  bool success = 1;
+}
+
+
+message SetThemeRequest {
+  string aid = 1;
+  uint32 statusBarColor = 2;
+  uint32 colorPrimary = 3;
+  uint32 windowBackground = 4;
+  uint32 textColor = 5;
+  uint32 colorAccent = 6;
+}
+
+message SetThemeResponse {
+  bool success = 1;
+}
+
+
+message SetTaskDescriptionRequest {
+  string aid = 1;
+  bytes img = 2;
+  string label = 3;
+}
+
+message SetTaskDescriptionResponse {
+  bool success = 1;
+}
+
+
+
+
+
+
+
+message Method {
+  oneof method {
+    NewActivityRequest newActivity = 1;
+    FinishActivityRequest finishActivity = 2;
+    FinishTaskRequest finishTask = 3;
+    BringTaskToFrontRequest bringTaskToFront = 4;
+    MoveTaskToBackRequest moveTaskToBack = 5;
+    SetThemeRequest setTheme = 6;
+    SetTaskDescriptionRequest setTaskDescription = 7;
+    
+    
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+message CreateEvent {
+  string aid = 1;
+}
+
+message StartEvent {
+  string aid = 1;
+}
+
+message ResumeEvent {
+  string aid = 1;
+}
+
+message PauseEvent {
+  string aid = 1;
+  bool finishing = 2;
+}
+
+message StopEvent {
+  string aid = 1;
+  bool finishing = 2;
+}
+
+message DestroyEvent {
+  string aid = 1;
+  bool finishing = 2;
+}
+
+message ConfigEvent {
+  string aid = 1;
+  bool darkMode = 2;
+  string country = 3;
+  string language = 4;
+  string orientation = 5;
+  bool keyboardHidden = 6;
+  int32 screenWidth = 7;
+  int32 screenHeight = 8;
+  float fontscale = 9;
+  float density = 10;
+}
+
+message ClickEvent {
+  string aid = 1;
+  string id = 2;
+  int32 x = 3;
+  int32 y = 4;
+  bool set = 5;
+}
+
+message LongClickEvent {
+  string aid = 1;
+  string id = 2;
+}
+
+message FocusChangeEvent {
+  string aid = 1;
+  string id = 2;
+  bool focus = 3;
+}
+
+message TouchEvent {
+  string aid = 1;
+  string id = 2;
+  // TODO finish touch event data
+  message Touch {
+    
+  }
+  repeated Touch touches = 3;
+}
+
+message TextEvent {
+  string aid = 1;
+  string id = 2;
+}
+
+message RefreshEvent {
+  string aid = 1;
+  string id = 2;
+}
+
+message SelectedEvent {
+  string aid = 1;
+  string id = 2;
+  string selected = 3;
+}
+
+message ItemSelectedEvent {
+  string aid = 1;
+  string id = 2;
+  string selected = 3;
+}
+
+message Event {
+  oneof event {
+    ClickEvent click = 1;
+    TouchEvent touch = 2;
+    TextEvent text = 3;
+    CreateEvent create = 16;
+    StartEvent start = 17;
+    ResumeEvent resume = 18;
+    PauseEvent pause = 19;
+    StopEvent stop = 20;
+    DestroyEvent destroy = 21;
+    ConfigEvent config = 22;
+    LongClickEvent longClick = 23;
+    FocusChangeEvent focusChange = 24;
+    RefreshEvent refresh = 26;
+    SelectedEvent selected = 27;
+    ItemSelectedEvent itemSelected = 28;
+  }
+}
+
+
+
+
+
+
+
+

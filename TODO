@@ -7,9 +7,9 @@
 
 Roadmap:
     - 0.1.5:
-        [ ] GridLayout
-        [ ] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
-        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
+        [x] GridLayout
+        [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
+        [/] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
         [ ] WebView
             - catch all WebChromeClient and WebViewClient events
             - Run javascript in the WebView with user consent.
