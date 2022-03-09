@@ -1,4 +1,4 @@
-package com.termux.gui.protocol.v0
+package com.termux.gui.protocol.json.v0
 
 import android.app.PendingIntent
 import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN

@@ -9,7 +9,6 @@ import com.google.gson.JsonElement
 import java.io.Serializable
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
-import kotlin.collections.HashMap
 
 open class GUIActivity : AppCompatActivity() {
     
@@ -114,6 +113,7 @@ open class GUIActivity : AppCompatActivity() {
                 enterPictureInPictureMode()
             }
         }
+        
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

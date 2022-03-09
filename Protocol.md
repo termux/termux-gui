@@ -23,15 +23,15 @@ For additional security, the program may check if the connected peer has the sam
 
 2 Protocol types are supported right now:
 - JSON: For better compatibility with high-level languages, messages can be transferred in JSON.
-- Binary: For Increased throughput and compatibility with low-level languages, a custom binary protocol can be used.
+- Binary: For Increased throughput and compatibility with low-level languages, a protobuf-based protocol can be used. This will eventually be the default and the JSOn protocol will be removed.
 
-Regardless of Protocol, each message must be preceded by the length of the message (without this length value) as a 4 byte unsigned integer, the same with the return messages from the plugin.
+For the JSON Protocol, each message must be preceded by the length of the message (without this length value) as a 4 byte unsigned integer, the same with the return messages from the plugin.
 This integer is send big-endian.
 
 ## Protocol negotiation
 
 The first byte send specifies the desired protocol type and version:  
-- The 4 most significant bits specify the protocol type: 0 indicates the binary protocol, 1 indicates JSON. Currently only the JSON protocol is implemented.
+- The 4 most significant bits specify the protocol type: 0 indicates the binary protocol, 1 indicates JSON.
 - The 4 least significant bits specify the protocol version. Currently unused, should be set to 0 for compatibility with future versions.
 
 The plugin then responds with a single byte unsigned integer. A response of 0 means the plugin supports the desired protocol type and version. Any other value denotes an error and the plugin will close the connection.
@@ -472,7 +472,7 @@ Events are a JSON object with the field "type" denoting the event type and the f
 The binary protocol is/will be implemented with protocol buffers.  
 See app/src/proto for the definitions and documentation.  
 The general flow after establishing a connection is this:
-- The client sends a Method message with the *Request set for the method it would like to call
+- The client sends a Method message with the *Request in the oneof set for the method it would like to call.
 - The plugin sends back the corresponding *Response message.
 
 The only exception to this is the addBuffer method:  

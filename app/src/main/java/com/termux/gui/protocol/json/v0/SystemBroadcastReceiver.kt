@@ -1,4 +1,4 @@
-package com.termux.gui.protocol.v0
+package com.termux.gui.protocol.json.v0
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.termux.gui.protocol.v0
+package com.termux.gui.protocol.json.v0
 
 import android.annotation.SuppressLint
 import android.app.*
@@ -17,8 +17,8 @@ import android.view.*
 import android.widget.*
 import com.termux.gui.*
 import com.termux.gui.Util.Companion.runOnUIThreadBlocking
-import com.termux.gui.protocol.v0.HandleActivityAndTask.Companion.handleActivityTaskMessage
-import com.termux.gui.protocol.v0.HandleView.Companion.handleView
+import com.termux.gui.protocol.json.v0.HandleActivityAndTask.Companion.handleActivityTaskMessage
+import com.termux.gui.protocol.json.v0.HandleView.Companion.handleView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

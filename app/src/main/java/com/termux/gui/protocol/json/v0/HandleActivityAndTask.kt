@@ -1,4 +1,4 @@
-package com.termux.gui.protocol.v0
+package com.termux.gui.protocol.json.v0
 
 import android.app.ActivityManager
 import android.app.KeyguardManager

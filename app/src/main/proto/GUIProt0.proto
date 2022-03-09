@@ -4,8 +4,6 @@ option java_package = "com.termux.gui.protocol.protobuf.v0";
 
 
 
-
-
 message NewActivityRequest {
   string tid = 1;
   enum ActivityType {

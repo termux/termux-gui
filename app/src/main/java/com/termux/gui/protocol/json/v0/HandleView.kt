@@ -1,10 +1,9 @@
-package com.termux.gui.protocol.v0
+package com.termux.gui.protocol.json.v0
 
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.util.Base64
-import android.util.Half.toFloat
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup

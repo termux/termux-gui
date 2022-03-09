@@ -7,12 +7,11 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonSyntaxException
 import com.termux.gui.Util.Companion.sendMessage
-import com.termux.gui.protocol.v0.V0
+import com.termux.gui.protocol.json.v0.V0
 import kotlinx.coroutines.Runnable
 import java.io.DataOutputStream
 import java.io.EOFException
 import java.nio.ByteBuffer
-import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 class ConnectionHandler(private val request: GUIService.ConnectionRequest, val service: GUIService) : Runnable {
