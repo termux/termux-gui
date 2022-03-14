@@ -4,6 +4,7 @@ If you don't want to implement a custom library for using the protocol, you can 
 
 
 Due to Android limitations, methods that return a value fail when the Activity isn't visible and up to 100 methods that don't return a value will be queued up to run when the Activity is visible again.  
+For the binary protocol no methods will be queued, since they all return a value.  
 If onCreate gets called again for an Activity (because it was destroyed and re-created by the system (this shouldn't happen often because the Activities ignore all configuration changes), all state in that Activity like registered listeners, and views is lost.  
 You should always store state you care about yourself, because Android reserves the right to terminate an Activity or a process at any time, and rebuild the layout when you see that a second onCreate is triggered for one of your activities.  
 
@@ -162,12 +163,12 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - [Spinner](https://developer.android.com/guide/topics/ui/controls/spinner)
     - [ProgressBar](https://developer.android.com/reference/android/widget/ProgressBar)
     - [TabLayout](https://developer.android.com/reference/com/google/android/material/tabs/TabLayout)
+    - [GridLayout](https://developer.android.com/reference/android/widget/GridLayout)
+    - [WebView](https://developer.android.com/reference/android/webkit/WebView)
   - The following Views will be supported in the future:
     - [RelativeLayout](https://developer.android.com/guide/topics/ui/layout/relative)
     - [AutocompleteTextView](https://developer.android.com/reference/android/widget/AutoCompleteTextView)
     - [ImageButton](https://developer.android.com/reference/android/widget/ImageButton)
-    - [GridLayout](https://developer.android.com/reference/android/widget/GridLayout)
-    - [WebView](https://developer.android.com/reference/android/webkit/WebView)
   - The following Views may be supported in the future:
     - [RecyclerView](https://developer.android.com/guide/topics/ui/layout/recyclerview)
     - [ViewPager2](https://developer.android.com/guide/navigation/navigation-swipe-view-2)
@@ -198,7 +199,14 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - id: The id of the View.
     - weight: Sets the Layout weight.
     - position: The index of the element. If null, the position is kept.
-- setViewLocation: Sets the LinearLayout parameters for a View in a LinearLayout.
+- setGridLayoutParams: Sets the GridLayout parameters for a View in a GridLayout.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the View.
+    - row, col: The row and column of the View.
+    - rowsize, colsize: The amount of cells in a row/column the View takes up.
+    - alignmentrow, alignmentcol: "top", "bottom", "left", "right", "center", "baseline" or "fill". Default is "center".
+- setViewLocation: Sets position of a View.
   - Parameters:
     - aid: The id of the Activity the View is in.
     - id: The id of the View.
@@ -327,12 +335,18 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - aid: The id of the Activity the View is in.
 
 
-RecyclerViews:
-RecyclerViews can be used to display large datasets efficiently.  
-All methods that accept a View id can also additionally accept recyclerview as the id of a RecyclerView and recyclerindex as the index of the element in the list.  
-The View to act on is then searched in the specified item of the specified RecyclerView.  
-These can additionally be used for create* methods to set the item in the RecyclerView.  
-These limitations are there so that searching for a View doesn't lead to the whole dataset being searched.
+
+WebView:  
+A WebView can be used as a browser integrated in an app. You can control the size and placement with Layouts like any other View, and even hide the browser UI like the address bar.  
+However historically WebView had many critical vulnerabilities. The default settings try to be as secure as possible, but you should still make sure to NEVER load untrusted Data into a WebView.  
+E.g. running a local webserver with node.js and displaying it in a WebView with Termux:GUI is fine, but you should not allow users to navigate away from your webserver.  
+To help with security, the default settings are:
+- Javascript execution is not allowed. You can enable it, but this will result in a blocking dialog asking the user for confirmation, and can be denied.
+- File access via URIs is not allowed.
+- content:// URIs are not allowed.
+- Navigation is blocked. You can only set the page content through methods in Termux:GUI.
+
+
 
 
 
@@ -353,32 +367,104 @@ Event control:
 
 
 RemoteViews:  
+RemoteViews are used for homescreen widgets and custom notifications.  
+- createRemoteLayout: Creates a new remote Layout. Returns the id for the remote Layout
+- deleteRemoteLayout: Deletes a remote Layout.
+  - params:
+    - rid: The id of the remote Layout to delete.
+- addRemoteFrameLayout: creates a FrameLayout in a remote Layout. Returns the View id in the Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
+- addRemoteLinearLayout: creates a LinearLayout in a remote Layout. Returns the View id in the Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
+    - vertical: The same as a normal LinearLayout
+- addRemoteTextView: creates a TextView in a remote Layout. Returns the View id in the Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
+    - text: Initial text for the View.
+- addRemoteButton: creates a Button in a remote Layout. Returns the View id in the Layout. The Activity id for the Button click event will be the remote Layout id.
+  - params:
+    - rid: id of the remote Layout.
+    - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
+    - text: Initial text for the View.
+- addRemoteImageView: creates an ImageView in a remote Layout. Returns the View id in the Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
+- addRemoteProgressBar: creates a ProgressBar in a remote Layout. Returns the View id in the Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
+- setRemoteBackgroundColor: Sets the background color for a View in a remote Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - color: A color value in the format of setTheme.
+- setRemoteProgressBar: Sets values for a ProgressBar in a remote Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - max: The 100% value for the ProgressBar.
+    - progress: The current progress value for the ProgressBar.
+- setRemoteText: Sets the text of a remote View.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - text: The text of the View.
+- setRemoteTextSize: Sets the text size of a remote View.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - size: The text size.
+    - px: If true size is a value in pixels, otherwise in dip.
+- setRemoteTextColor: Sets the Text color for a View in a remote Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - color: A color value in the format of setTheme.
+- setRemoteVisibility: Sets the visibility for a View in a remote Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - vis: 0 = gone, 1 = hidden, 2 = visible. While hidden, views are not visible but still take up space in the layout. Gone views do not take up layout space.
+- setRemotePadding: Sets the padding in pixels for a View in a remote Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - left, top, right, bottom: The padding values for the directions.
+- setRemoteImage: Sets the image of a remote ImageView.
+  - params:
+    - rid: id of the remote Layout.
+    - id: id of the View in the remote Layout.
+    - img: The image data in PNG or JPEG format.
+- setWidgetLayout: Sets the layout of a Widget to a remote Layout.
+  - params:
+    - rid: id of the remote Layout.
+    - wid: id of the Widget.
 
 
 
+Custom Notifications:
+- createNotificationChannel: On Android 8.0 and higher this creates a NotificationChannel, if one with the given id doesn't exist. 
+  - params:
+    - id: The id of the created notification channel. Notification channels are shared between all clients using Termux:GUI, so choose a unique name.
+    - importance: 0: min, shows the icon in the tray, 1: low, shows the notification, 2: default, can make noise, 3: high, intrusive, 4: max, very intrusive
+    - name: The displayed name for the channel in the Android notification settings.
+- createNotification: creates a custom notification. If you need more standard notifications, use Termux:API instead. Returns the notification id used for further calls.
+  - params:
+    - id: The id of the notification to update.
+    - ongoing: If true, the Notification cannot be dismissed by the user, but the Notification is automatically dismissed when you close the connection to the plugin.
+    - layout: The id of the remote Layout to use.
+    - expandedLayout: The id of the remote Layout to use when the Notification has been expanded. Optional.
+    - icon: An image for the Notification in PNG or JPEG. Defaults to the Termux:GUI app icon if left empty.
+    - channel: The notification channel id.
+    - importance: The same as for createNotificationChannel. This is the importance used on Android versions lower than 8.0.
+    - alertOnce: If this call is used to update a notification, don't alert the user again.
 
-
-Widgets:  
-App widget support only a subset of Views. See [remote views](https://developer.android.com/reference/android/widget/RemoteViews#public-constructors).  
-WARNING: This part will be re-worked due to limitations by Androids widget system.
-- bindWidget: Binds a widget to this connection, so you can perform actions on it. Returns 0 on success, another number on failure.
-  - Parameters:
-    - wid: The widget id.
-- blitWidget: updates the widget with the views you created and configured in it.
-  - Parameters:
-    - wid: The widget id.
-- clearWidget: clears the widget representation. This is needed because you can't remove views in a widget, you then have to build it again.
-  - Parameters:
-    - wid: The widget id.
-- createListView: Creates a ListView where content can be placed dynamically
-
-The following methods can also take the parameter wid instead of aid to operate on widgets:
-- createLinearLayout: can only be used as the root layout
-- createImageView: the image has to be specified in this method and cannot be changed afterwards.
-- createButton: The text has to be specified here and cannot be changed afterwards.
-- createTextView: The text has to be specified here and cannot be changed afterwards.
-- createGridLayout: Works as a collection like ListView
-- createProgressBar
 
 
 
@@ -481,6 +567,7 @@ If there is no ancillary data, the request failed. The value of the byte can be 
 
 The events are a stream of Event messages with the actual Event inside the event oneof.
 
+All protobuf messages are read and written delimited.
 
 
 

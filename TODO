@@ -1,30 +1,39 @@
 
 
-
-[ ] try to add termux-gui-package to termux-packages
-[ ] update the readme when the f-droid build is finished
 [ ] add the "get it on f-droid" badge with the link to the app
 
 Roadmap:
     - 0.1.5:
         [x] GridLayout
         [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
-        [/] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
+        [ ] binary protocol with protobuf
+            [ ] Activity and Task methods
+            [ ] View creation methods
+            [ ] View manipulation methods
+            [ ] Event configuring methods
+        [ ] make the C library
+        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
         [ ] WebView
             - catch all WebChromeClient and WebViewClient events
             - Run javascript in the WebView with user consent.
             - setting: always allow javascript in WebViews
+            [ ] navigating history
+            [ ] show/hide URL bar
+            [ ] setData
+            [ ] load from URI
+            [ ] setAllowFileAccess
+            [ ] setJavascriptEnabled
         [ ] update the f-droid metadata
             [x] write a changelog
             [ ] more screenshots
             [x] update description and readme
         [ ] try to make the programs in termux-gui-package robust to destroyed Activities
             [ ] also update the python bindings tutorial for that
-    - 0.1.6:
         [ ] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
             [ ] Also give the option to receive events for notifications set via termux-api, by setting the command to an am command that invokes the notification receiver
-        [ ] idea: AppReceiver, where programs can register themselves to filter intents on the receiver with a appname string extra, so programs can use intents to communicate
         [ ] Rework the widgets
+        [ ] generate unique notification and widget ids in a certain range, so apps cannot guess each others ids
+        [ ] add a button in the settings to delete all notification channels
         [ ] option to set an executable as a onClick handler in widgets, that then gets started as a Termux task. That should work even when no program is connected to listen to widget events.
         [ ] add everything to the python library
         [ ] add the ability to intercept touch events in layouts
@@ -38,9 +47,12 @@ Roadmap:
             [ ] A .txt file matching the rest of the filename will be set as the text displayed in the widget.
             [ ] only connect to the plugin to make changes, so the notification isn't always there
     - 1.0.0: !!! start semantic versioning from here !!!
+        [ ] add more logging
+        [ ] add Javadocs
         [ ] fragment connections
             [ ] make a method to check if it's a fragment connection
             [ ] use 0-0 as the dummy activity id for the activity the fragment connection is in.
+            [ ] as an optimisation, put all views and the ids in a HashMap, and let findView use that map. It's faster than searching the view tree and main and fragment connections can have different Maps.
         [ ] implement RecyclerView native or as a component in the python library (custom class with methods around a NestedScrollView)
         [ ] implement ViewPager native or as a component in the python library (custom class with methods around a HorizontalScrollView)
             [ ] the component in the library needs to listen to configuration change updates, to change the item size if the screen size changes
@@ -54,13 +66,9 @@ Roadmap:
     - 1.1.0
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
-            [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard an can be focused with requestFocus
+            [ ] use dlopen("libandroid.so") for that in C/C++
+            [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard and can be focused with requestFocus
                 [ ] Also for ImageView
-        [ ] add the binary protocol type using protobuf (and gRPC?), use that for the C/C++ library
-            [ ] https://stackoverflow.com/questions/38406211/how-to-convert-from-json-to-protobuf
-                convert the JSON messages to protobuf, so there aren't 2 implementations to maintain
-        [ ] finish the C/C++ library
-            [ ] just handle the aid as a simple struct with 2 ints
     - 1.2.0:
         [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .
             The id get looked up once and cached in a weakref Hashmap.
@@ -121,47 +129,15 @@ https://developer.android.com/ndk/guides/graphics/getting-started
         - Views in Fragments can still be found from the Parent activity. Make a custom findViewById that doesn't search Fragments, also for performance reasons
 
 
-
-[ ] implement the rest of the already specified methods
-
-[ ] ability to make ImageView focusable, so the virtual keyboard gets activated when it is tapped and you can receive keyevents. That enables you to create custom views.
-
-
-[ ] for all supported views and layouts check if restoring the state works
-
-
-
-[ ] also implement notifications in general, because Termux:API has a noticeable startup time
-    [ ] also implement other features from Termux:API that are useful to have low-latency for a GUI app
-        - brightness
-        - clipboard
         
 
 
 [ ] method to move views in the hierarchy
-[ ] method to inflate a json layout n times and add the layouts as children, for better list performance
-[ ] screen wakelock to keep the screen on
 [ ] Action Bar with elements: https://developer.android.com/training/appbar/setting-up
-[ ] App widgets
-    [ ] only 1 depth layouts, because the IDs can't be changed
-        [ ] or have 10 different layout files for each view type with 10 different ids, that allows a bit of nesting
-            [ ] 5 for Layouts, 10 for textview and button, 5 for progress bar
-            [ ] But the main dynamic content should be made with collections: https://developer.android.com/guide/topics/appwidgets/collections
-    [ ] support for using layouts in widgets (if parent != null, use R.id.remoteview as parent)
 [ ] Notifications with custom Layout
 [ ] method to get the screen resolution, to change layout if needed
-[ ] on screen orientation change event
-[ ] support for divider between elements in LinearLayouts an RecyclerViews
 [ ] Gesture events
 [ ] Multitouch
-[ ] setting visibility to hidden or gone
-[ ] method to check dark mode and other configuration variables
-[ ] register dynamic broadcast receivers for things like language chance, airplane mode and other useful events and relay them to the program
-    - ACTION_AIRPLANE_MODE_CHANGED
-    - ACTION_LOCALE_CHANGED
-    - ACTION_SCREEN_OFF
-    - ACTION_SCREEN_ON
-    - ACTION_TIMEZONE_CHANGED
 [ ] setting explicit size for views
 [ ] setting ImageView size in px, so it can be exactly the size of the bitmap buffer 
 [ ] or query the current size of the ImageView to use a new buffer

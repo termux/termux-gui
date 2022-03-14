@@ -36,7 +36,7 @@
             android:id="@+id/service_timeout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
             android:ems="10"
             android:importantForAutofill="no"
             android:inputType="numberSigned"
@@ -48,6 +48,21 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="@string/service_background" />
+
+        <TextView
+            android:id="@+id/loglevel_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/loglevel_description" />
+
+        <EditText
+            android:id="@+id/loglevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:inputType="number" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

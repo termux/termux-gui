@@ -2,7 +2,42 @@ syntax = "proto3";
 
 option java_package = "com.termux.gui.protocol.protobuf.v0";
 
+// Types used by multiple messages
 
+message Configuration {
+  bool darkMode = 2;
+  string country = 3;
+  string language = 4;
+  enum Orientation {
+    portrait = 0;
+    landscape = 1;
+  }
+  Orientation orientation = 5;
+  bool keyboardHidden = 6;
+  int32 screenWidth = 7;
+  int32 screenHeight = 8;
+  float fontscale = 9;
+  float density = 10;
+}
+
+message Create {
+  string aid = 1;
+  int32 parent = 2;
+}
+
+
+
+
+
+
+
+
+
+// Request and response types
+
+
+
+// Activity and Task methods
 
 message NewActivityRequest {
   string tid = 1;
@@ -83,6 +118,383 @@ message SetTaskDescriptionResponse {
 }
 
 
+message SetPiPParamsRequest {
+  string aid = 1;
+  uint32 num = 2;
+  uint32 den = 3;
+}
+
+message SetPiPParamsResponse {
+  bool success = 1;
+}
+
+
+message SetInputModeRequest {
+  string aid = 1;
+  enum InputMode {
+    pan = 0;
+    resize = 1;
+  }
+  InputMode mode = 2;
+}
+
+message SetInputModeResponse {
+  bool success = 1;
+}
+
+
+message SetPiPModeRequest {
+  string aid = 1;
+  bool pip = 2;
+}
+
+message SetPiPModeResponse {
+  bool success = 1;
+}
+
+
+message SetPiPModeAutoRequest {
+  string aid = 1;
+  bool pip = 2;
+}
+
+message SetPiPModeAutoResponse {
+  bool success = 1;
+}
+
+
+message ToastRequest {
+  string text = 1;
+  bool long = 2;
+}
+
+message ToastResponse {
+  bool success = 1;
+}
+
+
+message KeepScreenOnRequest {
+  string aid = 1;
+  bool on = 2;
+}
+
+message KeepScreenOnResponse {
+  bool success = 1;
+}
+
+
+message SetOrientationRequest {
+  string aid = 1;
+  enum Orientation {
+      unspecified = 0;
+      behind = 1;
+      fullSensor = 2;
+      fullUser = 3;
+      landscape = 4;
+      locked = 5;
+      nosensor = 6;
+      portrait = 7;
+      reverseLandscape = 8;
+      reversePortrait = 9;
+      sensor = 10;
+      sensorLandscape = 11;
+      sensorPortrait = 12;
+      user = 13;
+      userLandscape = 14;
+      userPortrait = 15;
+  }
+  Orientation orientation = 2;
+}
+
+message SetOrientationResponse {
+  bool success = 1;
+}
+
+
+message SetPositionRequest {
+  string aid = 1;
+  uint32 x = 2;
+  uint32 y = 3;
+}
+
+message SetPositionResponse {
+  bool success = 1;
+}
+
+
+message GetConfigurationRequest {
+  string aid = 1;
+}
+
+message GetConfigurationResponse {
+  bool success = 1;
+  Configuration configuration = 2;
+}
+
+
+message TurnScreenOnRequest {
+  
+}
+
+message TurnScreenOnResponse {
+  bool success = 1;
+}
+
+
+message IsLockedRequest {
+  
+}
+
+message IsLockedResponse {
+  bool locked = 1;
+}
+
+
+message RequestUnlockRequest {
+  string aid = 1;
+}
+
+message RequestUnlockResponse {
+  bool success = 1;
+}
+
+
+message HideSoftKeyboardRequest {
+  string aid = 1;
+}
+
+message HideSoftKeyboardResponse {
+  bool success = 1;
+}
+
+
+
+
+// View creation methods
+
+message CreateLinearLayoutRequest {
+  Create data = 1;
+  bool horizontal = 2;
+}
+
+message CreateLinearLayoutResponse {
+  int32 id = 1;
+}
+
+
+message CreateFrameLayoutRequest {
+  Create data = 1;
+}
+
+message CreateFrameLayoutResponse {
+  int32 id = 1;
+}
+
+
+message CreateSwipeRefreshLayoutRequest {
+  Create data = 1;
+}
+
+message CreateSwipeRefreshLayoutResponse {
+  int32 id = 1;
+}
+
+
+message CreateTextViewRequest {
+  Create data = 1;
+  string text = 2;
+  bool selectableText = 3;
+  bool clickableLinks = 4;
+}
+
+message CreateTextViewResponse {
+  int32 id = 1;
+}
+
+
+message CreateEditTextRequest {
+  Create data = 1;
+  bool noline = 2;
+  bool blockinput = 3;
+  enum Type {
+    text = 0;
+    textMultiLine = 1;
+    phone = 3;
+    date = 4;
+    time = 5;
+    datetime = 6;
+    number = 7;
+    numberDecimal = 8;
+    numberPassword = 9;
+    numberSigned = 10;
+    numberDecimalSigned = 11;
+    textEmailAddress = 12;
+    textPassword = 13;
+  }
+  Type type = 4;
+  string txt = 5;
+}
+
+message CreateEditTextResponse {
+  int32 id = 1;
+}
+
+
+message CreateButtonRequest {
+  Create data = 1;
+  string text = 2;
+}
+
+message CreateButtonResponse {
+  int32 id = 1;
+}
+
+
+message CreateImageViewRequest {
+  Create data = 1;
+}
+
+message CreateImageViewResponse {
+  int32 id = 1;
+}
+
+
+message CreateSpaceRequest {
+  Create data = 1;
+}
+
+message CreateSpaceResponse {
+  int32 id = 1;
+}
+
+
+message CreateNestedScrollViewRequest {
+  Create data = 1;
+  bool snapping = 2;
+  bool nobar = 3;
+  bool fillViewport = 4;
+}
+
+message CreateNestedScrollViewResponse {
+  int32 id = 1;
+}
+
+
+message CreateHorizontalScrollViewRequest {
+  Create data = 1;
+  bool snapping = 2;
+  bool nobar = 3;
+  bool fillViewPort = 4;
+}
+
+message CreateHorizontalScrollViewResponse {
+  int32 id = 1;
+}
+
+
+message CreateRadioButtonRequest {
+  Create data = 1;
+  string text = 2;
+  bool checked = 3;
+}
+
+message CreateRadioButtonResponse {
+  int32 id = 1;
+}
+
+
+message CreateRadioGroupRequest {
+  Create data = 1;
+}
+
+message CreateRadioGroupResponse {
+  int32 id = 1;
+}
+
+
+message CreateCheckboxRequest {
+  Create data = 1;
+  string text = 2;
+  bool checked = 3;
+}
+
+message CreateCheckboxResponse {
+  int32 id = 1;
+}
+
+
+message CreateToggleButtonRequest {
+  Create data = 1;
+  bool checked = 2;
+}
+
+message CreateToggleButtonResponse {
+  int32 id = 1;
+}
+
+
+message CreateSwitchRequest {
+  Create data = 1;
+  string text = 2;
+  bool checked = 3;
+}
+
+message CreateSwitchResponse {
+  int32 id = 1;
+}
+
+
+message CreateSpinnerRequest {
+  Create data = 1;
+}
+
+message CreateSpinnerResponse {
+  int32 id = 1;
+}
+
+
+message CreateProgressBarRequest {
+  Create data = 1;
+}
+
+message CreateProgressBarResponse {
+  int32 id = 1;
+}
+
+
+message CreateTabLayoutRequest {
+  Create data = 1;
+}
+
+message CreateTabLayoutResponse {
+  int32 id = 1;
+}
+
+
+
+
+// View manipulation methods
+
+
+
+
+
+// RemoteViews methods
+
+
+
+
+
+// WebView methods
+
+
+
+
+
+// Event control methods
+
+
+
 
 
 
@@ -97,6 +509,38 @@ message Method {
     MoveTaskToBackRequest moveTaskToBack = 5;
     SetThemeRequest setTheme = 6;
     SetTaskDescriptionRequest setTaskDescription = 7;
+    SetPiPParamsRequest setPiPParams = 8;
+    SetInputModeRequest setInputMode = 9;
+    SetPiPModeRequest setPiPMode = 10;
+    SetPiPModeAutoRequest setPiPModeAuto = 11;
+    ToastRequest toast = 12;
+    KeepScreenOnRequest keepScreenOn = 13;
+    SetOrientationRequest setOrientation = 14;
+    SetPositionRequest setPosition = 15;
+    GetConfigurationRequest getConfiguration = 16;
+    TurnScreenOnRequest turnScreenOn = 17;
+    IsLockedRequest isLocked = 18;
+    RequestUnlockRequest requestUnlock = 19;
+    HideSoftKeyboardRequest hideSoftKeyboard = 20;
+    
+    CreateLinearLayoutRequest createLinearLayout = 21;
+    CreateFrameLayoutRequest createFrameLayout = 22;
+    CreateSwipeRefreshLayoutRequest createSwipeRefreshLayout = 23;
+    CreateTextViewRequest createTextView = 24;
+    CreateEditTextRequest createEditText = 25;
+    CreateButtonRequest createButton = 26;
+    CreateImageViewRequest createImageView = 27;
+    CreateSpaceRequest createSpace = 28;
+    CreateNestedScrollViewRequest createNestedScrollView = 29;
+    CreateHorizontalScrollViewRequest createHorizontalScrollView = 30;
+    CreateRadioGroupRequest createRadioGroup = 31;
+    CreateRadioButtonRequest createRadioButton = 32;
+    CreateCheckboxRequest createCheckbox = 33;
+    CreateToggleButtonRequest createToggleButton = 34;
+    CreateSwitchRequest createSwitch = 35;
+    CreateSpinnerRequest createSpinner = 36;
+    CreateProgressBarRequest createProgressBar = 37;
+    CreateTabLayoutRequest createTabLayout = 38;
     
     
   }
@@ -106,11 +550,7 @@ message Method {
 
 
 
-
-
-
-
-
+// Event types
 
 
 
@@ -143,15 +583,7 @@ message DestroyEvent {
 
 message ConfigEvent {
   string aid = 1;
-  bool darkMode = 2;
-  string country = 3;
-  string language = 4;
-  string orientation = 5;
-  bool keyboardHidden = 6;
-  int32 screenWidth = 7;
-  int32 screenHeight = 8;
-  float fontscale = 9;
-  float density = 10;
+  Configuration configuration = 2;
 }
 
 message ClickEvent {
@@ -178,7 +610,8 @@ message TouchEvent {
   string id = 2;
   // TODO finish touch event data
   message Touch {
-    
+    int32 x = 1;
+    int32 y = 2;
   }
   repeated Touch touches = 3;
 }
@@ -205,6 +638,35 @@ message ItemSelectedEvent {
   string selected = 3;
 }
 
+message AirplaneEvent {
+  bool active = 1;
+}
+
+message LocaleEvent {
+  string locale = 1;
+}
+
+message TimezoneEvent {
+  string tz = 1;
+}
+
+message ScreenOffEvent {
+  
+}
+
+message ScreenOnEvent {
+  
+}
+
+message UserLeaveHintEvent {
+  string aid = 1;
+}
+
+message PiPChangedEvent {
+  string aid = 1;
+  bool pip = 2;
+}
+
 message Event {
   oneof event {
     ClickEvent click = 1;
@@ -222,6 +684,13 @@ message Event {
     RefreshEvent refresh = 26;
     SelectedEvent selected = 27;
     ItemSelectedEvent itemSelected = 28;
+    AirplaneEvent airplane = 29;
+    LocaleEvent locale = 30;
+    TimezoneEvent timezone = 31;
+    ScreenOffEvent screenOff = 32;
+    ScreenOnEvent screenOn = 33;
+    UserLeaveHintEvent userLeaveHint = 34;
+    PiPChangedEvent pip = 35;
   }
 }
 

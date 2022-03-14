@@ -7,18 +7,15 @@ import com.termux.gui.databinding.ActivityGuiConfigBinding
 
 class GUIConfigActivity : AppCompatActivity() {
     
-    val settings = Settings()
-    var b: ActivityGuiConfigBinding? = null
+    private var b: ActivityGuiConfigBinding? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        settings.load(this)
         
         b = ActivityGuiConfigBinding.inflate(layoutInflater)
-        b!!.serviceTimeout.setText(settings.timeout.toString(), TextView.BufferType.EDITABLE)
-        
-        b!!.serviceBackground.isChecked = settings.background
-        
+        b!!.serviceTimeout.setText(Settings.instance.timeout.toString(), TextView.BufferType.EDITABLE)
+        b!!.serviceBackground.isChecked = Settings.instance.background
+        b!!.loglevel.setText(Settings.instance.loglevel.toString(), TextView.BufferType.EDITABLE)
         setContentView(b!!.root)
     }
 
@@ -26,10 +23,13 @@ class GUIConfigActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         try {
-            settings.timeout = Integer.parseInt(b!!.serviceTimeout.text.toString())
+            Settings.instance.timeout = Integer.parseInt(b!!.serviceTimeout.text.toString())
         } catch(_: NumberFormatException) {}
-        settings.background = b!!.serviceBackground.isChecked
-        settings.save(this)
+        try {
+            Settings.instance.loglevel = Integer.parseInt(b!!.loglevel.text.toString())
+        } catch(_: NumberFormatException) {}
+        Settings.instance.background = b!!.serviceBackground.isChecked
+        Settings.instance.save(this)
     }
     
     

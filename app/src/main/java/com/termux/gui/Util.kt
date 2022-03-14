@@ -15,11 +15,13 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
+import com.google.protobuf.MessageLite
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.DataOutputStream
 import java.io.FileDescriptor
+import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
@@ -65,6 +67,11 @@ class Util {
             w.write(bytes)
             w.flush()
         }
+        
+        fun sendProto(o: OutputStream, m: MessageLite) {
+            m.writeDelimitedTo(o)
+            o.flush()
+        }
 
         fun generateViewID(rand: Random, a: GUIActivity): Int {
             return generateViewIDRaw(rand, a.usedIds)
@@ -76,6 +83,14 @@ class Util {
                 id = rand.nextInt(Integer.MAX_VALUE)
             }
             usedIds.add(id)
+            return id
+        }
+
+        fun generateIndex(rand: Random, used: Set<Int>): Int {
+            var id = rand.nextInt(Integer.MAX_VALUE)
+            while (used.contains(id)) {
+                id = rand.nextInt(Integer.MAX_VALUE)
+            }
             return id
         }
 

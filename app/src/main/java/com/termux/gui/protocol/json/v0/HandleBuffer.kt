@@ -7,6 +7,8 @@ import android.os.SharedMemory
 import android.widget.ImageView
 import com.termux.gui.ConnectionHandler
 import com.termux.gui.Util
+import com.termux.gui.protocol.shared.v0.DataClasses
+import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.DataOutputStream
 import java.io.FileDescriptor
 import java.lang.reflect.InvocationTargetException
@@ -15,19 +17,19 @@ import java.util.*
 
 class HandleBuffer {
     companion object {
-        fun handleBuffer(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, overlays: MutableMap<String, V0.Overlay>,
-                         rand: Random, out: DataOutputStream, buffers: MutableMap<Int, V0.SharedBuffer>, main: LocalSocket): Boolean {
+        fun handleBuffer(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, overlays: MutableMap<String, DataClasses.Overlay>,
+                         rand: Random, out: DataOutputStream, buffers: MutableMap<Int, DataClasses.SharedBuffer>, main: LocalSocket): Boolean {
             when (m.method) {
                 "addBuffer" -> {
                     val format = m.params?.get("format")?.asString
                     val w = m.params?.get("w")?.asInt
                     val h = m.params?.get("h")?.asInt
                     if (w != null && h != null && format == "ARGB888" && w > 0 && h > 0) {
-                        val bid = V0.generateBufferID(rand, buffers)
+                        val bid = V0Shared.generateBufferID(rand, buffers)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                             println("creating buffer on API 27+")
                             val shm = SharedMemory.create(bid.toString(), w * h * 4)
-                            val b = V0.SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888, true), shm, shm.mapReadOnly(), null)
+                            val b = DataClasses.SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888, true), shm, shm.mapReadOnly(), null)
                             try {
                                 // this is a dirty trick to get the FileDescriptor of a SharedMemory object without using JNI or a higher API version.
                                 // this could break anytime, though it is still marked as public but discouraged, so that is unlikely, also given the implementation of the class.
@@ -80,7 +82,7 @@ class HandleBuffer {
                                 val setInt = FileDescriptor::class.java.getDeclaredMethod("setInt$", Int::class.java)
                                 setInt(fdesc, fdint)
                                 Util.sendMessageFd(out, ConnectionHandler.gson.toJson(bid), main, fdesc)
-                                buffers[bid] = V0.SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888), null, buff, fdint)
+                                buffers[bid] = DataClasses.SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888), null, buff, fdint)
                             } catch (e: Exception) {
                                 ConnectionHandler.unmap_ashmem(buff)
                                 ConnectionHandler.destroy_ashmem(fdint)
@@ -134,7 +136,7 @@ class HandleBuffer {
                     val o = overlays[aid]
                     if (buffer != null && id != null) {
                         if (a != null) {
-                            V0.runOnUIThreadActivityStarted(a) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
                                 it.findViewReimplemented<ImageView>(id)?.setImageBitmap(buffer.btm)
                             }
                         }
@@ -153,7 +155,7 @@ class HandleBuffer {
                     val o = overlays[aid]
                     if (id != null) {
                         if (a != null) {
-                            V0.runOnUIThreadActivityStarted(a) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
                                 it.findViewReimplemented<ImageView>(id)?.invalidate()
                             }
                         }

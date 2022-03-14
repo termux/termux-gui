@@ -1,4 +1,4 @@
-package com.termux.gui.protocol.json.v0
+package com.termux.gui.protocol.shared.v0
 
 import android.app.Activity
 import android.app.ActivityManager
@@ -10,12 +10,12 @@ import com.termux.gui.Util
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
-class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>, private val activities: MutableMap<String, V0.ActivityState>,
+class LifecycleListener(private val v0: V0Shared, private val activities: MutableMap<String, DataClasses.ActivityState>,
                         private val tasks: LinkedList<ActivityManager.AppTask>, private val am: ActivityManager) : Application.ActivityLifecycleCallbacks {
     override fun onActivityCreated(a: Activity, savedInstanceState: Bundle?) {
         //println("create")
         if (a is GUIActivity) {
-            val f = activities[a.intent?.dataString]
+            val f = activities[a.intent.dataString]
             if (f != null) {
                 if (tasks.find { Util.getTaskInfo(tasks, it)?.let { it1 -> Util.getTaskId(it1) } == a.taskId } == null) {
                     for (t in am.appTasks) {
@@ -26,19 +26,16 @@ class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHa
                         }
                     }
                 }
-                a.eventQueue = eventQueue
+                a.listener = v0
                 f.a = a
-                val map = HashMap<String, Any?>()
-                map["finishing"] = a.isFinishing
-                map["aid"] = a.intent?.dataString
-                eventQueue.offer(ConnectionHandler.Event("create", ConnectionHandler.gson.toJsonTree(map)))
+                v0.onActivityCreated(f)
             }
         }
     }
     override fun onActivityStarted(a: Activity) {
         //println("start")
         if (a is GUIActivity) {
-            val f = activities[a.intent?.dataString]
+            val f = activities[a.intent.dataString]
             if (f != null) {
                 f.saved = false
                 for (r in f.queued) {
@@ -49,10 +46,7 @@ class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHa
                         e.printStackTrace()
                     }
                 }
-                val map = HashMap<String, Any?>()
-                map["finishing"] = a.isFinishing
-                map["aid"] = a.intent?.dataString
-                eventQueue.offer(ConnectionHandler.Event("start", ConnectionHandler.gson.toJsonTree(map)))
+                v0.onActivityStarted(f)
             }
         }
     }
@@ -60,12 +54,9 @@ class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHa
         //println("resume")
         try {
             if (a is GUIActivity) {
-                val f = activities[a.intent?.dataString]
+                val f = activities[a.intent.dataString]
                 if (f != null) {
-                    val map = HashMap<String, Any?>()
-                    map["finishing"] = a.isFinishing
-                    map["aid"] = a.intent?.dataString
-                    eventQueue.add(ConnectionHandler.Event("resume", ConnectionHandler.gson.toJsonTree(map)))
+                    v0.onActivityResumed(f)
                 }
             }
         } catch (e: Exception) {
@@ -76,12 +67,9 @@ class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHa
         //println("pause")
         try {
             if (a is GUIActivity) {
-                val f = activities[a.intent?.dataString]
+                val f = activities[a.intent.dataString]
                 if (f != null) {
-                    val map = HashMap<String, Any?>()
-                    map["finishing"] = a.isFinishing
-                    map["aid"] = a.intent?.dataString
-                    eventQueue.add(ConnectionHandler.Event("pause", ConnectionHandler.gson.toJsonTree(map)))
+                    v0.onActivityPaused(f)
                 }
             }
         } catch (e: Exception) {
@@ -92,12 +80,9 @@ class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHa
         //println("stop")
         try {
             if (a is GUIActivity) {
-                val f = activities[a.intent?.dataString]
+                val f = activities[a.intent.dataString]
                 if (f != null) {
-                    val map = HashMap<String, Any?>()
-                    map["finishing"] = a.isFinishing
-                    map["aid"] = a.intent?.dataString
-                    eventQueue.add(ConnectionHandler.Event("stop", ConnectionHandler.gson.toJsonTree(map)))
+                    v0.onActivityStopped(f)
                 }
             }
         } catch (e: Exception) {
@@ -109,7 +94,7 @@ class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHa
         //println("saveInstanceState")
         try {
             if (a is GUIActivity) {
-                val aid = a.intent?.dataString
+                val aid = a.intent.dataString
                 val f = activities[aid]
                 if (f != null) {
                     f.saved = true
@@ -122,13 +107,10 @@ class LifecycleListener(private val eventQueue: LinkedBlockingQueue<ConnectionHa
     override fun onActivityDestroyed(a: Activity) {
         try {
             if (a is GUIActivity) {
-                val aid = a.intent?.dataString
+                val aid = a.intent.dataString
                 val f = activities[aid]
                 if (f != null) {
-                    val map = HashMap<String, Any?>()
-                    map["finishing"] = a.isFinishing
-                    map["aid"] = a.intent?.dataString
-                    eventQueue.add(ConnectionHandler.Event("destroy", ConnectionHandler.gson.toJsonTree(map)))
+                    v0.onActivityDestroyed(f)
                 }
                 if (a.isFinishing) {
                     //println("finishing")

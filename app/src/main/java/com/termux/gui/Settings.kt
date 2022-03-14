@@ -8,21 +8,23 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 
 
-class Settings {
+class Settings private constructor() {
     
     companion object {
         private const val TIMEOUT_KEY = "timeout"
         private const val TIMEOUT_DEFAULT = 3
         private const val BACKGROUND_KEY = "background"
         private const val BACKGROUND_DEFAULT = false
-        val MODIFIED_WAIT = Object()
-        var modified = false
+        private const val LOGLEVEL_KEY = "loglevel"
+        private const val LOGLEVEL_DEFAULT = 0
+        val instance = Settings()
     }
     
     
     
     var timeout: Int = TIMEOUT_DEFAULT
     var background: Boolean = BACKGROUND_DEFAULT
+    var loglevel: Int = LOGLEVEL_DEFAULT
     
     @Suppress("DEPRECATION")
     private fun settingsPreferences(c: Context): EncryptedSharedPreferences? {
@@ -47,6 +49,7 @@ class Settings {
         if (prefs != null) {
             timeout = prefs.getInt(TIMEOUT_KEY, TIMEOUT_DEFAULT)
             background = prefs.getBoolean(BACKGROUND_KEY, BACKGROUND_DEFAULT)
+            loglevel = prefs.getInt(LOGLEVEL_KEY, LOGLEVEL_DEFAULT)
         }
     }
     
@@ -55,11 +58,11 @@ class Settings {
     fun save(c: Context) {
         val prefs = settingsPreferences(c)
         if (prefs != null) {
-            prefs.edit().putInt(TIMEOUT_KEY, timeout).putBoolean(BACKGROUND_KEY, background).commit()
-            modified = true
-            synchronized(MODIFIED_WAIT) {
-                MODIFIED_WAIT.notifyAll()
-            }
+            val e = prefs.edit()
+            e.putInt(TIMEOUT_KEY, timeout)
+            e.putBoolean(BACKGROUND_KEY, background)
+            e.putInt(LOGLEVEL_KEY, loglevel)
+            e.commit()
         }
     }
     

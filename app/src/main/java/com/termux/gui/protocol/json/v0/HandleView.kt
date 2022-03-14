@@ -18,20 +18,22 @@ import com.termux.gui.App
 import com.termux.gui.ConnectionHandler
 import com.termux.gui.R
 import com.termux.gui.Util
+import com.termux.gui.protocol.shared.v0.DataClasses
+import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.DataOutputStream
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 class HandleView {
     companion object {
-        fun handleView(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, widgets: MutableMap<Int, V0.WidgetRepresentation>,
-                       overlays: MutableMap<String, V0.Overlay>, rand: Random, out: DataOutputStream,
-                       app: Context, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : Boolean {
+        fun handleView(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, overlays: MutableMap<String, DataClasses.Overlay>,
+                       rand: Random, out: DataOutputStream, app: Context,
+                       eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : Boolean {
             operator fun Regex.contains(text: String?): Boolean = if (text == null) false else this.matches(text)
             when (m.method) {
                 in Regex("create.*") -> {
                     if (m.params != null) {
-                        Create.handleCreateMessage(m, activities, widgets, overlays, rand, out, app, eventQueue)
+                        Create.handleCreateMessage(m, activities, overlays, rand, out, app, eventQueue)
                     }
                     return true
                 }
@@ -42,7 +44,7 @@ class HandleView {
                     val a = activities[aid]
                     val o = overlays[aid]
                     if (a != null && id != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             it.findViewReimplemented<EditText>(id)?.isCursorVisible = show
                         }
                     }
@@ -59,7 +61,7 @@ class HandleView {
                     val a = activities[aid]
                     val o = overlays[aid]
                     if (a != null && id != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             
                             Util.removeViewRecursive(it.findViewReimplemented(id), it.usedIds)
                         }
@@ -77,7 +79,7 @@ class HandleView {
                     val a = activities[aid]
                     val o = overlays[aid]
                     if (a != null && id != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             val v = it.findViewReimplemented<ViewGroup>(id)
                             if (v != null) {
                                 while (v.childCount > 0) {
@@ -107,7 +109,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && size != null && size > 0) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     val tv = it.findViewReimplemented<TextView>(id)
                                     tv?.setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
                                 }
@@ -129,7 +131,7 @@ class HandleView {
                     val o = overlays[aid]
                     if (img != null && id != null) {
                         if (a != null) {
-                            V0.runOnUIThreadActivityStarted(a) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
                                 val bin = Base64.decode(img, Base64.DEFAULT)
                                 val bitmap = BitmapFactory.decodeByteArray(bin, 0, bin.size)
                                 it.findViewReimplemented<ImageView>(id)?.setImageBitmap(bitmap)
@@ -154,7 +156,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && margin != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     val mar = Util.toPX(it, margin)
                                     val v = it.findViewReimplemented<View>(id)
                                     val p = v?.layoutParams as? ViewGroup.MarginLayoutParams
@@ -196,7 +198,7 @@ class HandleView {
                     val position = m.params?.get("position")?.asInt
                     if (id != null && (weight != null || position != null)) {
                         if (a != null) {
-                            V0.runOnUIThreadActivityStarted(a) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
                                 val v = it.findViewReimplemented<View>(id)
                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                 if (p != null) {
@@ -232,6 +234,44 @@ class HandleView {
                     }
                     return true
                 }
+                "setGridLayoutParams" -> {
+                    val aid = m.params?.get("aid")?.asString
+                    val a = activities[aid]
+                    val id = m.params?.get("id")?.asInt
+                    val row = m.params?.get("row")?.asInt
+                    val col = m.params?.get("col")?.asInt
+                    val rowsize = m.params?.get("rowsize")?.asInt
+                    val colsize = m.params?.get("colsize")?.asInt
+                    val alignmentrow = m.params?.get("alignmentrow")?.asString
+                    val alignmentcol = m.params?.get("alignmentcol")?.asString
+                    val align: Map<String, GridLayout.Alignment> = mapOf("top" to GridLayout.TOP, "bottom" to GridLayout.BOTTOM, "left" to GridLayout.LEFT, "right" to GridLayout.RIGHT, "center" to GridLayout.CENTER, "baseline" to GridLayout.BASELINE, "fill" to GridLayout.FILL)
+                    val o = overlays[aid]
+                    if (id != null && row != null && col != null && rowsize != null && colsize != null) {
+                        if (a != null) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
+                                val v = it.findViewReimplemented<View>(id)
+                                val p = v?.layoutParams as? GridLayout.LayoutParams
+                                if (p != null) {
+                                    p.rowSpec = GridLayout.spec(row, rowsize, align[alignmentrow] ?: GridLayout.CENTER)
+                                    p.columnSpec = GridLayout.spec(col, colsize, align[alignmentcol] ?: GridLayout.CENTER)
+                                }
+                                v?.layoutParams = p
+                            }
+                        }
+                        if (o != null) {
+                            Util.runOnUIThreadBlocking {
+                                val v = o.root.findViewReimplemented<View>(id)
+                                val p = v?.layoutParams as? GridLayout.LayoutParams
+                                if (p != null) {
+                                    p.rowSpec = GridLayout.spec(row, rowsize, align[alignmentrow] ?: GridLayout.CENTER)
+                                    p.columnSpec = GridLayout.spec(col, colsize, align[alignmentcol] ?: GridLayout.CENTER)
+                                }
+                                v?.layoutParams = p
+                            }
+                        }
+                    }
+                    return true
+                }
                 "setViewLocation" -> {
                     val aid = m.params?.get("aid")?.asString
                     val a = activities[aid]
@@ -241,14 +281,13 @@ class HandleView {
                     val dp = m.params?.get("dp")?.asBoolean
                     val top = m.params?.get("top")?.asBoolean
                     val o = overlays[aid]
-                    val position = m.params?.get("position")?.asInt
                     if (id != null) {
                         if (a != null) {
-                            V0.runOnUIThreadActivityStarted(a) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
                                 val v = it.findViewReimplemented<View>(id)
                                 if (x != null && y != null) {
-                                    v?.x = x.toFloat()
-                                    v?.y = y.toFloat()
+                                    v?.x = if (dp == true) Util.toPX(it, x).toFloat() else x.toFloat()
+                                    v?.y = if (dp == true) Util.toPX(it, y).toFloat() else y.toFloat()
                                 }
                                 if (top == true) {
                                     v?.bringToFront()
@@ -259,8 +298,8 @@ class HandleView {
                             Util.runOnUIThreadBlocking {
                                 val v = o.root.findViewReimplemented<View>(id)
                                 if (x != null && y != null) {
-                                    v?.x = x.toFloat()
-                                    v?.y = y.toFloat()
+                                    v?.x = if (dp == true) Util.toPX(o.context, x).toFloat() else x.toFloat()
+                                    v?.y = if (dp == true) Util.toPX(o.context, y).toFloat() else y.toFloat()
                                 }
                                 if (top == true) {
                                     v?.bringToFront()
@@ -286,7 +325,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     val v = it.findViewReimplemented<View>(id)
                                     if (v != null) {
                                         Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.width, v.height)))
@@ -318,7 +357,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     val tv = it.findViewReimplemented<TextView>(id)
                                     tv?.text = text
                                 }
@@ -341,7 +380,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && color != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     it.findViewReimplemented<View>(id)?.backgroundTintList = ColorStateList.valueOf(color)
                                 }
                             }
@@ -363,7 +402,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && color != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     it.findViewReimplemented<TextView>(id)?.setTextColor(color)
                                 }
                             }
@@ -385,7 +424,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && progress != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     it.findViewReimplemented<ProgressBar>(id)?.progress = progress
                                 }
                             }
@@ -407,7 +446,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && refresh != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     it.findViewReimplemented<SwipeRefreshLayout>(id)?.isRefreshing = refresh
                                 }
                             }
@@ -429,7 +468,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStartedBlocking(a) {
+                                V0Shared.runOnUIThreadActivityStartedBlocking(a) {
                                     text = it.findViewReimplemented<TextView>(id)?.text?.toString()
                                 }
                             }
@@ -453,7 +492,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     it.findViewReimplemented<CompoundButton>(id)?.isChecked = m.params?.get("checked")?.asBoolean ?: false
                                 }
                             }
@@ -474,7 +513,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     val v = it.findViewReimplemented<View>(id)
                                     if (v != null) {
                                         v.requestFocus()
@@ -512,7 +551,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && x != null && y != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     val v = it.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
                                         if (soft == true && v is NestedScrollView) {
@@ -547,7 +586,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     val v = it.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
                                         Util.sendMessage(out, ConnectionHandler.gson.toJson(arrayOf(v.scrollX, v.scrollY)))
@@ -591,7 +630,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStartedBlocking(a) {
+                                V0Shared.runOnUIThreadActivityStartedBlocking(a) {
                                     val v = it.findViewReimplemented<View>(id)
                                     if (v is Spinner)
                                         v.adapter = ArrayAdapter(it, R.layout.spinner_text, options)
@@ -633,7 +672,7 @@ class HandleView {
                         val o = overlays[aid]
                         if (id != null && vis != null && vis >= 0 && vis <= 2) {
                             if (a != null) {
-                                V0.runOnUIThreadActivityStarted(a) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
                                     it.findViewReimplemented<View>(id)?.visibility = when (vis) {
                                         0 -> View.GONE
                                         1 -> View.INVISIBLE
@@ -660,7 +699,7 @@ class HandleView {
             return false
         }
 
-        private fun setDimension(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, overlays: MutableMap<String, V0.Overlay>, app: Context) {
+        private fun setDimension(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, overlays: MutableMap<String, DataClasses.Overlay>, app: Context) {
             val aid = m.params?.get("aid")?.asString
             val a = activities[aid]
             val id = m.params?.get("id")?.asInt
@@ -697,7 +736,7 @@ class HandleView {
             if (id != null && el?.isJsonPrimitive == true) {
                 val p = el.asJsonPrimitive
                 if (a != null) {
-                    V0.runOnUIThreadActivityStarted(a) {
+                    V0Shared.runOnUIThreadActivityStarted(a) {
                         val v = it.findViewReimplemented<View>(id)
                         val pa = v?.layoutParams
                         if (pa != null) {

@@ -10,12 +10,21 @@ import java.io.Serializable
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
+/**
+ * Base class for custom user Activities.
+ */
 open class GUIActivity : AppCompatActivity() {
-    
-    
+
+
+    interface Listener {
+        fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration)
+        fun onPictureInPictureModeChanged(a: GUIActivity, isInPictureInPictureMode: Boolean)
+        fun onUserLeaveHint(a: GUIActivity)
+    }
     
     
     companion object {
+        private val TAG: String? = GUIActivity::class.java.canonicalName
         private const val THEME_KEY = "gui_theme"
         private const val DATA_KEY = "gui_data"
     }
@@ -36,14 +45,14 @@ open class GUIActivity : AppCompatActivity() {
     var data = ActivityData()
     
     data class GUITheme(val statusBarColor: Int, val colorPrimary: Int, var windowBackground: Int, val textColor: Int, val colorAccent: Int) : Serializable
-    var eventQueue : LinkedBlockingQueue<ConnectionHandler.Event>? = null
-
+    var listener: Listener? = null
+    
     @Suppress("UNCHECKED_CAST")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        println("oncreate activity")
+        Logger.log(2, TAG, "oncreate activity")
         if (intent.getBooleanExtra("pip", false)) {
-            println("pip")
+            Logger.log(2, TAG, "pip")
             setTheme(R.style.Theme_TermuxGUI_NoAnimation)
             @Suppress("DEPRECATION")
             enterPictureInPictureMode()
@@ -58,6 +67,9 @@ open class GUIActivity : AppCompatActivity() {
             }
         }
     }
+    
+    val aid: String? get() {return intent.dataString}
+    
     
     fun configToJson(conf: Configuration?): JsonElement? {
         val c: Configuration = conf ?: resources.configuration ?: return ConnectionHandler.gson.toJsonTree(emptyArray<Any>())
@@ -87,33 +99,22 @@ open class GUIActivity : AppCompatActivity() {
     
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        eventQueue?.offer(ConnectionHandler.Event("config", configToJson(newConfig)))
+        listener?.onConfigurationChanged(this, newConfig)
     }
 
     @Suppress("DEPRECATION")
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        val ev = eventQueue
-        if (ev != null) {
-            try {
-                ev.add(ConnectionHandler.Event("pipchanged", ConnectionHandler.gson.toJsonTree(isInPictureInPictureMode)))
-            } catch (ignored: Exception) {}
-        }
+        listener?.onPictureInPictureModeChanged(this, isInPictureInPictureMode)
     }
 
     @Suppress("DEPRECATION")
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        val ev = eventQueue
-        if (ev != null) {
-            try {
-                ev.add(ConnectionHandler.Event("UserLeaveHint", null))
-            } catch (ignored: Exception) {}
-            if (data.autopip) {
-                enterPictureInPictureMode()
-            }
+        if (data.autopip) {
+            enterPictureInPictureMode()
         }
-        
+        listener?.onUserLeaveHint(this)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

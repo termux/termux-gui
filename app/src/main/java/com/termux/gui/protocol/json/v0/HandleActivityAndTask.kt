@@ -15,13 +15,15 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.termux.gui.*
+import com.termux.gui.protocol.shared.v0.DataClasses
+import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.DataOutputStream
 import java.util.*
 
 class HandleActivityAndTask {
     companion object {
         @Suppress("DEPRECATION")
-        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<String, V0.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>, widgets: MutableMap<Int, V0.WidgetRepresentation>, overlays: MutableMap<String, V0.Overlay>, app: Context, wm: WindowManager, out: DataOutputStream) : Boolean {
+        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>, overlays: MutableMap<String, DataClasses.Overlay>, app: Context, wm: WindowManager, out: DataOutputStream) : Boolean {
             when (m.method) {
                 "finishTask" -> {
                     tasks.find { t -> Util.getTaskInfo(tasks, t)?.let { it1 -> Util.getTaskId(it1) } == m.params?.get("tid")?.asInt }?.finishAndRemoveTask()
@@ -35,7 +37,7 @@ class HandleActivityAndTask {
                     val aid = m.params?.get("aid")?.asString
                     val a = activities[aid]
                     if (a != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             it.moveTaskToBack(true)
                         }
                     }
@@ -85,17 +87,12 @@ class HandleActivityAndTask {
                     val b = m.params?.get("windowBackground")?.asInt
                     val p = m.params?.get("colorPrimary")?.asInt
                     val ac = m.params?.get("colorAccent")?.asInt
-                    val wid = m.params?.get("wid")?.asInt
-                    val w = widgets[wid]
                     val o = overlays[aid]
-                    if ((a != null || w != null || o != null) && s != null && t != null && b != null && p != null && ac != null) {
+                    if ((a != null || o != null) && s != null && t != null && b != null && p != null && ac != null) {
                         if (a != null) {
-                            V0.runOnUIThreadActivityStarted(a) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
                                 it.theme = GUIActivity.GUITheme(s, p, b, t, ac)
                             }
-                        }
-                        if (w != null) {
-                            w.theme = GUIActivity.GUITheme(s, p, b, t, ac)
                         }
                         if (o != null) {
                             o.theme = GUIActivity.GUITheme(s, p, b, t, ac)
@@ -108,7 +105,7 @@ class HandleActivityAndTask {
                     val a = activities[aid]
                     val img = m.params?.get("img")?.asString
                     if (a != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             val t = it.theme
                             val prim = t?.colorPrimary ?: (0xFF000000).toInt()
                             if (img != null) {
@@ -133,7 +130,7 @@ class HandleActivityAndTask {
                     val a = activities[aid]
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && num != null && den != null && a != null) {
                         val rat = Rational(num, den).coerceAtMost(Rational(239, 100)).coerceAtLeast(Rational(100, 239))
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             it.setPictureInPictureParams(PictureInPictureParams.Builder().setAspectRatio(rat).build())
                         }
                     }
@@ -144,7 +141,7 @@ class HandleActivityAndTask {
                     val mode = m.params?.get("mode")?.asString
                     val a = activities[aid]
                     if (a != null && mode != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             when (mode) {
                                 "resize" -> {
                                     it.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
@@ -162,7 +159,7 @@ class HandleActivityAndTask {
                     val pip = m.params?.get("pip")?.asBoolean ?: false
                     val a = activities[aid]
                     if (a != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             if (pip) {
                                 it.enterPictureInPictureMode()
                             } else {
@@ -177,7 +174,7 @@ class HandleActivityAndTask {
                     val pip = m.params?.get("pip")?.asBoolean ?: false
                     val a = activities[aid]
                     if (a != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             it.data.autopip = pip
                         }
                     }
@@ -196,7 +193,7 @@ class HandleActivityAndTask {
                     val on = m.params?.get("on")?.asBoolean ?: false
                     val a = activities[aid]
                     if (a != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             if (on) {
                                 it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                             } else {
@@ -211,7 +208,7 @@ class HandleActivityAndTask {
                     val orientation = m.params?.get("orientation")?.asString
                     val a = activities[aid]
                     if (a != null && orientation != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             it.requestedOrientation = when (orientation) {
                                 "behind" -> ActivityInfo.SCREEN_ORIENTATION_BEHIND
                                 "fullSensor" -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
@@ -253,7 +250,7 @@ class HandleActivityAndTask {
                     val a = activities[aid]
                     val o = overlays[aid]
                     if (a != null) {
-                        V0.runOnUIThreadActivityStarted(a) {
+                        V0Shared.runOnUIThreadActivityStarted(a) {
                             val im = it.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                             im?.hideSoftInputFromWindow(it.findViewById<View>(R.id.root).windowToken, 0)
                         }

@@ -9,3 +9,4 @@ dependencyResolutionManagement {
 rootProject.name = "Termux GUI"
 include ':app'
 include ':hbuffers'
+include ':externaltest'
