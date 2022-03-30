@@ -368,6 +368,7 @@ Event control:
 
 RemoteViews:  
 RemoteViews are used for homescreen widgets and custom notifications.  
+Due to Android limitations, you can only have a specific number of distinct Views of each type.  
 - createRemoteLayout: Creates a new remote Layout. Returns the id for the remote Layout
 - deleteRemoteLayout: Deletes a remote Layout.
   - params:
@@ -385,12 +386,10 @@ RemoteViews are used for homescreen widgets and custom notifications.
   - params:
     - rid: id of the remote Layout.
     - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
-    - text: Initial text for the View.
 - addRemoteButton: creates a Button in a remote Layout. Returns the View id in the Layout. The Activity id for the Button click event will be the remote Layout id.
   - params:
     - rid: id of the remote Layout.
     - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
-    - text: Initial text for the View.
 - addRemoteImageView: creates an ImageView in a remote Layout. Returns the View id in the Layout.
   - params:
     - rid: id of the remote Layout.
@@ -456,7 +455,7 @@ Custom Notifications:
     - name: The displayed name for the channel in the Android notification settings.
 - createNotification: creates a custom notification. If you need more standard notifications, use Termux:API instead. Returns the notification id used for further calls.
   - params:
-    - id: The id of the notification to update.
+    - id: The id of the notification to update. If not specified, generates a new id.
     - ongoing: If true, the Notification cannot be dismissed by the user, but the Notification is automatically dismissed when you close the connection to the plugin.
     - layout: The id of the remote Layout to use.
     - expandedLayout: The id of the remote Layout to use when the Notification has been expanded. Optional.

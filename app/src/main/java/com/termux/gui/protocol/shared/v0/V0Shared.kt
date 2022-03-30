@@ -12,11 +12,13 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.RemoteViews
 import android.widget.TextView
+import com.google.gson.JsonObject
 import com.termux.gui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
+import kotlin.reflect.KClass
 
 
 abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
@@ -28,7 +30,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     protected val tasks = LinkedList<ActivityManager.AppTask>()
     protected val activities = Collections.synchronizedMap(HashMap<String, DataClasses.ActivityState>())
     protected val buffers: MutableMap<Int, DataClasses.SharedBuffer> = HashMap()
-    protected val remoteviews: MutableMap<Int, RemoteViews> = HashMap()
+    protected val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation> = HashMap()
     protected val overlays = Collections.synchronizedMap(HashMap<String, DataClasses.Overlay>())
     
     protected fun withSystemListenersAndCleanup(am: ActivityManager, wm: WindowManager, clos: () -> Unit) {
@@ -41,10 +43,18 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         filter.addAction(Intent.ACTION_LOCALE_CHANGED)
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
         App.APP?.registerReceiver(sysrec, filter)
+        WidgetButtonReceiver.threadCallbacks[Thread.currentThread().id] = fun(m: JsonObject) {
+            val rid = m[WidgetButtonReceiver.RID].asInt
+            val id = m[WidgetButtonReceiver.ID].asInt
+            if (rid != null && rid != -1 && id != -1) {
+                onWidgetButton(rid, id)
+            }
+        }
         try {
             clos()
         } finally {
             Logger.log(1, TAG, "cleanup V0")
+            WidgetButtonReceiver.threadCallbacks.remove(Thread.currentThread().id)
             for (o in overlays.values) {
                 wm.removeView(o.root)
             }
@@ -90,6 +100,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     abstract fun onScreenOn(c: Context, i: Intent)
     abstract fun onTimezoneChanged(c: Context, i: Intent)
     
+    abstract fun onWidgetButton(rid: Int, id: Int)
     
     protected fun generateActivityID(): String {
         val aid = Thread.currentThread().id.toString()+"-"+activityID.toString()
@@ -131,19 +142,6 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
                     v.layoutParams = p
                 }
                 g?.addView(v)
-            }
-        }
-
-        fun setViewWidget(w: DataClasses.WidgetRepresentation, v: RemoteViews, parent: Int?, id: Int) {
-            if (parent == null) {
-                if (w.theme != null) {
-                    v.setInt(id, "setBackgroundColor", w.theme!!.windowBackground)
-                } else {
-                    v.setInt(id, "setBackgroundColor", R.color.widget_background)
-                }
-                w.root = v
-            } else {
-                w.root?.addView(parent, v)
             }
         }
 
@@ -197,11 +195,46 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
             }
             return ! stopped
         }
-
-        fun generateWidgetViewID(rand: Random, w: DataClasses.WidgetRepresentation): Int {
+        
+        // this can only be used in API 31, where you can set the ID of the root element of the Layout in a RemoteViews
+        // this could be used to make unlimited amounts of views in remote layouts, but isn't compatible with earlier API versions
+        /*
+        fun generateWidgetViewID(rand: Random, w: DataClasses.RemoteLayoutRepresentation): Int {
             return Util.generateViewIDRaw(rand, w.usedIds)
         }
+         */
 
+
+        fun getReflectedLayout(name: String): Pair<Int?,Int?> {
+            val layout = R.layout::class.java
+            val id = R.id::class.java
+            return try {
+                Pair(layout.getDeclaredField(name).getInt(null), id.getDeclaredField(name).getInt(null))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Pair(null, null)
+            }
+        }
+        
+        
+        fun getRemoteLayout(c: KClass<*>, index: Int, postfix: String): Pair<Int?,Int?> {
+            return getReflectedLayout("remote_" + c.simpleName?.lowercase() + postfix + index)
+        }
+        
+        fun addRemoteView(c: KClass<*>, rv: DataClasses.RemoteLayoutRepresentation?, parent: Int?, app: Context, postfix: String = ""): Int {
+            if (rv == null) {
+                return -1
+            }
+            val p = parent ?: R.id.root
+            val count = rv.viewCount[c] ?: 0
+            val ids = getRemoteLayout(c, count+1, postfix)
+            if (ids.first != null && ids.second != null) {
+                rv.root?.addView(p, RemoteViews(app.packageName, ids.first!!))
+                rv.viewCount[c] = count + 1
+            }
+            return ids.second ?: -1
+        }
+        
         fun generateBufferID(rand: Random, buffers: MutableMap<Int, DataClasses.SharedBuffer>): Int {
             var id = rand.nextInt(Integer.MAX_VALUE)
             while (buffers.contains(id)) {

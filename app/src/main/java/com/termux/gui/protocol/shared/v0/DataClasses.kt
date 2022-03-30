@@ -11,10 +11,12 @@ import com.termux.gui.R
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
+import kotlin.collections.HashMap
+import kotlin.reflect.KClass
 
 class DataClasses {
     data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory?, val buff: ByteBuffer, val fd: Int?)
-    data class WidgetRepresentation(val usedIds: TreeSet<Int> = TreeSet(), var root: RemoteViews?, var theme: GUIActivity.GUITheme?)
+    data class RemoteLayoutRepresentation(var root: RemoteViews?, val viewCount: HashMap<KClass<*>, Int> = HashMap())
     data class ActivityState(var a: GUIActivity?, @Volatile var saved: Boolean = false, val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(100))
     data class Overlay(val context: Context) {
         val usedIds: TreeSet<Int> = TreeSet()

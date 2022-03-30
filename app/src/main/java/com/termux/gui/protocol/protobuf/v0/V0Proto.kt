@@ -114,6 +114,10 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<GUIProt0
         eventQueue.offer(GUIProt0.Event.newBuilder().setTimezone(GUIProt0.TimezoneEvent.newBuilder().setTz(TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT, c.resources.configuration.locales.get(0)))).build())
     }
 
+    override fun onWidgetButton(rid: Int, id: Int) {
+        TODO("Not yet implemented")
+    }
+
     override fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration) {
         val e = GUIProt0.ConfigEvent.newBuilder()
         val c = GUIProt0.Configuration.newBuilder()

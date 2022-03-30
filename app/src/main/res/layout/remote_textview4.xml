@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/remotetextview4"
+    android:id="@+id/remote_textview4"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 

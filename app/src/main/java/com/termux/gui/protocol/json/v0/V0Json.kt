@@ -50,10 +50,10 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                 val m = ConnectionHandler.gson.fromJson(msg, ConnectionHandler.Message::class.java)
                 //println(m?.method)
                 if (m?.method != null) {
+                    if (HandleRemote.handleRemoteMessage(m, remoteviews, rand, out, app, eventQueue)) continue
                     if (handleActivityTaskMessage(m, activities, tasks, overlays, app, wm, out)) continue
                     if (handleView(m, activities, overlays, rand, out, app, eventQueue)) continue
                     if (HandleBuffer.handleBuffer(m, activities, overlays, rand, out, buffers, main)) continue
-                    if (HandleRemote.handleRemoteMessage(m, remoteviews, rand, out, app, eventQueue)) continue
                 }
                 when (m?.method) {
                     // Activity and Task methods
@@ -373,6 +373,13 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
 
     override fun onTimezoneChanged(c: Context, i: Intent) {
         eventQueue.offer(ConnectionHandler.Event("timezone", ConnectionHandler.gson.toJsonTree(TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT, c.resources.configuration.locales.get(0)))))
+    }
+
+    override fun onWidgetButton(rid: Int, id: Int) {
+        val map = HashMap<String, Any?>()
+        map["aid"] = rid
+        map["id"] = id
+        eventQueue.offer(ConnectionHandler.Event("click", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration) {

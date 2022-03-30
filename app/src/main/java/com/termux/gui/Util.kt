@@ -78,10 +78,7 @@ class Util {
         }
 
         fun generateViewIDRaw(rand: Random, usedIds: MutableSet<Int>): Int {
-            var id = rand.nextInt(Integer.MAX_VALUE)
-            while (usedIds.contains(id)) {
-                id = rand.nextInt(Integer.MAX_VALUE)
-            }
+            val id = generateIndex(rand, usedIds)
             usedIds.add(id)
             return id
         }
