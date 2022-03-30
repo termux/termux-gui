@@ -17,9 +17,9 @@ jobs:
     - name: Clone repository
       uses: actions/checkout@v2
     - name: Build
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebugMinify
     - name: Upload APK
       uses: actions/upload-artifact@v2
       with:
         name: termux-gui-debug.apk
-        path: ./app/build/outputs/apk/debug/app-debug.apk
+        path: ./app/build/intermediates/apk/debugMinify/app-debugMinify.apk
