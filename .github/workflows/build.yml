@@ -22,4 +22,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: termux-gui-debug.apk
-        path: ./app/build/intermediates/apk/debugMinify/app-debugMinify.apk
+        path: ./app/build/outputs/apk/debugMinify/app-debugMinify.apk
