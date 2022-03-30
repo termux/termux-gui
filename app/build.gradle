@@ -43,6 +43,14 @@ android {
         }
     }
     
+    aaptOptions {
+        cruncherEnabled = false
+    }
+    
+    packagingOptions {
+        doNotStrip '**/*.so'
+    }
+    
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -52,12 +60,12 @@ android {
             debuggable true
             signingConfig signingConfigs.debug
             minifyEnabled true
-            shrinkResources true
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release {
             minifyEnabled true
-            shrinkResources true
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

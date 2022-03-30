@@ -20,6 +20,10 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+-dontobfuscate
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
 -printusage usage.txt
 -printseeds seeds.txt
 -printmapping mapping.txt
