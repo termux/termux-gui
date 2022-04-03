@@ -13,6 +13,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
 import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 import com.google.gson.JsonPrimitive
 import com.termux.gui.App
 import com.termux.gui.ConnectionHandler
@@ -193,9 +194,13 @@ class HandleView {
                     val aid = m.params?.get("aid")?.asString
                     val a = activities[aid]
                     val id = m.params?.get("id")?.asInt
-                    val weight = m.params?.get("weight")?.asInt
+                    var weight = m.params?.get("weight")
+                    if (weight is JsonNull)
+                        weight = null
                     val o = overlays[aid]
-                    val position = m.params?.get("position")?.asInt
+                    var position = m.params?.get("position")
+                    if (position is JsonNull)
+                        position = null
                     if (id != null && (weight != null || position != null)) {
                         if (a != null) {
                             V0Shared.runOnUIThreadActivityStarted(a) {
@@ -203,13 +208,13 @@ class HandleView {
                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                 if (p != null) {
                                     if (weight != null) {
-                                        p.weight = weight.toFloat()
+                                        p.weight = weight.asInt.toFloat()
                                     }
                                     v.layoutParams = p
                                     if (position != null) {
                                         val parent = v.parent as? LinearLayout
                                         parent?.removeView(v)
-                                        parent?.addView(v, position)
+                                        parent?.addView(v, position.asInt)
                                     }
                                 }
                             }
@@ -220,13 +225,13 @@ class HandleView {
                                 val p = v?.layoutParams as? LinearLayout.LayoutParams
                                 if (p != null) {
                                     if (weight != null) {
-                                        p.weight = weight.toFloat()
+                                        p.weight = weight.asInt.toFloat()
                                     }
                                     v.layoutParams = p
                                     if (position != null) {
                                         val parent = v.parent as? LinearLayout
                                         parent?.removeView(v)
-                                        parent?.addView(v, position)
+                                        parent?.addView(v, position.asInt)
                                     }
                                 }
                             }
