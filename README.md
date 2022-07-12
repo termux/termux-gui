@@ -35,6 +35,7 @@ If you want to use overlay windows or be able to open windows from the backgroun
 
 - [Python](https://github.com/tareksander/termux-gui-python-bindings)
 - [C/C++](https://github.com/tareksander/termux-gui-c-bindings)
+- [Rust](https://github.com/sweetkitty13/tgui-rs)
 
 ## Using the plugin
 
