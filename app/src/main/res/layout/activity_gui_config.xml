@@ -61,8 +61,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:ems="10"
             android:inputType="number" />
+
+        <TextView
+            android:id="@+id/channel_delete_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/channel_delete_desc" />
+
+        <Button
+            android:id="@+id/channel_delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/channel_delete" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

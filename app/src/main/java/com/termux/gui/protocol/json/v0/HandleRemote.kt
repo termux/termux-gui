@@ -16,14 +16,12 @@ import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.DataOutputStream
 import java.util.*
-import java.util.concurrent.LinkedBlockingQueue
 
 class HandleRemote {
     companion object {
         
         @SuppressLint("ApplySharedPref")
-        fun handleRemoteMessage(m: ConnectionHandler.Message, remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>, rand: Random, out: DataOutputStream, app: Context,
-                                eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : Boolean {
+        fun handleRemoteMessage(m: ConnectionHandler.Message, remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>, rand: Random, out: DataOutputStream, app: Context) : Boolean {
             if ("createRemoteLayout" == m.method) {
                 val id = Util.generateIndex(rand, remoteviews.keys)
                 remoteviews[id] = DataClasses.RemoteLayoutRepresentation(RemoteViews(app.packageName, R.layout.remote_view_root))
@@ -41,6 +39,8 @@ class HandleRemote {
                 Util.sendMessage(out, ConnectionHandler.gson.toJson(V0Shared.addRemoteView(FrameLayout::class, remoteviews[m.params?.get("rid")?.asInt], m.params?.get("parent")?.asInt, app)))
                 return true
             }
+            // Doesn't work currently
+            /*
             if ("addRemoteLinearLayout" == m.method) {
                 if (m.params?.get("vertical")?.asBoolean == false) {
                     Util.sendMessage(out, ConnectionHandler.gson.toJson(V0Shared.addRemoteView(LinearLayout::class, remoteviews[m.params?.get("rid")?.asInt], m.params?.get("parent")?.asInt, app, "_horizontal")))
@@ -49,6 +49,7 @@ class HandleRemote {
                 }
                 return true
             }
+             */
             if ("addRemoteTextView" == m.method) {
                 Util.sendMessage(out, ConnectionHandler.gson.toJson(V0Shared.addRemoteView(TextView::class, remoteviews[m.params?.get("rid")?.asInt], m.params?.get("parent")?.asInt, app)))
                 return true

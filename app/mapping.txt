@@ -1,7 +1,7 @@
 # compiler: R8
 # compiler_version: 3.1.66
 # min_api: 24
-# pg_map_id: 1e0b870
+# pg_map_id: 6db7a1a
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"1.0"}
 android.support.v4.app.RemoteActionCompatParcelizer -> android.support.v4.app.RemoteActionCompatParcelizer:
@@ -21710,7 +21710,7 @@ com.termux.gui.Util$Companion -> com.termux.gui.Util$Companion:
     81:83:int generateViewIDRaw(java.util.Random,java.util.Set) -> generateViewIDRaw
     45:48:int getTaskId(android.app.ActivityManager$RecentTaskInfo) -> getTaskId
     35:40:android.app.ActivityManager$RecentTaskInfo getTaskInfo(java.util.LinkedList,android.app.ActivityManager$AppTask) -> getTaskInfo
-    336:348:void removeViewRecursive(android.view.View,java.util.Set) -> removeViewRecursive
+    337:349:void removeViewRecursive(android.view.View,java.util.Set) -> removeViewRecursive
     95:109:void runOnUIThreadBlocking(java.lang.Runnable) -> runOnUIThreadBlocking
     65:69:void sendMessage(java.io.DataOutputStream,java.lang.String) -> sendMessage
     57:62:void sendMessageFd(java.io.DataOutputStream,java.lang.String,android.net.LocalSocket,java.io.FileDescriptor) -> sendMessageFd
@@ -21728,9 +21728,9 @@ com.termux.gui.Util$Companion -> com.termux.gui.Util$Companion:
     222:225:void setRefreshListener$lambda-5(androidx.swiperefreshlayout.widget.SwipeRefreshLayout,java.util.concurrent.LinkedBlockingQueue,com.termux.gui.ConnectionHandler$Event) -> setRefreshListener$lambda-5
     199:214:void setSpinnerListener(android.widget.Spinner,java.lang.String,java.util.concurrent.LinkedBlockingQueue) -> setSpinnerListener
     229:242:void setTabSelectedListener(com.google.android.material.tabs.TabLayout,java.lang.String,java.util.concurrent.LinkedBlockingQueue) -> setTabSelectedListener
-    257:272:void setTextWatcher(android.widget.TextView,java.lang.String,boolean,java.util.concurrent.LinkedBlockingQueue) -> setTextWatcher
-    278:332:void setTouchListener(android.view.View,java.lang.String,boolean,java.util.concurrent.LinkedBlockingQueue) -> setTouchListener
-    284:327:boolean setTouchListener$lambda-6(java.util.HashMap,android.view.View,java.util.concurrent.LinkedBlockingQueue,android.view.View,android.view.MotionEvent) -> setTouchListener$lambda-6
+    257:273:void setTextWatcher(android.widget.TextView,java.lang.String,boolean,java.util.concurrent.LinkedBlockingQueue) -> setTextWatcher
+    279:333:void setTouchListener(android.view.View,java.lang.String,boolean,java.util.concurrent.LinkedBlockingQueue) -> setTouchListener
+    285:328:boolean setTouchListener$lambda-6(java.util.HashMap,android.view.View,java.util.concurrent.LinkedBlockingQueue,android.view.View,android.view.MotionEvent) -> setTouchListener$lambda-6
     112:138:void setViewActivity(com.termux.gui.GUIActivity,android.view.View,java.lang.Integer) -> setViewActivity
     53:53:int toPX(android.content.Context,int) -> toPX
 com.termux.gui.Util$Companion$$ExternalSyntheticLambda0 -> com.termux.gui.Util$Companion$$ExternalSyntheticLambda0:
@@ -21820,15 +21820,15 @@ com.termux.gui.Util$Companion$setTabSelectedListener$1 -> com.termux.gui.Util$Co
 com.termux.gui.Util$Companion$setTextWatcher$1 -> com.termux.gui.Util$Companion$setTextWatcher$1:
 # {"id":"sourceFile","fileName":"Util.kt"}
     258:258:void <init>(android.widget.TextView,java.lang.String,java.util.concurrent.LinkedBlockingQueue) -> <init>
-    262:269:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    262:270:void afterTextChanged(android.text.Editable) -> afterTextChanged
     259:259:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
     260:260:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
 com.termux.gui.Util$Companion$setTouchListener$PointerData -> com.termux.gui.Util$Companion$setTouchListener$PointerData:
 # {"id":"sourceFile","fileName":"Util.kt"}
-    282:282:void <init>(int,int,int) -> <init>
-    282:282:int getId() -> getId
-    282:282:int getX() -> getX
-    282:282:int getY() -> getY
+    283:283:void <init>(int,int,int) -> <init>
+    283:283:int getId() -> getId
+    283:283:int getX() -> getX
+    283:283:int getY() -> getY
 com.termux.gui.WidgetButtonReceiver -> com.termux.gui.WidgetButtonReceiver:
 # {"id":"sourceFile","fileName":"WidgetButtonReceiver.kt"}
     17:17:void <clinit>() -> <clinit>
@@ -21931,6 +21931,27 @@ com.termux.gui.databinding.RemoteImageview1Binding -> com.termux.gui.databinding
     31:31:android.widget.ImageView getRoot() -> getRoot
     36:36:com.termux.gui.databinding.RemoteImageview1Binding inflate(android.view.LayoutInflater) -> inflate
     42:46:com.termux.gui.databinding.RemoteImageview1Binding inflate(android.view.LayoutInflater,android.view.ViewGroup,boolean) -> inflate
+com.termux.gui.databinding.RemoteImageview2Binding -> com.termux.gui.databinding.RemoteImageview2Binding:
+    23:26:void <init>(android.widget.ImageView,android.widget.ImageView) -> <init>
+    51:57:com.termux.gui.databinding.RemoteImageview2Binding bind(android.view.View) -> bind
+    15:15:android.view.View getRoot() -> getRoot
+    31:31:android.widget.ImageView getRoot() -> getRoot
+    36:36:com.termux.gui.databinding.RemoteImageview2Binding inflate(android.view.LayoutInflater) -> inflate
+    42:46:com.termux.gui.databinding.RemoteImageview2Binding inflate(android.view.LayoutInflater,android.view.ViewGroup,boolean) -> inflate
+com.termux.gui.databinding.RemoteImageview3Binding -> com.termux.gui.databinding.RemoteImageview3Binding:
+    23:26:void <init>(android.widget.ImageView,android.widget.ImageView) -> <init>
+    51:57:com.termux.gui.databinding.RemoteImageview3Binding bind(android.view.View) -> bind
+    15:15:android.view.View getRoot() -> getRoot
+    31:31:android.widget.ImageView getRoot() -> getRoot
+    36:36:com.termux.gui.databinding.RemoteImageview3Binding inflate(android.view.LayoutInflater) -> inflate
+    42:46:com.termux.gui.databinding.RemoteImageview3Binding inflate(android.view.LayoutInflater,android.view.ViewGroup,boolean) -> inflate
+com.termux.gui.databinding.RemoteImageview4Binding -> com.termux.gui.databinding.RemoteImageview4Binding:
+    23:26:void <init>(android.widget.ImageView,android.widget.ImageView) -> <init>
+    51:57:com.termux.gui.databinding.RemoteImageview4Binding bind(android.view.View) -> bind
+    15:15:android.view.View getRoot() -> getRoot
+    31:31:android.widget.ImageView getRoot() -> getRoot
+    36:36:com.termux.gui.databinding.RemoteImageview4Binding inflate(android.view.LayoutInflater) -> inflate
+    42:46:com.termux.gui.databinding.RemoteImageview4Binding inflate(android.view.LayoutInflater,android.view.ViewGroup,boolean) -> inflate
 com.termux.gui.databinding.RemoteLinearlayout1Binding -> com.termux.gui.databinding.RemoteLinearlayout1Binding:
     23:26:void <init>(android.widget.LinearLayout,android.widget.LinearLayout) -> <init>
     51:57:com.termux.gui.databinding.RemoteLinearlayout1Binding bind(android.view.View) -> bind
@@ -22597,8 +22618,8 @@ com.termux.gui.protocol.json.v0.HandleRemote -> com.termux.gui.protocol.json.v0.
 com.termux.gui.protocol.json.v0.HandleRemote$Companion -> com.termux.gui.protocol.json.v0.HandleRemote$Companion:
 # {"id":"sourceFile","fileName":"HandleRemote.kt"}
     22:22:void <init>() -> <init>
-    27:215:boolean handleRemoteMessage(com.termux.gui.ConnectionHandler$Message,java.util.Map,java.util.Random,java.io.DataOutputStream,android.content.Context,java.util.concurrent.LinkedBlockingQueue) -> handleRemoteMessage
-    197:198:void handleRemoteMessage$lambda-0(android.content.Context,java.lang.Integer,android.widget.RemoteViews) -> handleRemoteMessage$lambda-0
+    27:218:boolean handleRemoteMessage(com.termux.gui.ConnectionHandler$Message,java.util.Map,java.util.Random,java.io.DataOutputStream,android.content.Context,java.util.concurrent.LinkedBlockingQueue) -> handleRemoteMessage
+    200:201:void handleRemoteMessage$lambda-0(android.content.Context,java.lang.Integer,android.widget.RemoteViews) -> handleRemoteMessage$lambda-0
 com.termux.gui.protocol.json.v0.HandleRemote$Companion$$ExternalSyntheticLambda0 -> com.termux.gui.protocol.json.v0.HandleRemote$Companion$$ExternalSyntheticLambda0:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}

@@ -2,8 +2,14 @@
 
 [ ] add the "get it on f-droid" badge with the link to the app
 
+
+
 Roadmap:
     - 0.1.5:
+        [ ] button to write logcat to file, as a preparation for separate UID, logcat won't work in Termux then for the plugin
+            [ ] or make a new protocol version for each protocol type that includes a debug socket, which gets debug messages in the specified protocol
+        [ ] add aid to onUserLeaveHint event
+        [ ] method to set selected tab for TabLayout
         [x] GridLayout
         [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
         [ ] binary protocol with protobuf
@@ -11,7 +17,9 @@ Roadmap:
             [ ] View creation methods
             [ ] View manipulation methods
             [ ] Event configuring methods
+            [ ] widget and notification methods
         [ ] make the C library
+        [ ] ability to catch the back button as an event: https://stackoverflow.com/questions/8094715/how-to-catch-event-with-hardware-back-button-on-android
         [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
         [ ] WebView
             - catch all WebChromeClient and WebViewClient events
@@ -28,12 +36,12 @@ Roadmap:
             [ ] more screenshots
             [x] update description and readme
         [ ] try to make the programs in termux-gui-package robust to destroyed Activities
+            [ ] Or don't, I have never seen that an Activity is destroyed alone without the whole process
             [ ] also update the python bindings tutorial for that
         [x] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
         [x] Rework the widgets
         [x] generate unique notification and widget ids in a certain range, so apps cannot guess each others ids
-        [ ] add a button in the settings to delete all notification channels
-        [ ] option to set an executable as a onClick handler in widgets, that then gets started as a Termux task. That should work even when no program is connected to listen to widget events.
+        [x] add a button in the settings to delete all notification channels
         [ ] add everything to the python library
         [ ] add the ability to intercept touch events in layouts
         [ ] add a small helper script to termux-gui-packages, that can be used as a daemon for small stateful widgets.
@@ -46,6 +54,7 @@ Roadmap:
             [ ] A .txt file matching the rest of the filename will be set as the text displayed in the widget.
             [ ] only connect to the plugin to make changes, so the notification isn't always there
     - 1.0.0: !!! start semantic versioning from here !!!
+        [ ] switch to the new plugin system, disable shared uid
         [ ] add more logging
         [ ] add Javadocs
         [ ] fragment connections
@@ -59,20 +68,22 @@ Roadmap:
         [ ] the rest of the views in the protocol
         [ ] make the readme nicer
     - 1.1.0
-        [ ] support for the new widget features fro API 31
+        [ ] support for the new widget features for API 31
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] use dlopen("libandroid.so") for that in C/C++
             [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard and can be focused with requestFocus
+                [ ] https://stackoverflow.com/questions/5419766/how-to-capture-soft-keyboard-input-in-a-view
                 [ ] Also for ImageView
     - 1.2.0:
         [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .
-            The id get looked up once and cached in a weakref Hashmap.
+            The id gets looked up once and cached in a Hashmap (delete when view is removed).
             Future methods with the same subtree argument can then use the cached value and don't have to traverse the whole View tree.
         [ ] enable all methods to operate on a list of view ids rather than a specific view. A lot of time is spend waiting for the UI thread, so clustering
             the methods should improve performance
             [ ] You should also be able to replace the arguments with arrays, in case you want that argument to have a different value for each view, like the text for TextViews
             [ ] think about creating a batch api to group multiple messages together into one runnable for the ui thread
+                [ ] maybe an async version of the api, but only for protobuf 
         
         
 

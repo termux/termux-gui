@@ -37,7 +37,7 @@ message Create {
 
 
 
-// Activity and Task methods
+// Activity, Task and global methods
 
 message NewActivityRequest {
   string tid = 1;
@@ -502,45 +502,47 @@ message CreateTabLayoutResponse {
 
 message Method {
   oneof method {
-    NewActivityRequest newActivity = 1;
-    FinishActivityRequest finishActivity = 2;
-    FinishTaskRequest finishTask = 3;
-    BringTaskToFrontRequest bringTaskToFront = 4;
-    MoveTaskToBackRequest moveTaskToBack = 5;
-    SetThemeRequest setTheme = 6;
-    SetTaskDescriptionRequest setTaskDescription = 7;
-    SetPiPParamsRequest setPiPParams = 8;
-    SetInputModeRequest setInputMode = 9;
-    SetPiPModeRequest setPiPMode = 10;
-    SetPiPModeAutoRequest setPiPModeAuto = 11;
-    ToastRequest toast = 12;
-    KeepScreenOnRequest keepScreenOn = 13;
-    SetOrientationRequest setOrientation = 14;
-    SetPositionRequest setPosition = 15;
-    GetConfigurationRequest getConfiguration = 16;
-    TurnScreenOnRequest turnScreenOn = 17;
-    IsLockedRequest isLocked = 18;
-    RequestUnlockRequest requestUnlock = 19;
-    HideSoftKeyboardRequest hideSoftKeyboard = 20;
-    
-    CreateLinearLayoutRequest createLinearLayout = 21;
-    CreateFrameLayoutRequest createFrameLayout = 22;
-    CreateSwipeRefreshLayoutRequest createSwipeRefreshLayout = 23;
-    CreateTextViewRequest createTextView = 24;
-    CreateEditTextRequest createEditText = 25;
-    CreateButtonRequest createButton = 26;
-    CreateImageViewRequest createImageView = 27;
-    CreateSpaceRequest createSpace = 28;
-    CreateNestedScrollViewRequest createNestedScrollView = 29;
-    CreateHorizontalScrollViewRequest createHorizontalScrollView = 30;
-    CreateRadioGroupRequest createRadioGroup = 31;
-    CreateRadioButtonRequest createRadioButton = 32;
-    CreateCheckboxRequest createCheckbox = 33;
-    CreateToggleButtonRequest createToggleButton = 34;
-    CreateSwitchRequest createSwitch = 35;
-    CreateSpinnerRequest createSpinner = 36;
-    CreateProgressBarRequest createProgressBar = 37;
-    CreateTabLayoutRequest createTabLayout = 38;
+    // Activity, Task and global methods
+    NewActivityRequest newActivity = 16;
+    FinishActivityRequest finishActivity = 17;
+    FinishTaskRequest finishTask = 18;
+    BringTaskToFrontRequest bringTaskToFront = 19;
+    MoveTaskToBackRequest moveTaskToBack = 20;
+    SetThemeRequest setTheme = 21;
+    SetTaskDescriptionRequest setTaskDescription = 22;
+    SetPiPParamsRequest setPiPParams = 23;
+    SetInputModeRequest setInputMode = 24;
+    SetPiPModeRequest setPiPMode = 25;
+    SetPiPModeAutoRequest setPiPModeAuto = 26;
+    ToastRequest toast = 27;
+    KeepScreenOnRequest keepScreenOn = 28;
+    SetOrientationRequest setOrientation = 29;
+    SetPositionRequest setPosition = 30;
+    GetConfigurationRequest getConfiguration = 31;
+    TurnScreenOnRequest turnScreenOn = 32;
+    IsLockedRequest isLocked = 33;
+    RequestUnlockRequest requestUnlock = 34;
+    HideSoftKeyboardRequest hideSoftKeyboard = 35;
+
+    // View creation methods
+    CreateLinearLayoutRequest createLinearLayout = 36;
+    CreateFrameLayoutRequest createFrameLayout = 37;
+    CreateSwipeRefreshLayoutRequest createSwipeRefreshLayout = 38;
+    CreateTextViewRequest createTextView = 39;
+    CreateEditTextRequest createEditText = 40;
+    CreateButtonRequest createButton = 41;
+    CreateImageViewRequest createImageView = 42;
+    CreateSpaceRequest createSpace = 43;
+    CreateNestedScrollViewRequest createNestedScrollView = 44;
+    CreateHorizontalScrollViewRequest createHorizontalScrollView = 45;
+    CreateRadioGroupRequest createRadioGroup = 46;
+    CreateRadioButtonRequest createRadioButton = 47;
+    CreateCheckboxRequest createCheckbox = 48;
+    CreateToggleButtonRequest createToggleButton = 49;
+    CreateSwitchRequest createSwitch = 50;
+    CreateSpinnerRequest createSpinner = 51;
+    CreateProgressBarRequest createProgressBar = 52;
+    CreateTabLayoutRequest createTabLayout = 53;
     
     
   }

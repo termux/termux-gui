@@ -346,6 +346,15 @@ To help with security, the default settings are:
 - content:// URIs are not allowed.
 - Navigation is blocked. You can only set the page content through methods in Termux:GUI.
 
+Methods:
+- allowJavascript: Asks the user for permission to run Javascript in the WebView, if it isn't enabled globally in the options.
+  - Parameters:
+    - id: The id of the WebView.
+    - allow: Whether to allow or disallow Javascript.
+
+
+
+
 
 
 
@@ -368,7 +377,7 @@ Event control:
 
 RemoteViews:  
 RemoteViews are used for homescreen widgets and custom notifications.  
-Due to Android limitations, you can only have a specific number of distinct Views of each type.  
+Due to Android limitations, you can only have a specific number of distinct Views of each type per RemoteViews.  
 - createRemoteLayout: Creates a new remote Layout. Returns the id for the remote Layout
 - deleteRemoteLayout: Deletes a remote Layout.
   - params:
@@ -377,11 +386,11 @@ Due to Android limitations, you can only have a specific number of distinct View
   - params:
     - rid: id of the remote Layout.
     - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
-- addRemoteLinearLayout: creates a LinearLayout in a remote Layout. Returns the View id in the Layout.
+- <s>addRemoteLinearLayout: creates a LinearLayout in a remote Layout. Returns the View id in the Layout.</s> Doesn't work currently.<s>
   - params:
     - rid: id of the remote Layout.
     - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
-    - vertical: The same as a normal LinearLayout
+    - vertical: The same as a normal LinearLayout</s>
 - addRemoteTextView: creates a TextView in a remote Layout. Returns the View id in the Layout.
   - params:
     - rid: id of the remote Layout.
