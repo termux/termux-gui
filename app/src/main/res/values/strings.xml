@@ -14,6 +14,6 @@
     <string name="setting_service_timeout">How many seconds the service stays active when there are no connections. If a program wants to connect and the service is still active, the startup time is shorter. A negative value means the service is never shut down automatically.</string>
     <string name="service_background">If enabled, this makes the service go into the background and hide the notification if there are no active connections. Use this with a negative value above to let the service always be ready in the background.</string>
     <string name="loglevel_description">This sets the amount of information available in logcat. 0 is good to not pollute the Termux logcat, but doesn\'t give any information. Currently values up to 5 enable progressively more information.</string>
-    
-    
+    <string name="channel_delete_desc">This deletes all notification channels from the notification settings screen. Use this if there are too many unused notification channels in the options.</string>
+    <string name="channel_delete">delete all notification channels</string>
 </resources>
