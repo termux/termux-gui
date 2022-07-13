@@ -151,7 +151,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<GUIProt0
     }
 
     override fun onUserLeaveHint(a: GUIActivity) {
-        eventQueue.offer(GUIProt0.Event.newBuilder().setUserLeaveHint(GUIProt0.UserLeaveHintEvent.newBuilder()).build())
+        eventQueue.offer(GUIProt0.Event.newBuilder().setUserLeaveHint(GUIProt0.UserLeaveHintEvent.newBuilder().setAid(a.intent?.dataString)).build())
     }
 
 

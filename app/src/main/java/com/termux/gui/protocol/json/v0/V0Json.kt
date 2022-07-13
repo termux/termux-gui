@@ -394,7 +394,9 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
 
     override fun onUserLeaveHint(a: GUIActivity) {
         try {
-            eventQueue.add(ConnectionHandler.Event("UserLeaveHint", null))
+            val map = HashMap<String, Any?>()
+            map["aid"] = a.intent?.dataString
+            eventQueue.add(ConnectionHandler.Event("UserLeaveHint", ConnectionHandler.gson.toJsonTree(map)))
         } catch (ignored: Exception) {}
     }
 }

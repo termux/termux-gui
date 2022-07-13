@@ -7,8 +7,8 @@
 Roadmap:
     - 0.1.5:
         [ ] button to write logcat to file, as a preparation for separate UID, logcat won't work in Termux then for the plugin
-            [ ] or make a new protocol version for each protocol type that includes a debug socket, which gets debug messages in the specified protocol
-        [ ] add aid to onUserLeaveHint event
+            [ ] add a method to set the debug level. Debug messages are then send as events.
+        [x] add aid to onUserLeaveHint event
         [ ] method to set selected tab for TabLayout
         [x] GridLayout
         [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
