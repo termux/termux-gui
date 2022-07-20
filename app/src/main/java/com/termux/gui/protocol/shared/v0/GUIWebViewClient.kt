@@ -1,3 +1,5 @@
+@file:Suppress("OverrideDeprecatedMigration")
+
 package com.termux.gui.protocol.shared.v0
 
 import android.graphics.Bitmap
@@ -6,7 +8,8 @@ import android.os.Message
 import android.view.KeyEvent
 import android.webkit.*
 
-class GUIWebViewClient() : WebViewClient() {
+class GUIWebViewClient : WebViewClient() {
+    @Deprecated("Deprecated in Java")
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         return super.shouldOverrideUrlLoading(view, url)
     }
@@ -31,6 +34,8 @@ class GUIWebViewClient() : WebViewClient() {
         super.onPageCommitVisible(view, url)
     }
 
+    
+    @Deprecated("Deprecated in Java")
     override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
         return super.shouldInterceptRequest(view, url)
     }
@@ -39,6 +44,8 @@ class GUIWebViewClient() : WebViewClient() {
         return super.shouldInterceptRequest(view, request)
     }
 
+    
+    @Deprecated("Deprecated in Java")
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
         super.onReceivedError(view, errorCode, description, failingUrl)
     }

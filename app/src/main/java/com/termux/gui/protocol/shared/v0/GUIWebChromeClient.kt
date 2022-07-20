@@ -45,6 +45,7 @@ class GUIWebChromeClient() : WebChromeClient() {
         request?.deny()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
         onConsoleMessage(ConsoleMessage(message,sourceID, lineNumber, ConsoleMessage.MessageLevel.LOG))
     }
