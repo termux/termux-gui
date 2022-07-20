@@ -1,5 +1,6 @@
 syntax = "proto3";
 
+package tgui.proto0;
 option java_package = "com.termux.gui.protocol.protobuf.v0";
 
 // Types used by multiple messages
@@ -25,7 +26,19 @@ message Create {
   int32 parent = 2;
 }
 
-
+message Size {
+  float value = 1;
+  // see https://developer.android.com/guide/topics/resources/more-resources.html#Dimension
+  enum Unit {
+    dp = 0; // density-independent pixels
+    sp = 1; // scale-independent pixels
+    px = 2; // pixels
+    mm = 3; // millimeters
+    in = 4; // inches
+    pt = 5; // points
+  }
+  Unit unit = 2;
+}
 
 
 
@@ -669,6 +682,19 @@ message PiPChangedEvent {
   bool pip = 2;
 }
 
+message BackButtonEvent {
+  string aid = 1;
+}
+
+
+
+// Debug events
+
+message ExceptionDebugEvent {
+  string stacktrace = 1;
+}
+
+
 message Event {
   oneof event {
     ClickEvent click = 1;
@@ -693,6 +719,18 @@ message Event {
     ScreenOnEvent screenOn = 33;
     UserLeaveHintEvent userLeaveHint = 34;
     PiPChangedEvent pip = 35;
+    BackButtonEvent back = 36;
+    
+    
+    // Debug events
+    
+    ExceptionDebugEvent exception = 1000;
+    
+    
+    
+    
+    
+    
   }
 }
 

@@ -46,7 +46,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         WidgetButtonReceiver.threadCallbacks[Thread.currentThread().id] = fun(m: JsonObject) {
             val rid = m[WidgetButtonReceiver.RID].asInt
             val id = m[WidgetButtonReceiver.ID].asInt
-            if (rid != null && rid != -1 && id != -1) {
+            if (rid != -1 && id != -1) {
                 onWidgetButton(rid, id)
             }
         }
@@ -93,7 +93,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     abstract fun onActivityPaused(state: DataClasses.ActivityState)
     abstract fun onActivityStopped(state: DataClasses.ActivityState)
     abstract fun onActivityDestroyed(state: DataClasses.ActivityState)
-
+    
     abstract fun onAirplaneModeChanged(c: Context, i: Intent)
     abstract fun onLocaleChanged(c: Context, i: Intent)
     abstract fun onScreenOff(c: Context, i: Intent)

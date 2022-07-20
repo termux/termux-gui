@@ -7,6 +7,7 @@ import termuxgui as tg
 with tg.Connection() as c:
     
     a = tg.Activity(c, dialog=True)
+    a.interceptbackbutton(True)
     
     l = tg.LinearLayout(a)
     

@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonElement
 import java.io.Serializable
 import java.util.*
-import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * Base class for custom user Activities.
@@ -20,6 +19,7 @@ open class GUIActivity : AppCompatActivity() {
         fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration)
         fun onPictureInPictureModeChanged(a: GUIActivity, isInPictureInPictureMode: Boolean)
         fun onUserLeaveHint(a: GUIActivity)
+        fun onBackButton(a: GUIActivity)
     }
     
     
@@ -41,7 +41,7 @@ open class GUIActivity : AppCompatActivity() {
             }
         }
     
-    data class ActivityData(var autopip: Boolean = false) : Serializable
+    data class ActivityData(var autopip: Boolean = false, var backEvent: Boolean = false) : Serializable
     var data = ActivityData()
     
     data class GUITheme(val statusBarColor: Int, val colorPrimary: Int, var windowBackground: Int, val textColor: Int, val colorAccent: Int) : Serializable
@@ -69,7 +69,14 @@ open class GUIActivity : AppCompatActivity() {
     }
     
     val aid: String? get() {return intent.dataString}
-    
+
+    override fun onBackPressed() {
+        if (data.backEvent) {
+            listener?.onBackButton(this)
+        } else {
+            super.onBackPressed()
+        }
+    }
     
     fun configToJson(conf: Configuration?): JsonElement? {
         val c: Configuration = conf ?: resources.configuration ?: return ConnectionHandler.gson.toJsonTree(emptyArray<Any>())

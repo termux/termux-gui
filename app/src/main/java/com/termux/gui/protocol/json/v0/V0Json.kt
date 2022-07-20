@@ -152,7 +152,10 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                         continue
                     }
                 }
-                eventQueue.offer(ConnectionHandler.INVALID_METHOD)
+                eventQueue.offer(ConnectionHandler.Event(
+                    "invalidMethod",
+                    ConnectionHandler.gson.toJsonTree("invalid method")
+                ))
             }
         }
     }
@@ -355,6 +358,12 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
         eventQueue.offer(ConnectionHandler.Event("destroy", ConnectionHandler.gson.toJsonTree(map)))
     }
 
+    override fun onBackButton(a: GUIActivity) {
+        val map = HashMap<String, Any?>()
+        map["aid"] = a.intent?.dataString
+        eventQueue.offer(ConnectionHandler.Event("back", ConnectionHandler.gson.toJsonTree(map)))
+    }
+    
     override fun onAirplaneModeChanged(c: Context, i: Intent) {
         eventQueue.offer(ConnectionHandler.Event("airplane", ConnectionHandler.gson.toJsonTree(i.getBooleanExtra("state", false))))
     }

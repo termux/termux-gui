@@ -15,15 +15,13 @@ import com.google.android.material.tabs.TabLayout
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonPrimitive
-import com.termux.gui.App
-import com.termux.gui.ConnectionHandler
-import com.termux.gui.R
-import com.termux.gui.Util
+import com.termux.gui.*
 import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.DataOutputStream
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
+
 
 class HandleView {
     companion object {

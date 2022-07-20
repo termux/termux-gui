@@ -32,7 +32,6 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, val s
     companion object {
         private val TAG: String? = ConnectionHandler::class.java.canonicalName
         val gson = Gson()
-        val INVALID_METHOD: Event = Event("invalidMethod", gson.toJsonTree("invalid method"))
         init {
             System.loadLibrary("gui")
         }

@@ -113,6 +113,10 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<GUIProt0
     override fun onTimezoneChanged(c: Context, i: Intent) {
         eventQueue.offer(GUIProt0.Event.newBuilder().setTimezone(GUIProt0.TimezoneEvent.newBuilder().setTz(TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT, c.resources.configuration.locales.get(0)))).build())
     }
+    
+    override fun onBackButton(a: GUIActivity) {
+        eventQueue.offer(GUIProt0.Event.newBuilder().setBack(GUIProt0.BackButtonEvent.newBuilder().setAid(a.aid)).build())
+    }
 
     override fun onWidgetButton(rid: Int, id: Int) {
         TODO("Not yet implemented")

@@ -7,20 +7,11 @@
 Roadmap:
     - 0.1.5:
         [ ] button to write logcat to file, as a preparation for separate UID, logcat won't work in Termux then for the plugin
-            [ ] add a method to set the debug level. Debug messages are then send as events.
+            [ ] add a method to set the debug level for a connection. Debug messages are then send as events.
         [x] add aid to onUserLeaveHint event
         [ ] method to set selected tab for TabLayout
-        [x] GridLayout
-        [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
-        [ ] binary protocol with protobuf
-            [ ] Activity and Task methods
-            [ ] View creation methods
-            [ ] View manipulation methods
-            [ ] Event configuring methods
-            [ ] widget and notification methods
-        [ ] make the C library
-        [ ] ability to catch the back button as an event: https://stackoverflow.com/questions/8094715/how-to-catch-event-with-hardware-back-button-on-android
-        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
+        [ ] add the ability to intercept touch events in layouts
+        [ ] notifications with custom layout
         [ ] WebView
             - catch all WebChromeClient and WebViewClient events
             - Run javascript in the WebView with user consent.
@@ -31,32 +22,28 @@ Roadmap:
             [ ] load from URI
             [ ] setAllowFileAccess
             [ ] setJavascriptEnabled
+        [ ] add everything to the python library
+        [x] GridLayout
+        [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
+        [ ] binary protocol with protobuf
+            [ ] Activity and Task methods
+            [ ] View creation methods
+            [ ] View manipulation methods
+            [ ] Event configuring methods
+            [ ] widget and notification methods
+        [ ] make the C library
+        [x] ability to catch the back button as an event: https://stackoverflow.com/questions/8094715/how-to-catch-event-with-hardware-back-button-on-android
+        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
         [ ] update the f-droid metadata
-            [x] write a changelog
+            [ ] write a changelog
             [ ] more screenshots
             [x] update description and readme
-        [ ] try to make the programs in termux-gui-package robust to destroyed Activities
-            [ ] Or don't, I have never seen that an Activity is destroyed alone without the whole process
-            [ ] also update the python bindings tutorial for that
-        [x] notifications with custom layout (the same principle as with widgets, probably just make a special RemoteViews interface)
         [x] Rework the widgets
         [x] generate unique notification and widget ids in a certain range, so apps cannot guess each others ids
         [x] add a button in the settings to delete all notification channels
-        [ ] add everything to the python library
-        [ ] add the ability to intercept touch events in layouts
-        [ ] add a small helper script to termux-gui-packages, that can be used as a daemon for small stateful widgets.
-            [ ] registers itself to start at boot with Termux:Boot, so the widget state can be restored at startup
-            [ ] watches with inotify on ~/.image-shortcuts
-            [ ] text files should contain:
-                [ ] in the first line only the widget id
-                [ ] in the second line the path to the executable to be run (newlines in paths not supported)
-            [ ] A .png file matching the rest of the filename will be set as the icon displayed in the widget.
-            [ ] A .txt file matching the rest of the filename will be set as the text displayed in the widget.
-            [ ] only connect to the plugin to make changes, so the notification isn't always there
     - 1.0.0: !!! start semantic versioning from here !!!
-        [ ] switch to the new plugin system, disable shared uid
+        [ ] switch to the new plugin system, deprecate shared uid
         [ ] add more logging
-        [ ] add Javadocs
         [ ] fragment connections
             [ ] make a method to check if it's a fragment connection
             [ ] use 0-0 as the dummy activity id for the activity the fragment connection is in.
@@ -65,9 +52,13 @@ Roadmap:
         [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
         [ ] RelativeLayout
         [ ] ConstraintLayout
+        [ ] normal notifications in addition to custom ones
+        [ ] fullscreen mode for Activities (hiding the 3 buttons and the notification bar)
         [ ] the rest of the views in the protocol
         [ ] make the readme nicer
+        [ ] add Javadocs
     - 1.1.0
+        [ ] remove shared uid
         [ ] support for the new widget features for API 31
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions

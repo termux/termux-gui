@@ -263,6 +263,15 @@ class HandleActivityAndTask {
                     }
                     return true
                 }
+                "interceptBackButton" -> {
+                    val aid = m.params?.get("aid")?.asString
+                    val intercept = m.params?.get("intercept")?.asBoolean
+                    val a = activities[aid]
+                    if (a != null && intercept != null) {
+                        a.a?.data?.backEvent = intercept
+                    }
+                    return true
+                }
             }
             return false
         }

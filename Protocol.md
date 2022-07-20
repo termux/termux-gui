@@ -137,6 +137,10 @@ These methods control Android [Activities](https://developer.android.com/referen
 - hideSoftKeyboard: Forces to soft keyboard to hide.
   - Parameters:
     - aid: The Activity id of the Activity that wants to hide the soft keyboard.
+- interceptBackButton: 
+  - Parameters:
+    - aid: The Activity id of the Activity that wants intercept back button presses.
+    - intercept: A boolean, whether to intercept back button presses and send an event or to use the default action of finishing the Activity.
 
 
 
@@ -511,8 +515,9 @@ Event types:
   - input: Send from EditText where you set the input to blocked
   - cut: Send from EditText where you set the input to blocked
   - paste: Send from EditText where you set the input to blocked
-  - text: Send when the Text of the View changed, even when the text was chenged with setText.
+  - text: Send when the Text of the View changed, even when the text was changed with setText.
     - Additional values: text: The new text of the view
+  - back: Send when you set an Activity to intercept the back button press and the back button is pressed. No id, since it originates from the Activity.
 - [Activity Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) :
   - values for all:
     - aid: The id of the Activity.

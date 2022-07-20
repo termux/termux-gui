@@ -9,6 +9,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
 import com.termux.gui.ConnectionHandler
+import com.termux.gui.Logger
 import com.termux.gui.Util
 import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.V0Shared
@@ -293,6 +294,21 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setTabSelectedListener(v, aid, eventQueue)
+                            Util.setViewActivity(it, v, parent)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createGridLayout") {
+                        var id = -1
+                        V0Shared.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = GridLayout(app)
+                            val rows: Int = m.params!!["rows"]!!.asInt
+                            val cols: Int = m.params!!["cols"]!!.asInt
+                            v.rowCount = rows
+                            v.columnCount = cols
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
