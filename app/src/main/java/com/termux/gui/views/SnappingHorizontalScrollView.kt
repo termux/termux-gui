@@ -7,7 +7,6 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import androidx.core.view.GestureDetectorCompat
-import androidx.core.widget.NestedScrollView
 import kotlin.math.abs
 
 

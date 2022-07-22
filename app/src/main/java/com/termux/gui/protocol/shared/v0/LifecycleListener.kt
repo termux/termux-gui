@@ -4,11 +4,9 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.Application
 import android.os.Bundle
-import com.termux.gui.ConnectionHandler
 import com.termux.gui.GUIActivity
 import com.termux.gui.Util
 import java.util.*
-import java.util.concurrent.LinkedBlockingQueue
 
 class LifecycleListener(private val v0: V0Shared, private val activities: MutableMap<String, DataClasses.ActivityState>,
                         private val tasks: LinkedList<ActivityManager.AppTask>, private val am: ActivityManager) : Application.ActivityLifecycleCallbacks {

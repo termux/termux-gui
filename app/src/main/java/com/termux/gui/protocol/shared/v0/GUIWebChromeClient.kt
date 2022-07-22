@@ -4,7 +4,8 @@ import android.net.Uri
 import android.os.Message
 import android.webkit.*
 
-class GUIWebChromeClient() : WebChromeClient() {
+@Suppress("OVERRIDE_DEPRECATION")
+class GUIWebChromeClient : WebChromeClient() {
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
         super.onProgressChanged(view, newProgress)
     }
@@ -45,7 +46,7 @@ class GUIWebChromeClient() : WebChromeClient() {
         request?.deny()
     }
 
-    @Deprecated("Deprecated in Java")
+    
     override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
         onConsoleMessage(ConsoleMessage(message,sourceID, lineNumber, ConsoleMessage.MessageLevel.LOG))
     }

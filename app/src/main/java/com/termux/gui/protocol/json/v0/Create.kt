@@ -9,7 +9,6 @@ import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
 import com.termux.gui.ConnectionHandler
-import com.termux.gui.Logger
 import com.termux.gui.Util
 import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.V0Shared

@@ -5,9 +5,6 @@ import android.content.Intent
 import android.net.LocalServerSocket
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Test
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.lang.RuntimeException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException

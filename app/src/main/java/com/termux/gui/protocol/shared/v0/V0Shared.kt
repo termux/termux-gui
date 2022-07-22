@@ -28,10 +28,10 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     protected val rand = Random()
 
     protected val tasks = LinkedList<ActivityManager.AppTask>()
-    protected val activities = Collections.synchronizedMap(HashMap<String, DataClasses.ActivityState>())
+    protected val activities: MutableMap<String, DataClasses.ActivityState> = Collections.synchronizedMap(HashMap<String, DataClasses.ActivityState>())
     protected val buffers: MutableMap<Int, DataClasses.SharedBuffer> = HashMap()
     protected val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation> = HashMap()
-    protected val overlays = Collections.synchronizedMap(HashMap<String, DataClasses.Overlay>())
+    protected val overlays: MutableMap<String, DataClasses.Overlay> = Collections.synchronizedMap(HashMap<String, DataClasses.Overlay>())
     
     protected fun withSystemListenersAndCleanup(am: ActivityManager, wm: WindowManager, clos: () -> Unit) {
         val lifecycleCallbacks = LifecycleListener(this, activities, tasks, am)

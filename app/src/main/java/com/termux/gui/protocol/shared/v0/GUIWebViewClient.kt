@@ -8,8 +8,9 @@ import android.os.Message
 import android.view.KeyEvent
 import android.webkit.*
 
+@Suppress("OVERRIDE_DEPRECATION")
 class GUIWebViewClient : WebViewClient() {
-    @Deprecated("Deprecated in Java")
+    
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         return super.shouldOverrideUrlLoading(view, url)
     }
@@ -35,7 +36,7 @@ class GUIWebViewClient : WebViewClient() {
     }
 
     
-    @Deprecated("Deprecated in Java")
+    
     override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
         return super.shouldInterceptRequest(view, url)
     }

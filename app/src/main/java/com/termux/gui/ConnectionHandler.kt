@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue
  * Checks if the connection comes from a Termux program and terminates the connection if not.
  * Handles the protocol negotiation, then delegates the connection further to the correct handler for the protocol type and version.
  */
-class ConnectionHandler(private val request: GUIService.ConnectionRequest, val service: GUIService) : Runnable {
+class ConnectionHandler(private val request: GUIService.ConnectionRequest, private val service: GUIService) : Runnable {
     class Message {
         var method: String? = null
         var params: HashMap<String, JsonElement>? = null
