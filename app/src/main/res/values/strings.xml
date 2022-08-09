@@ -16,4 +16,11 @@
     <string name="loglevel_description">This sets the amount of information available in logcat. 0 is good to not pollute the Termux logcat, but doesn\'t give any information. Currently values up to 5 enable progressively more information.</string>
     <string name="channel_delete_desc">This deletes all notification channels from the notification settings screen. Use this if there are too many unused notification channels in the options.</string>
     <string name="channel_delete">delete all notification channels</string>
+    <string name="javascript_dialog_title">Javascript execution requested</string>
+    <string name="javascript_dialog_content">The program wants to enable Javascript execution in a WebView. If the program allows untrusted Javascript to run, data from other programs using the plugin can be leaked. Activate at your own risk. You can disable this prompt in the settings.</string>
+    <string name="javascript_button_allow">allow Javascript</string>
+    <string name="javascript_button_deny">don\'t allow Javascript</string>
+    <string name="javascript_option">Allow Javascript without dialog</string>
+    <string name="dump_logcat">Dump logcat to file</string>
+    <string name="logcat_written">logcat written</string>
 </resources>

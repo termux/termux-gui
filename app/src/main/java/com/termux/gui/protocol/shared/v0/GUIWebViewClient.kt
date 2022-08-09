@@ -6,17 +6,22 @@ import android.graphics.Bitmap
 import android.net.http.SslError
 import android.os.Message
 import android.view.KeyEvent
+import android.view.ViewGroup
 import android.webkit.*
 
 @Suppress("OVERRIDE_DEPRECATION")
-class GUIWebViewClient : WebViewClient() {
-    
+class GUIWebViewClient(private val l: WebEventListener, var allowNavigation: Boolean = false) : WebViewClient() {
+    @Suppress("Deprecation")
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-        return super.shouldOverrideUrlLoading(view, url)
+        if (url != null)
+            l.onNavigation(url)
+        return ! allowNavigation
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-        return super.shouldOverrideUrlLoading(view, request)
+        if (request != null)
+            l.onNavigation(request.url.toString())
+        return ! allowNavigation
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -36,7 +41,7 @@ class GUIWebViewClient : WebViewClient() {
     }
 
     
-    
+    @Suppress("Deprecation")
     override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
         return super.shouldInterceptRequest(view, url)
     }
@@ -45,18 +50,22 @@ class GUIWebViewClient : WebViewClient() {
         return super.shouldInterceptRequest(view, request)
     }
 
-    
-    @Deprecated("Deprecated in Java")
+
+    @Suppress("Deprecation")
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
-        super.onReceivedError(view, errorCode, description, failingUrl)
+        if (failingUrl != null && description != null)
+            l.onReceivedError(failingUrl, description, errorCode)
     }
 
+    @Suppress("Deprecation")
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-        super.onReceivedError(view, request, error)
+        if (error != null && request != null)
+            onReceivedError(view, error.errorCode, error.description.toString(), request.url.toString())
     }
 
     override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
-        super.onReceivedHttpError(view, request, errorResponse)
+        if (request != null && errorResponse != null)
+            l.onHTTPError(request.url.toString(), errorResponse.statusCode)
     }
 
     override fun onFormResubmission(view: WebView?, dontResend: Message?, resend: Message?) {
@@ -68,7 +77,7 @@ class GUIWebViewClient : WebViewClient() {
     }
 
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-        super.onReceivedSslError(view, handler, error)
+        handler?.cancel()
     }
 
     override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
@@ -96,7 +105,12 @@ class GUIWebViewClient : WebViewClient() {
     }
 
     override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
-        return super.onRenderProcessGone(view, detail)
+        if (view != null) {
+            (view.parent as? ViewGroup)?.removeView(view)
+            l.onRenderProcessGone(view)
+            view.destroy()
+        }
+        return true
     }
 
     override fun onSafeBrowsingHit(view: WebView?, request: WebResourceRequest?, threatType: Int, callback: SafeBrowsingResponse?) {

@@ -3,6 +3,9 @@ syntax = "proto3";
 package tgui.proto0;
 option java_package = "com.termux.gui.protocol.protobuf.v0";
 
+
+
+
 // Types used by multiple messages
 
 message Configuration {
@@ -21,9 +24,22 @@ message Configuration {
   float density = 10;
 }
 
+enum Visibility {
+    visible = 0;
+    hidden = 1;
+    gone = 2;
+}
+
 message Create {
   string aid = 1;
   int32 parent = 2;
+  Visibility v = 3;
+}
+
+
+message View {
+  string aid = 1;
+  int32 id = 2;
 }
 
 message Size {
@@ -63,6 +79,7 @@ message NewActivityRequest {
     overlay = 5;
   }
   ActivityType type = 2;
+  bool interceptBackButton = 3;
 }
 
 message NewActivityResponse {
@@ -280,7 +297,23 @@ message HideSoftKeyboardResponse {
   bool success = 1;
 }
 
+message InterceptBackButtonRequest {
+  string aig = 1;
+  bool intercept = 2;
+}
 
+message InterceptBackButtonResponse {
+  bool success = 1;
+}
+
+
+message GetVersionRequest {
+  
+}
+
+message GetVersionResponse {
+  int32 versionCode = 1;
+}
 
 
 // View creation methods
@@ -483,6 +516,24 @@ message CreateTabLayoutResponse {
   int32 id = 1;
 }
 
+message CreateGridLayoutRequest {
+  Create data = 1;
+  uint32 rows = 2;
+  uint32 cols = 3;
+}
+
+message CreateGridLayoutResponse {
+  int32 id = 1;
+}
+
+message CreateWebViewRequest {
+  Create data = 1;
+}
+
+message CreateWebViewResponse {
+  int32 id = 1;
+}
+
 
 
 
@@ -536,26 +587,54 @@ message Method {
     IsLockedRequest isLocked = 33;
     RequestUnlockRequest requestUnlock = 34;
     HideSoftKeyboardRequest hideSoftKeyboard = 35;
+    InterceptBackButtonRequest interceptBackButton = 36;
+    GetVersionRequest version = 37;
+    
 
     // View creation methods
-    CreateLinearLayoutRequest createLinearLayout = 36;
-    CreateFrameLayoutRequest createFrameLayout = 37;
-    CreateSwipeRefreshLayoutRequest createSwipeRefreshLayout = 38;
-    CreateTextViewRequest createTextView = 39;
-    CreateEditTextRequest createEditText = 40;
-    CreateButtonRequest createButton = 41;
-    CreateImageViewRequest createImageView = 42;
-    CreateSpaceRequest createSpace = 43;
-    CreateNestedScrollViewRequest createNestedScrollView = 44;
-    CreateHorizontalScrollViewRequest createHorizontalScrollView = 45;
-    CreateRadioGroupRequest createRadioGroup = 46;
-    CreateRadioButtonRequest createRadioButton = 47;
-    CreateCheckboxRequest createCheckbox = 48;
-    CreateToggleButtonRequest createToggleButton = 49;
-    CreateSwitchRequest createSwitch = 50;
-    CreateSpinnerRequest createSpinner = 51;
-    CreateProgressBarRequest createProgressBar = 52;
-    CreateTabLayoutRequest createTabLayout = 53;
+    CreateLinearLayoutRequest createLinearLayout = 100;
+    CreateFrameLayoutRequest createFrameLayout = 101;
+    CreateSwipeRefreshLayoutRequest createSwipeRefreshLayout = 102;
+    CreateTextViewRequest createTextView = 103;
+    CreateEditTextRequest createEditText = 104;
+    CreateButtonRequest createButton = 105;
+    CreateImageViewRequest createImageView = 106;
+    CreateSpaceRequest createSpace = 107;
+    CreateNestedScrollViewRequest createNestedScrollView = 108;
+    CreateHorizontalScrollViewRequest createHorizontalScrollView = 109;
+    CreateRadioGroupRequest createRadioGroup = 110;
+    CreateRadioButtonRequest createRadioButton = 111;
+    CreateCheckboxRequest createCheckbox = 112;
+    CreateToggleButtonRequest createToggleButton = 113;
+    CreateSwitchRequest createSwitch = 114;
+    CreateSpinnerRequest createSpinner = 115;
+    CreateProgressBarRequest createProgressBar = 116;
+    CreateTabLayoutRequest createTabLayout = 117;
+    CreateWebViewRequest createWebView = 128;
+    
+    
+    // View manipulation methods
+    
+    // = 200;
+    
+    
+    
+    // RemoteViews methods
+    
+    // = 300;
+    
+    
+    
+    // WebView methods
+    
+    // = 400;
+    
+    
+    
+    // Event control methods
+    
+    // = 500;
+    
     
     
   }
@@ -603,7 +682,7 @@ message ConfigEvent {
 
 message ClickEvent {
   string aid = 1;
-  string id = 2;
+  int32 id = 2;
   int32 x = 3;
   int32 y = 4;
   bool set = 5;
@@ -611,47 +690,68 @@ message ClickEvent {
 
 message LongClickEvent {
   string aid = 1;
-  string id = 2;
+  int32 id = 2;
 }
 
 message FocusChangeEvent {
   string aid = 1;
-  string id = 2;
+  int32 id = 2;
   bool focus = 3;
 }
 
 message TouchEvent {
   string aid = 1;
-  string id = 2;
-  // TODO finish touch event data
-  message Touch {
-    int32 x = 1;
-    int32 y = 2;
+  int32 id = 2;
+  enum Action {
+    down = 0;
+    up = 1;
+    pointerDown = 2;
+    pointerUp = 3;
+    cancel = 4;
+    move = 5;
   }
-  repeated Touch touches = 3;
+  Action action = 3;
+  message Touch {
+    message Pointer {
+      int32 x = 1;
+      int32 y = 2;
+      int32 id = 3;
+    }
+    repeated Pointer pointers = 4;
+  }
+  repeated Touch touches = 4;
+  int32 index = 5;
+  uint64 time = 6;
 }
 
 message TextEvent {
   string aid = 1;
-  string id = 2;
+  int32 id = 2;
 }
 
 message RefreshEvent {
   string aid = 1;
-  string id = 2;
+  int32 id = 2;
 }
 
 message SelectedEvent {
   string aid = 1;
-  string id = 2;
-  string selected = 3;
+  int32 id = 2;
+  int32 selected = 3;
 }
 
 message ItemSelectedEvent {
   string aid = 1;
-  string id = 2;
+  int32 id = 2;
   string selected = 3;
 }
+
+message TabSelectedEvent {
+  string aid = 1;
+  int32 id = 2;
+  int32 tab = 4;
+}
+
 
 message AirplaneEvent {
   bool active = 1;
@@ -686,7 +786,19 @@ message BackButtonEvent {
   string aid = 1;
 }
 
+message RemoteClickEvent {
+  uint32 rid = 1;
+  uint32 id = 2;
+}
 
+message NotificationEvent {
+  uint32 id = 1;
+}
+
+message NotificationActionEvent {
+  uint32 id = 1;
+  uint32 action = 2;
+}
 
 // Debug events
 
@@ -712,14 +824,19 @@ message Event {
     RefreshEvent refresh = 26;
     SelectedEvent selected = 27;
     ItemSelectedEvent itemSelected = 28;
-    AirplaneEvent airplane = 29;
-    LocaleEvent locale = 30;
-    TimezoneEvent timezone = 31;
-    ScreenOffEvent screenOff = 32;
-    ScreenOnEvent screenOn = 33;
-    UserLeaveHintEvent userLeaveHint = 34;
-    PiPChangedEvent pip = 35;
-    BackButtonEvent back = 36;
+    TabSelectedEvent tabSelected = 29;
+    AirplaneEvent airplane = 30;
+    LocaleEvent locale = 31;
+    TimezoneEvent timezone = 32;
+    ScreenOffEvent screenOff = 33;
+    ScreenOnEvent screenOn = 34;
+    UserLeaveHintEvent userLeaveHint = 35;
+    PiPChangedEvent pip = 36;
+    BackButtonEvent back = 37;
+    RemoteClickEvent remoteClick = 38;
+    NotificationEvent notification = 39;
+    NotificationActionEvent notificationAction = 40;
+    
     
     
     // Debug events

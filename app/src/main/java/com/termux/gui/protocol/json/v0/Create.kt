@@ -1,8 +1,11 @@
 package com.termux.gui.protocol.json.v0
 
 import android.content.Context
+import android.os.Build
 import android.text.method.LinkMovementMethod
 import android.view.inputmethod.EditorInfo
+import android.webkit.ConsoleMessage
+import android.webkit.WebView
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
@@ -10,8 +13,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
 import com.termux.gui.ConnectionHandler
 import com.termux.gui.Util
-import com.termux.gui.protocol.shared.v0.DataClasses
-import com.termux.gui.protocol.shared.v0.V0Shared
+import com.termux.gui.protocol.shared.v0.*
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
 import com.termux.gui.views.WrappedEditText
@@ -21,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 class Create {
     companion object {
+        @Suppress("DEPRECATION")
         fun handleCreateMessage(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>,
                                 overlays: MutableMap<String, DataClasses.Overlay>, rand: Random, out: DataOutputStream, app: Context,
                                 eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
@@ -42,6 +45,7 @@ class Create {
                             if (m.params?.get("clickableLinks")?.asBoolean == true) {
                                 v.movementMethod = LinkMovementMethod.getInstance()
                             }
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -79,6 +83,7 @@ class Create {
                                 v.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_FILTER or EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                             }
                             v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -95,6 +100,7 @@ class Create {
                             } else {
                                 LinearLayout.HORIZONTAL
                             }
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -106,9 +112,11 @@ class Create {
                             val v = Button(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            v.isAllCaps = m.params?.get("allcaps")?.asBoolean ?: false
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -120,6 +128,7 @@ class Create {
                             val v = ImageView(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -131,6 +140,7 @@ class Create {
                             val v = Space(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -142,6 +152,7 @@ class Create {
                             val v = FrameLayout(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -157,6 +168,7 @@ class Create {
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -174,6 +186,7 @@ class Create {
                             }
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -191,6 +204,7 @@ class Create {
                             }
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -203,6 +217,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setCheckedListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -217,6 +232,7 @@ class Create {
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -229,6 +245,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setSpinnerListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -243,6 +260,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -258,6 +276,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -269,6 +288,7 @@ class Create {
                             val v = ProgressBar(it, null, android.R.attr.progressBarStyleHorizontal)
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -281,6 +301,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setRefreshListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -293,6 +314,7 @@ class Create {
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             Util.setTabSelectedListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -308,12 +330,110 @@ class Create {
                             v.columnCount = cols
                             id = Util.generateViewID(rand, it)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
+                            Util.setViewActivity(it, v, parent)
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                        return
+                    }
+                    if (m.method == "createWebView") {
+                        var id = -1
+                        V0Shared.runOnUIThreadActivityStartedBlocking(a) {
+                            val v = WebView(app)
+                            val settings = v.settings
+                            settings.allowFileAccess = false
+                            settings.allowContentAccess = false
+                            settings.allowFileAccessFromFileURLs = false
+                            settings.allowUniversalAccessFromFileURLs = false
+                            settings.domStorageEnabled = true
+                            settings.setGeolocationEnabled(false)
+                            settings.mediaPlaybackRequiresUserGesture = false
+                            settings.saveFormData = false
+                            settings.savePassword = false
+                            
+                            val l = object: WebEventListener {
+                                override fun onNavigation(url: String) {
+                                    val map = HashMap<String, Any?>()
+                                    map["url"] = url
+                                    eventQueue.offer(ConnectionHandler.Event("webviewNavigation", ConnectionHandler.gson.toJsonTree(map)))
+                                }
+
+                                override fun onHTTPError(url: String, code: Int) {
+                                    val map = HashMap<String, Any?>()
+                                    map["url"] = url
+                                    map["code"] = code
+                                    eventQueue.offer(ConnectionHandler.Event("webviewHTTPError", ConnectionHandler.gson.toJsonTree(map)))
+                                }
+
+                                override fun onReceivedError(url: String, description: String, code: Int) {
+                                    val map = HashMap<String, Any?>()
+                                    map["url"] = url
+                                    eventQueue.offer(ConnectionHandler.Event("webviewError", ConnectionHandler.gson.toJsonTree(map)))
+                                }
+
+                                override fun onRenderProcessGone(v: WebView) {
+                                    val map = HashMap<String, Any?>()
+                                    eventQueue.offer(ConnectionHandler.Event("webviewDestroyed", ConnectionHandler.gson.toJsonTree(map)))
+                                }
+
+                                override fun onProgressChanged(progress: Int) {
+                                    val map = HashMap<String, Any?>()
+                                    map["progress"] = progress
+                                    eventQueue.offer(ConnectionHandler.Event("webviewProgress", ConnectionHandler.gson.toJsonTree(map)))
+                                }
+
+                                override fun onConsoleMessage(m: ConsoleMessage) {
+                                    val map = HashMap<String, Any?>()
+                                    map["msg"] = m.message()
+                                    eventQueue.offer(ConnectionHandler.Event("webviewConsoleMessage", ConnectionHandler.gson.toJsonTree(map)))
+                                }
+                            }
+                            
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                v.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, true)
+                            }
+                            v.webViewClient = GUIWebViewClient(l)
+                            v.webChromeClient = GUIWebChromeClient(l)
+                            
+                            id = Util.generateViewID(rand, it)
+                            v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             Util.setViewActivity(it, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
                         return
                     }
                 }
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                // ---------------------------------------------------------------------------------------------
+                // ------------------------ OVERLAY METHODS ----------------------------------------------------
+                // ---------------------------------------------------------------------------------------------
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
                 if (o != null) {
                     if (m.method == "createTextView") {
                         val v = TextView(app)
@@ -326,6 +446,7 @@ class Create {
                             if (m.params?.get("clickableLinks")?.asBoolean == true) {
                                 v.movementMethod = LinkMovementMethod.getInstance()
                             }
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -340,6 +461,7 @@ class Create {
                                 v.setBackgroundResource(android.R.color.transparent)
                             }
                             v.setText(m.params?.get("text")?.asString, TextView.BufferType.EDITABLE)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -355,6 +477,7 @@ class Create {
                             } else {
                                 LinearLayout.HORIZONTAL
                             }
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -365,9 +488,11 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
-                            v.text = m.params?.get("text")?.asString
+                            v.isAllCaps = m.params?.get("allcaps")?.asBoolean ?: false
                             v.freezesText = true
+                            v.text = m.params?.get("text")?.asString
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -378,6 +503,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -388,6 +514,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -398,6 +525,7 @@ class Create {
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -412,6 +540,7 @@ class Create {
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             v.freezesText = true
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -428,6 +557,7 @@ class Create {
                             if (m.params?.get("nobar")?.asBoolean == true) {
                                 v.scrollBarSize = 0
                             }
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -444,6 +574,7 @@ class Create {
                             if (m.params?.get("nobar")?.asBoolean == true) {
                                 v.scrollBarSize = 0
                             }
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -455,6 +586,7 @@ class Create {
                         Util.runOnUIThreadBlocking {
                             v.id = id
                             Util.setCheckedListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -468,6 +600,7 @@ class Create {
                             v.text = m.params?.get("text")?.asString
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -479,6 +612,7 @@ class Create {
                         Util.runOnUIThreadBlocking {
                             v.id = id
                             Util.setSpinnerListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -493,6 +627,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -508,6 +643,7 @@ class Create {
                             v.freezesText = true
                             v.isChecked = m.params?.get("checked")?.asBoolean ?: false
                             Util.setClickListener(v, aid, true, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -519,6 +655,7 @@ class Create {
                             val v = ProgressBar(app, null, android.R.attr.progressBarStyleHorizontal)
                             id = Util.generateViewIDRaw(rand, o.usedIds)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -531,6 +668,7 @@ class Create {
                             id = Util.generateViewIDRaw(rand, o.usedIds)
                             v.id = id
                             Util.setRefreshListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -543,6 +681,7 @@ class Create {
                             id = Util.generateViewIDRaw(rand, o.usedIds)
                             v.id = id
                             Util.setTabSelectedListener(v, aid, eventQueue)
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -558,6 +697,7 @@ class Create {
                             v.columnCount = cols
                             id = Util.generateViewIDRaw(rand, o.usedIds)
                             v.id = id
+                            Util.createViewOptionalsJSON(v, m.params)
                             V0Shared.setViewOverlay(o, v, parent)
                         }
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(id))

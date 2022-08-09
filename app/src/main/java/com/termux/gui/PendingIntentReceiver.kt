@@ -6,19 +6,21 @@ import android.content.Intent
 import com.google.gson.JsonObject
 import java.util.*
 
-class WidgetButtonReceiver : BroadcastReceiver() {
+class PendingIntentReceiver : BroadcastReceiver() {
     companion object {
         const val THREAD = "thread"
         const val RID = "rid"
         const val ID = "id"
-        val threadCallbacks: MutableMap<Long, (JsonObject) -> Unit> = Collections.synchronizedMap(HashMap<Long, (JsonObject)->Unit>())
+        const val ACTION = "action"
+        const val NID = "nid"
+        val threadCallbacks: MutableMap<Long, (JsonObject) -> Unit> = Collections.synchronizedMap(HashMap())
     }
     
     override fun onReceive(context: Context, intent: Intent) {
         try {
             val dat = ConnectionHandler.gson.fromJson(intent.dataString, JsonObject::class.java)
             threadCallbacks[dat[THREAD].asLong]?.let { it(dat) }
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }

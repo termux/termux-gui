@@ -18,3 +18,4 @@ local.properties
 /bindings/Python/src/termuxgui.egg-info/
 /.idea/
 /app/debugMinify/
+/examples/code/

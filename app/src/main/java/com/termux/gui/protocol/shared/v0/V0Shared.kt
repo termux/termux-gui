@@ -12,12 +12,14 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.RemoteViews
 import android.widget.TextView
+import androidx.core.app.NotificationManagerCompat
 import com.google.gson.JsonObject
 import com.termux.gui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
+import kotlin.collections.HashSet
 import kotlin.reflect.KClass
 
 
@@ -28,10 +30,11 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     protected val rand = Random()
 
     protected val tasks = LinkedList<ActivityManager.AppTask>()
-    protected val activities: MutableMap<String, DataClasses.ActivityState> = Collections.synchronizedMap(HashMap<String, DataClasses.ActivityState>())
+    protected val activities: MutableMap<String, DataClasses.ActivityState> = Collections.synchronizedMap(HashMap())
     protected val buffers: MutableMap<Int, DataClasses.SharedBuffer> = HashMap()
     protected val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation> = HashMap()
-    protected val overlays: MutableMap<String, DataClasses.Overlay> = Collections.synchronizedMap(HashMap<String, DataClasses.Overlay>())
+    protected val overlays: MutableMap<String, DataClasses.Overlay> = Collections.synchronizedMap(HashMap())
+    protected val notifications: MutableSet<Int> = Collections.synchronizedSet(HashSet())
     
     protected fun withSystemListenersAndCleanup(am: ActivityManager, wm: WindowManager, clos: () -> Unit) {
         val lifecycleCallbacks = LifecycleListener(this, activities, tasks, am)
@@ -43,18 +46,28 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         filter.addAction(Intent.ACTION_LOCALE_CHANGED)
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
         App.APP?.registerReceiver(sysrec, filter)
-        WidgetButtonReceiver.threadCallbacks[Thread.currentThread().id] = fun(m: JsonObject) {
-            val rid = m[WidgetButtonReceiver.RID].asInt
-            val id = m[WidgetButtonReceiver.ID].asInt
-            if (rid != -1 && id != -1) {
-                onWidgetButton(rid, id)
+        PendingIntentReceiver.threadCallbacks[Thread.currentThread().id] = fun(m: JsonObject) {
+            val rid = m[PendingIntentReceiver.RID]?.asInt
+            val id = m[PendingIntentReceiver.ID]?.asInt
+            val action = m[PendingIntentReceiver.ACTION]?.asInt
+            val nid = m[PendingIntentReceiver.NID]?.asInt
+            if (rid != null && id != null && rid != -1 && id != -1) {
+                onRemoteButton(rid, id)
+                return
+            }
+            if (nid != null) {
+                if (action == null) {
+                    onNotification(nid)
+                } else {
+                    onNotificationAction(nid, action)
+                }
             }
         }
         try {
             clos()
         } finally {
             Logger.log(1, TAG, "cleanup V0")
-            WidgetButtonReceiver.threadCallbacks.remove(Thread.currentThread().id)
+            PendingIntentReceiver.threadCallbacks.remove(Thread.currentThread().id)
             for (o in overlays.values) {
                 wm.removeView(o.root)
             }
@@ -84,6 +97,11 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
                     }
                 }
             }
+            val not = NotificationManagerCompat.from(app)
+            for (id in notifications) {
+                not.cancel(Thread.currentThread().id.toString(), id)
+            }
+            GUIWebViewJavascriptDialog.requestMap.remove(Thread.currentThread().id.toString())
         }
     }
     
@@ -100,7 +118,9 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     abstract fun onScreenOn(c: Context, i: Intent)
     abstract fun onTimezoneChanged(c: Context, i: Intent)
     
-    abstract fun onWidgetButton(rid: Int, id: Int)
+    abstract fun onRemoteButton(rid: Int, id: Int)
+    abstract fun onNotification(nid: Int)
+    abstract fun onNotificationAction(nid: Int, action: Int)
     
     protected fun generateActivityID(): String {
         val aid = Thread.currentThread().id.toString()+"-"+activityID.toString()

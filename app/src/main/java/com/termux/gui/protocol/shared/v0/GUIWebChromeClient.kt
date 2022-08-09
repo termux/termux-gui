@@ -5,9 +5,9 @@ import android.os.Message
 import android.webkit.*
 
 @Suppress("OVERRIDE_DEPRECATION")
-class GUIWebChromeClient : WebChromeClient() {
+class GUIWebChromeClient(val l: WebEventListener) : WebChromeClient() {
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
-        super.onProgressChanged(view, newProgress)
+        l.onProgressChanged(newProgress)
     }
 
     override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
@@ -52,7 +52,9 @@ class GUIWebChromeClient : WebChromeClient() {
     }
 
     override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-        return super.onConsoleMessage(consoleMessage)
+        if (consoleMessage != null)
+            l.onConsoleMessage(consoleMessage)
+        return true
     }
 
     override fun getVisitedHistory(callback: ValueCallback<Array<String>>?) {

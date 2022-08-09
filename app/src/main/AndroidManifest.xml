@@ -31,7 +31,7 @@
         </activity>
 
         <receiver
-            android:name=".WidgetButtonReceiver"
+            android:name=".PendingIntentReceiver"
             android:exported="false" />
         <receiver
             android:name=".GUIWidget"
@@ -78,6 +78,10 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:theme="@style/TermuxAlertDialogStyle" />
+        <activity
+            android:name=".GUIWebViewJavascriptDialog"
+            android:exported="false"
+            android:theme="@style/TermuxAlertDialogStyle" />
 
         <service
             android:name=".GUIService"
@@ -88,6 +92,9 @@
             android:name=".GUIReceiver"
             android:enabled="true"
             android:exported="false" />
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
     </application>
 
 </manifest>

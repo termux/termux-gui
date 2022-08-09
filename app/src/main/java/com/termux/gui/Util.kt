@@ -8,13 +8,16 @@ import android.net.LocalSocket
 import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.widget.*
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
+import com.google.gson.JsonElement
 import com.google.protobuf.MessageLite
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,6 +69,20 @@ class Util {
             w.writeInt(bytes.size)
             w.write(bytes)
             w.flush()
+        }
+        
+        fun createViewOptionalsJSON(v: View, params: HashMap<String, JsonElement>?) {
+            if (params != null) {
+                val visibility = params["visibility"]
+                if (visibility != null && ! visibility.isJsonNull) {
+                    v.visibility = when (visibility.asInt) {
+                        0 -> View.GONE
+                        1 -> View.INVISIBLE
+                        2 -> View.VISIBLE
+                        else -> View.VISIBLE
+                    }
+                }
+            }
         }
         
         fun sendProto(o: OutputStream, m: MessageLite) {
@@ -331,10 +348,17 @@ class Util {
             }
         }
         
+        fun destroyWebView(v: WebView) {
+            v.clearCache(false)
+            v.clearHistory()
+            v.onPause()
+            v.removeAllViews()
+            v.destroy()
+        }
         
         fun removeViewRecursive(v: View?, usedIds: MutableSet<Int>) {
             if (v != null) {
-                if (v is ViewGroup) {
+                if (v is ViewGroup && v !is WebView) {
                     while (v.childCount > 0) {
                         removeViewRecursive(v.getChildAt(0), usedIds)
                     }
@@ -342,6 +366,9 @@ class Util {
                 val p = v.parent
                 if (p is ViewGroup) {
                     p.removeView(v)
+                }
+                if (v is WebView) {
+                    destroyWebView(v)
                 }
                 usedIds.remove(v.id)
             }

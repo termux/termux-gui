@@ -1,5 +1,6 @@
 package com.termux.gui.protocol.json.v0
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
@@ -50,7 +51,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                 val m = ConnectionHandler.gson.fromJson(msg, ConnectionHandler.Message::class.java)
                 //println(m?.method)
                 if (m?.method != null) {
-                    if (HandleRemote.handleRemoteMessage(m, remoteviews, rand, out, app)) continue
+                    if (HandleRemote.handleRemoteMessage(m, remoteviews, rand, out, app, notifications)) continue
                     if (handleActivityTaskMessage(m, activities, tasks, overlays, app, wm, out)) continue
                     if (handleView(m, activities, overlays, rand, out, app, eventQueue)) continue
                     if (HandleBuffer.handleBuffer(m, activities, overlays, rand, out, buffers, main)) continue
@@ -70,11 +71,14 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                                 it.finish()
                             }
                         }
-                        if (o != null) {
+                        if (o != null && aid != null) {
                             wm.removeView(o.root)
-                            overlays[aid] = null
+                            overlays.remove(aid)
                         }
                         continue
+                    }
+                    "getVersion" -> {
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(BuildConfig.VERSION_CODE))
                     }
                     // Event methods
                     in Regex("send.*Event") -> {
@@ -255,12 +259,13 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                 m.params?.get("pip")?.asBoolean
                         ?: false, m.params?.get("dialog")?.asBoolean
                 ?: false,
-                m.params?.get("lockscreen")?.asBoolean ?: false, m.params?.get("canceloutside")?.asBoolean ?: true))
+                m.params?.get("lockscreen")?.asBoolean ?: false, m.params?.get("canceloutside")?.asBoolean ?: true,
+            m.params?.get("intercept")?.asBoolean ?: false))
     }
 
 
     @Suppress("DEPRECATION")
-    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, DataClasses.ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, canceloutside: Boolean): String {
+    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, DataClasses.ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, canceloutside: Boolean, interceptBackButton: Boolean): String {
         //println("ptid: $ptid")
         val i = Intent(app, GUIActivity::class.java)
         if (ptid == null) {
@@ -271,6 +276,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
         
         activities[aid] = DataClasses.ActivityState(null)
         i.putExtra("pip", pip)
+        i.putExtra("intercept", interceptBackButton)
         when {
             pip -> {
                 i.flags = i.flags or Intent.FLAG_ACTIVITY_NO_ANIMATION
@@ -384,11 +390,24 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
         eventQueue.offer(ConnectionHandler.Event("timezone", ConnectionHandler.gson.toJsonTree(TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT, c.resources.configuration.locales.get(0)))))
     }
 
-    override fun onWidgetButton(rid: Int, id: Int) {
+    override fun onRemoteButton(rid: Int, id: Int) {
         val map = HashMap<String, Any?>()
-        map["aid"] = rid
+        map["rid"] = rid
         map["id"] = id
-        eventQueue.offer(ConnectionHandler.Event("click", ConnectionHandler.gson.toJsonTree(map)))
+        eventQueue.offer(ConnectionHandler.Event("remoteclick", ConnectionHandler.gson.toJsonTree(map)))
+    }
+
+    override fun onNotification(nid: Int) {
+        val map = HashMap<String, Any?>()
+        map["id"] = nid
+        eventQueue.offer(ConnectionHandler.Event("notification", ConnectionHandler.gson.toJsonTree(map)))
+    }
+
+    override fun onNotificationAction(nid: Int, action: Int) {
+        val map = HashMap<String, Any?>()
+        map["id"] = nid
+        map["action"] = action
+        eventQueue.offer(ConnectionHandler.Event("notificationaction", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration) {

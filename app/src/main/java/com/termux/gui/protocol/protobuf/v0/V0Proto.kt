@@ -46,6 +46,8 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<GUIProt0
                     GUIProt0.Method.MethodCase.ISLOCKED -> TODO()
                     GUIProt0.Method.MethodCase.REQUESTUNLOCK -> TODO()
                     GUIProt0.Method.MethodCase.HIDESOFTKEYBOARD -> TODO()
+                    GUIProt0.Method.MethodCase.INTERCEPTBACKBUTTON -> TODO()
+                    GUIProt0.Method.MethodCase.VERSION -> TODO()
                     GUIProt0.Method.MethodCase.CREATELINEARLAYOUT -> TODO()
                     GUIProt0.Method.MethodCase.CREATEFRAMELAYOUT -> TODO()
                     GUIProt0.Method.MethodCase.CREATESWIPEREFRESHLAYOUT -> TODO()
@@ -64,6 +66,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<GUIProt0
                     GUIProt0.Method.MethodCase.CREATESPINNER -> TODO()
                     GUIProt0.Method.MethodCase.CREATEPROGRESSBAR -> TODO()
                     GUIProt0.Method.MethodCase.CREATETABLAYOUT -> TODO()
+                    GUIProt0.Method.MethodCase.CREATEWEBVIEW -> TODO()
                     null -> { return@withSystemListenersAndCleanup } // terminate the connection when nothing is in the oneof
                 }
             }
@@ -118,8 +121,16 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<GUIProt0
         eventQueue.offer(GUIProt0.Event.newBuilder().setBack(GUIProt0.BackButtonEvent.newBuilder().setAid(a.aid)).build())
     }
 
-    override fun onWidgetButton(rid: Int, id: Int) {
-        TODO("Not yet implemented")
+    override fun onRemoteButton(rid: Int, id: Int) {
+        eventQueue.offer(GUIProt0.Event.newBuilder().setRemoteClick(GUIProt0.RemoteClickEvent.newBuilder().setRid(rid).setId(id)).build())
+    }
+
+    override fun onNotification(nid: Int) {
+        eventQueue.offer(GUIProt0.Event.newBuilder().setNotification(GUIProt0.NotificationEvent.newBuilder().setId(nid)).build())
+    }
+
+    override fun onNotificationAction(nid: Int, action: Int) {
+        eventQueue.offer(GUIProt0.Event.newBuilder().setNotificationAction(GUIProt0.NotificationActionEvent.newBuilder().setId(nid).setAction(action)).build())
     }
 
     override fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration) {

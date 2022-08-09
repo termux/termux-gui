@@ -6,25 +6,37 @@
 
 Roadmap:
     - 0.1.5:
-        [ ] button to write logcat to file, as a preparation for separate UID, logcat won't work in Termux then for the plugin
-            [ ] add a method to set the debug level for a connection. Debug messages are then send as events.
+        [x] button to write logcat to file, as a preparation for separate UID, logcat won't work in Termux then for the plugin
         [x] add aid to onUserLeaveHint event
-        [ ] method to set selected tab for TabLayout
-        [ ] add the ability to intercept touch events in layouts
-        [ ] notifications with custom layout
-        [ ] WebView
+        [x] method to set selected tab for TabLayout
+        [x] method to set clickability of views
+        [x] option to specify View visibility at creation
+        [x] notifications with custom layout
+        [x] normal notifications in addition to custom ones
+        [x] method to get plugin version code
+        [x] WebView
             - catch all WebChromeClient and WebViewClient events
             - Run javascript in the WebView with user consent.
             - setting: always allow javascript in WebViews
-            [ ] navigating history
-            [ ] show/hide URL bar
-            [ ] setData
-            [ ] load from URI
-            [ ] setAllowFileAccess
-            [ ] setJavascriptEnabled
-        [ ] add everything to the python library
+            [x] navigating history
+            [x] setData
+            [x] load from URI
+            [x] setJavascriptEnabled
+            [x] run Javascript code in the WebView
         [x] GridLayout
         [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
+        [x] ability to catch the back button as an event: https://stackoverflow.com/questions/8094715/how-to-catch-event-with-hardware-back-button-on-android
+        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
+        [x] add everything to the python library
+            [x] test it
+                [x] back button catching
+                [x] visibility at creation
+                [x] set clickable
+                [x] get version code
+                [x] select tab
+                [x] WebView
+                [x] normal notifications
+                [x] custom notifications
         [ ] binary protocol with protobuf
             [ ] Activity and Task methods
             [ ] View creation methods
@@ -32,12 +44,11 @@ Roadmap:
             [ ] Event configuring methods
             [ ] widget and notification methods
         [ ] make the C library
-        [x] ability to catch the back button as an event: https://stackoverflow.com/questions/8094715/how-to-catch-event-with-hardware-back-button-on-android
-        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
+            [ ] test it
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots
-            [x] update description and readme
+            [ ] update description and readme
         [x] Rework the widgets
         [x] generate unique notification and widget ids in a certain range, so apps cannot guess each others ids
         [x] add a button in the settings to delete all notification channels
@@ -52,7 +63,7 @@ Roadmap:
         [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
         [ ] RelativeLayout
         [ ] ConstraintLayout
-        [ ] normal notifications in addition to custom ones
+        [ ] add the ability to intercept touch events in layouts
         [ ] fullscreen mode for Activities (hiding the 3 buttons and the notification bar)
         [ ] the rest of the views in the protocol
         [ ] make the readme nicer
@@ -74,9 +85,14 @@ Roadmap:
             the methods should improve performance
             [ ] You should also be able to replace the arguments with arrays, in case you want that argument to have a different value for each view, like the text for TextViews
             [ ] think about creating a batch api to group multiple messages together into one runnable for the ui thread
-                [ ] maybe an async version of the api, but only for protobuf 
-        
-        
+                
+    
+    Maybe in the future:
+    - tooltip/context menus
+    - action bar with configurable actions
+    - scroll change event
+    - gestures
+     
 
 
 

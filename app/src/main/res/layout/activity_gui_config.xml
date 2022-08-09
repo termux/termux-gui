@@ -77,5 +77,19 @@
             android:layout_marginTop="8dp"
             android:text="@string/channel_delete" />
 
+        <Switch
+            android:id="@+id/option_allow_javascript"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/javascript_option" />
+
+        <Button
+            android:id="@+id/logcat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/dump_logcat" />
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

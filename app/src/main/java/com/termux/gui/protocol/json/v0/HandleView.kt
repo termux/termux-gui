@@ -1,13 +1,19 @@
 package com.termux.gui.protocol.json.v0
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
 import android.util.Base64
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.webkit.WebView
 import android.widget.*
 import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -17,6 +23,7 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonPrimitive
 import com.termux.gui.*
 import com.termux.gui.protocol.shared.v0.DataClasses
+import com.termux.gui.protocol.shared.v0.GUIWebViewClient
 import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.DataOutputStream
 import java.util.*
@@ -25,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 class HandleView {
     companion object {
+        @SuppressLint("WebViewApiAvailability")
         fun handleView(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, overlays: MutableMap<String, DataClasses.Overlay>,
                        rand: Random, out: DataOutputStream, app: Context,
                        eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : Boolean {
@@ -61,7 +69,6 @@ class HandleView {
                     val o = overlays[aid]
                     if (a != null && id != null) {
                         V0Shared.runOnUIThreadActivityStarted(a) {
-                            
                             Util.removeViewRecursive(it.findViewReimplemented(id), it.usedIds)
                         }
                     }
@@ -557,8 +564,16 @@ class HandleView {
                                 V0Shared.runOnUIThreadActivityStarted(a) {
                                     val v = it.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
-                                        if (soft == true && v is NestedScrollView) {
-                                            v.smoothScrollTo(x, y)
+                                        if (soft == true) {
+                                            if (v is NestedScrollView) {
+                                                v.smoothScrollTo(x, y)
+                                            } else {
+                                                if (v is HorizontalScrollView) {
+                                                    v.smoothScrollTo(x, y)
+                                                } else {
+                                                    v.scrollTo(x, y)
+                                                }
+                                            }
                                         } else {
                                             v.scrollTo(x, y)
                                         }
@@ -569,8 +584,16 @@ class HandleView {
                                 Util.runOnUIThreadBlocking {
                                     val v = o.root.findViewReimplemented<View>(id)
                                     if (v is NestedScrollView || v is HorizontalScrollView) {
-                                        if (soft == true && v is NestedScrollView) {
-                                            v.smoothScrollTo(x, y)
+                                        if (soft == true) {
+                                            if (v is NestedScrollView) {
+                                                v.smoothScrollTo(x, y)
+                                            } else {
+                                                if (v is HorizontalScrollView) {
+                                                    v.smoothScrollTo(x, y)
+                                                } else {
+                                                    v.scrollTo(x, y)
+                                                }
+                                            }
                                         } else {
                                             v.scrollTo(x, y)
                                         }
@@ -693,6 +716,200 @@ class HandleView {
                                         else -> {View.VISIBLE}
                                     }
                                 }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setClickable" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val clickable = m.params?.get("clickable")?.asBoolean
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && clickable != null) {
+                            if (a != null) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<View>(id)?.isClickable = clickable
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<View>(id)?.isClickable = clickable
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "selectTab" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val tab = m.params?.get("tab")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && tab != null) {
+                            if (a != null) {
+                                V0Shared.runOnUIThreadActivityStarted(a) { it ->
+                                    it.findViewReimplemented<TabLayout>(id)?.let { it.selectTab(it.getTabAt(tab)) }
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<TabLayout>(id)?.let { it.selectTab(it.getTabAt(tab)) }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "allowJavascript" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val allow = m.params?.get("allow")?.asBoolean
+                        if (a != null && id != null && allow != null) {
+                            if (allow == true) {
+                                if (! Settings.instance.javascript) {
+                                    val data = Thread.currentThread().id.toString()
+                                    val r = GUIWebViewJavascriptDialog.Companion.Request()
+                                    GUIWebViewJavascriptDialog.requestMap[data] = r
+                                    val i = Intent(app, GUIWebViewJavascriptDialog::class.java)
+                                    i.data = Uri.parse(data)
+                                    V0Shared.runOnUIThreadActivityStarted(a) {
+                                        it.startActivity(i)
+                                    }
+                                    synchronized(r.monitor) {
+                                        while (r.allow == null)
+                                            r.monitor.wait()
+                                    }
+                                    GUIWebViewJavascriptDialog.requestMap.remove(data)
+                                    if (r.allow == true) {
+                                        V0Shared.runOnUIThreadActivityStarted(a) { it ->
+                                            //noinspection SetJavaScriptEnabled
+                                            it.findViewReimplemented<WebView>(id)
+                                                ?.let { it.settings.javaScriptEnabled = true }
+                                        }
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(true))
+                                    } else {
+                                        Util.sendMessage(out, ConnectionHandler.gson.toJson(false))
+                                    }
+                                } else {
+                                    V0Shared.runOnUIThreadActivityStarted(a) { it ->
+                                        //noinspection SetJavaScriptEnabled
+                                        it.findViewReimplemented<WebView>(id)
+                                            ?.let { it.settings.javaScriptEnabled = true }
+                                    }
+                                    Util.sendMessage(out, ConnectionHandler.gson.toJson(true))
+                                }
+                            } else {
+                                V0Shared.runOnUIThreadActivityStarted(a) { it ->
+                                    it.findViewReimplemented<WebView>(id)?.let { it.settings.javaScriptEnabled = false }
+                                }
+                                Util.sendMessage(out, ConnectionHandler.gson.toJson(false))
+                            }
+                        }
+                    }
+                    return true
+                }
+                "allowContentURI" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val allow = m.params?.get("allow")?.asBoolean
+                        if (a != null && id != null && allow != null) {
+                            V0Shared.runOnUIThreadActivityStarted(a) { it ->
+                                it.findViewReimplemented<WebView>(id)?.let { it.settings.allowContentAccess = allow }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setData" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val doc = m.params?.get("doc")?.asString
+                        if (a != null && id != null && doc != null) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
+                                it.findViewReimplemented<WebView>(id)?.loadData(doc, null, null)
+                            }
+                        }
+                    }
+                    return true
+                }
+                "loadURI" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val uri = m.params?.get("uri")?.asString
+                        if (a != null && id != null && uri != null) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
+                                it.findViewReimplemented<WebView>(id)?.loadUrl(uri)
+                            }
+                        }
+                    }
+                    return true
+                }
+                "allowNavigation" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        if (m.params != null) {
+                            val aid = m.params?.get("aid")?.asString
+                            val id = m.params?.get("id")?.asInt
+                            val a = activities[aid]
+                            val allow = m.params?.get("allow")?.asBoolean
+                            if (a != null && id != null && allow != null) {
+                                V0Shared.runOnUIThreadActivityStarted(a) { it ->
+                                    it.findViewReimplemented<WebView>(id)?.let { (it.webViewClient as GUIWebViewClient).allowNavigation = allow }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "goBack" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        if (a != null && id != null) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
+                                it.findViewReimplemented<WebView>(id)?.goBack()
+                            }
+                        }
+                    }
+                    return true
+                }
+                "goForward" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        if (a != null && id != null) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
+                                it.findViewReimplemented<WebView>(id)?.goForward()
+                            }
+                        }
+                    }
+                    return true
+                }
+                "evaluateJS" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val a = activities[aid]
+                        val code = m.params?.get("code")?.asString
+                        if (a != null && id != null && code != null) {
+                            V0Shared.runOnUIThreadActivityStarted(a) {
+                                val w = it.findViewReimplemented<WebView>(id)
+                                if (w != null && w.settings.javaScriptEnabled)
+                                    w.evaluateJavascript(code, null)
                             }
                         }
                     }

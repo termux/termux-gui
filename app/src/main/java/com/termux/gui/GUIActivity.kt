@@ -4,6 +4,9 @@ import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonElement
 import java.io.Serializable
@@ -57,6 +60,9 @@ open class GUIActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             enterPictureInPictureMode()
             overridePendingTransition(0,0)
+        }
+        if (intent.getBooleanExtra("intercept", false)) {
+            data.backEvent = true
         }
         setContentView(R.layout.activity_gui)
         if (savedInstanceState != null) {
@@ -136,5 +142,24 @@ open class GUIActivity : AppCompatActivity() {
         return findViewById(id)
     }
     
+    private fun destroyWebViews(v: View?) {
+        if (v == null) return
+        if (v is WebView) {
+            val p = v.parent as ViewGroup
+            p.removeView(v)
+            Util.destroyWebView(v)
+            return
+        }
+        if (v is ViewGroup) {
+            for (i in 0 until v.childCount) {
+                destroyWebViews(v.getChildAt(i))
+            }
+        }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        destroyWebViews(findViewById<ViewGroup>(R.id.root))
+    }
     
 }

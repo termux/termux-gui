@@ -11,6 +11,10 @@ import android.util.Base64
 import android.util.TypedValue
 import android.view.View
 import android.widget.*
+import androidx.core.app.NotificationChannelCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.termux.gui.*
 import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.V0Shared
@@ -20,8 +24,8 @@ import java.util.*
 class HandleRemote {
     companion object {
         
-        @SuppressLint("ApplySharedPref")
-        fun handleRemoteMessage(m: ConnectionHandler.Message, remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>, rand: Random, out: DataOutputStream, app: Context) : Boolean {
+        @SuppressLint("ApplySharedPref", "LaunchActivityFromNotification")
+        fun handleRemoteMessage(m: ConnectionHandler.Message, remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>, rand: Random, out: DataOutputStream, app: Context, notifications: MutableSet<Int>) : Boolean {
             if ("createRemoteLayout" == m.method) {
                 val id = Util.generateIndex(rand, remoteviews.keys)
                 remoteviews[id] = DataClasses.RemoteLayoutRepresentation(RemoteViews(app.packageName, R.layout.remote_view_root))
@@ -61,10 +65,10 @@ class HandleRemote {
                             PendingIntent.getBroadcast(app, 0, Intent(
                                     Intent.ACTION_DEFAULT, Uri.parse(
                                         ConnectionHandler.gson.toJsonTree(mapOf(
-                                                Pair(WidgetButtonReceiver.RID, m.params?.get("rid")?.asInt),
-                                                Pair(WidgetButtonReceiver.ID, id),
-                                                Pair(WidgetButtonReceiver.THREAD, Thread.currentThread().id))).toString()),
-                                    app, WidgetButtonReceiver::class.java),
+                                                Pair(PendingIntentReceiver.RID, m.params?.get("rid")?.asInt),
+                                                Pair(PendingIntentReceiver.ID, id),
+                                                Pair(PendingIntentReceiver.THREAD, Thread.currentThread().id))).toString()),
+                                    app, PendingIntentReceiver::class.java),
                                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT))
                 }
                 Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
@@ -205,14 +209,111 @@ class HandleRemote {
             
             
             if ("createNotificationChannel" == m.method) {
-
+                val id = m.params?.get("id")?.asString
+                val importance = m.params?.get("importance")?.asInt
+                val name = m.params?.get("name")?.asString
+                if (id != null && importance != null && name != null) {
+                    val impmap = mapOf(0 to NotificationManagerCompat.IMPORTANCE_MIN, 1 to NotificationManagerCompat.IMPORTANCE_LOW, 2 to NotificationManagerCompat.IMPORTANCE_DEFAULT, 3 to NotificationManagerCompat.IMPORTANCE_HIGH, 4 to NotificationManagerCompat.IMPORTANCE_MAX)
+                    NotificationManagerCompat.from(app).createNotificationChannel(
+                        NotificationChannelCompat.Builder(id, impmap[importance] ?: NotificationManagerCompat.IMPORTANCE_MIN).setName(name).build())
+                }
                 return true
             }
             if ("createNotification" == m.method) {
-
+                val id = m.params?.get("id")?.asInt ?: Util.generateIndex(rand, notifications)
+                val ongoing = m.params?.get("ongoing")?.asBoolean ?: false
+                val layout = remoteviews[m.params?.get("layout")?.asInt]
+                val expandedLayout = remoteviews[m.params?.get("expandedLayout")?.asInt]
+                val hudLayout = remoteviews[m.params?.get("hudLayout")?.asInt]
+                val icon = m.params?.get("icon")?.asString
+                val channel = m.params?.get("channel")?.asString
+                val importance = m.params?.get("importance")?.asInt
+                val alertOnce = m.params?.get("alertOnce")?.asBoolean ?: false
+                val showTimestamp = m.params?.get("showTimestamp")?.asBoolean ?: false
+                val timestamp = m.params?.get("timestamp")?.asLong
+                val title = m.params?.get("title")?.asString
+                val content = m.params?.get("content")?.asString
+                val largeImage = m.params?.get("largeImage")?.asString
+                val largeText = m.params?.get("largeText")?.asString
+                val largeImageAsThumbnail = m.params?.get("largeImageAsThumbnail")?.asBoolean ?: false
+                val actions = m.params?.get("actions")?.asJsonArray
+                if ((layout != null || title != null) && channel != null && importance != null && ! (largeImage != null && largeText != null)) {
+                    val b = NotificationCompat.Builder(app, channel)
+                    val impmap = mapOf(0 to NotificationCompat.PRIORITY_MIN, 1 to NotificationCompat.PRIORITY_LOW, 2 to NotificationCompat.PRIORITY_DEFAULT, 3 to NotificationCompat.PRIORITY_HIGH, 4 to NotificationCompat.PRIORITY_MAX)
+                    b.priority = impmap[importance] ?: NotificationCompat.PRIORITY_DEFAULT
+                    if (icon != null) {
+                        val bin = Base64.decode(icon, Base64.DEFAULT)
+                        b.setSmallIcon(IconCompat.createWithData(bin, 0, bin.size))
+                    } else {
+                        b.setSmallIcon(R.drawable.ic_service_notification)
+                    }
+                    if (timestamp != null) {
+                        b.setWhen(timestamp)
+                    }
+                    b.setShowWhen(showTimestamp)
+                    b.setOngoing(ongoing)
+                    b.setOnlyAlertOnce(alertOnce)
+                    if (layout != null) {
+                        b.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                        b.setCustomContentView(layout.root)
+                        if (expandedLayout != null) {
+                            b.setCustomBigContentView(expandedLayout.root)
+                        }
+                        if (hudLayout != null) {
+                            b.setCustomHeadsUpContentView(hudLayout.root)
+                        }
+                    } else {
+                        b.setContentTitle(title)
+                        if (largeImage != null) {
+                            val bin = Base64.decode(largeImage, Base64.DEFAULT)
+                            val bmp = BitmapFactory.decodeByteArray(bin, 0, bin.size)
+                            val style = NotificationCompat.BigPictureStyle().bigPicture(bmp)
+                            if (largeImageAsThumbnail) {
+                                style.bigLargeIcon(null)
+                                b.setLargeIcon(bmp)
+                            }
+                            b.setStyle(style)
+                        }
+                        if (largeText != null) {
+                            b.setStyle(NotificationCompat.BigTextStyle().bigText(largeText))
+                        } else {
+                            b.setContentText(content)
+                        }
+                    }
+                    if (actions != null) {
+                        for ((index, a) in actions.withIndex()) {
+                            val action = a.asString
+                            b.addAction(0, action, PendingIntent.getBroadcast(app, 0, Intent(
+                                Intent.ACTION_DEFAULT, Uri.parse(
+                                    ConnectionHandler.gson.toJsonTree(mapOf(
+                                        Pair(PendingIntentReceiver.NID, id),
+                                        Pair(PendingIntentReceiver.ACTION, index),
+                                        Pair(PendingIntentReceiver.THREAD, Thread.currentThread().id))).toString()),
+                                app, PendingIntentReceiver::class.java),
+                                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT))
+                        }
+                    }
+                    b.setContentIntent(PendingIntent.getBroadcast(app, 0, Intent(
+                        Intent.ACTION_DEFAULT, Uri.parse(
+                            ConnectionHandler.gson.toJsonTree(mapOf(
+                                Pair(PendingIntentReceiver.NID, id),
+                                Pair(PendingIntentReceiver.THREAD, Thread.currentThread().id))).toString()),
+                        app, PendingIntentReceiver::class.java),
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT))
+                    NotificationManagerCompat.from(app).notify(Thread.currentThread().id.toString(), id, b.build())
+                    notifications.add(id)
+                    Util.sendMessage(out, ConnectionHandler.gson.toJson(id))
+                }
                 return true
             }
-            
+            if ("cancelNotification" == m.method) {
+                val id = m.params?.get("id")?.asInt
+                if (id != null) {
+                    notifications.remove(id)
+                    NotificationManagerCompat.from(app).cancel(Thread.currentThread().id.toString(), id)
+                }
+                return true
+            }
             return false
         }
         

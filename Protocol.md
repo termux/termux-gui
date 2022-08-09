@@ -43,9 +43,9 @@ Each message invokes a method on the plugin.
 Methods may return values, the number of return values can vary with the parameters.  
   
 Available methods:  
-  
+
 Activity and Task control:  
-These methods control Android [Activities](https://developer.android.com/reference/android/app/Activity) and [Tasks](https://developer.android.com/guide/components/activities/tasks-and-back-stack).
+These methods control Android [Activities](https://developer.android.com/reference/android/app/Activity) and [Tasks](https://developer.android.com/guide/components/activities/tasks-and-back-stack). Also here are methods that don't need an Activity or Task.
 - newActivity: Launches a new Activity and returns the activity id. In case of an error, -1 is returned.
   - Parameters:
     - tid: the task in which the Activity should be started. If not specified, a new Task is created and the id is returned after the Activity id.
@@ -55,6 +55,7 @@ These methods control Android [Activities](https://developer.android.com/referen
       - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
       - lockscreen: displays this Activity on the lockscreen.
       - overlay: uses a system overlay window to display above everything else. Overlays are never in a Task and creating one doesn't return a Task id. Overlays don't get Activity lifecycle events.
+    - intercept: A boolean, whether to intercept back button presses and send an event or to use the default action of finishing the Activity. Default value is false.
 - finishActivity: Closes an Activity.
   - Parameters:
      - aid: The id of the Activity to close.
@@ -97,10 +98,6 @@ These methods control Android [Activities](https://developer.android.com/referen
   - Parameters:
     - aid: The id of the Activity.
     - pip: Whether or not an Activity should automatically enter pip mode when the user navigates away.
-- toast: Sends a [Toast](https://developer.android.com/guide/topics/ui/notifiers/toasts).
-  - Parameters:
-    - text: The text to display.
-    - long: true if the text should be displayed for longer.
 - keepScreenOn: Sets whether the screen should be kept on when an Activity shows.
   - Parameters:
     - aid: The id of the Activity.
@@ -141,7 +138,7 @@ These methods control Android [Activities](https://developer.android.com/referen
   - Parameters:
     - aid: The Activity id of the Activity that wants intercept back button presses.
     - intercept: A boolean, whether to intercept back button presses and send an event or to use the default action of finishing the Activity.
-
+- getVersion: Gets the version code of the plugin app. Can be used for feature detection or to prompt the user to update.
 
 
 Layout and View control:  
@@ -192,6 +189,8 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - blockinput: Disables adding the typed key automatically to a EditText and instead sends a key event.
     - type: For EditText this specifies the [input type](https://developer.android.com/reference/android/widget/TextView#attr_android:inputType) : can be one of "text", "textMultiLine", "phone", "date", "time", "datetime", "number", "numberDecimal", "numberPassword", "numberSigned", "numberDecimalSigned", "textEmailAddress", "textPassword". "text" is the default. Specifying singleline as true sets this to "text".
     - rows, cols: Row and column count for GridLayout
+    - visibility: Visibility of the View. See setVisibility. If not present, visible is assumed.
+    - allcaps: Use this when creating a button to make all text automatically all caps (using small caps if possible).
 - showCursor: Sets whether or not a cursor is shown in the EditText.
   - Parameters:
     - aid: The id of the Activity the View is in.
@@ -337,6 +336,17 @@ Due to Android limitations, methods that return a value fail when the Activity i
   - Parameters:
     - id: The View id of a ImageView.
     - aid: The id of the Activity the View is in.
+- selectTab: Selects a Tab in a TabLayout. The corresponding itemselected event is also send.
+  - Parameters:
+    - id: The View id of a TabLayout.
+    - aid: The id of the Activity the View is in.
+    - tab: The index of the tab to select, starting at 0.
+- setClickable: Sets whether a View can be clicked by the user (if yes, emits a sound and animation when clicked and sends a click event (if click events are enabled))).
+  - Parameters:
+    - id: The View id of a View.
+    - aid: The id of the Activity the View is in.
+    - clickable: Whether the View should be clickable.
+
 
 
 
@@ -351,15 +361,44 @@ To help with security, the default settings are:
 - Navigation is blocked. You can only set the page content through methods in Termux:GUI.
 
 Methods:
-- allowJavascript: Asks the user for permission to run Javascript in the WebView, if it isn't enabled globally in the options.
+- allowJavascript: Asks the user for permission to run Javascript in the WebView, if it isn't enabled globally in the options. Returns whether Javascript is enabled after the call.
   - Parameters:
+    - aid: The id of the Activity the View is in.
     - id: The id of the WebView.
     - allow: Whether to allow or disallow Javascript.
-
-
-
-
-
+- allowContentURI: Sets whether loading content:// URIs is allowed in the WebView. This can be used to open data from other apps in the WebView.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the WebView.
+    - allow: Whether to allow or disallow content:// URIs.
+- setData: Sets the document displayed in the WebView.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the WebView.
+    - doc: A string containing the HTML document.
+- loadURI: Loads a document from the provided URI.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the WebView.
+    - uri: A URI string
+- allowNavigation: Allows Javascript and the user to navigate. The recommended solution is to catch the navigation events, check the URL and call loadURI, but this needs more work from the client. Currently only works on Android 8.0 and higher.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the WebView.
+    - allow: Whether to allow or disallow navigation in the WebView.
+- goBack: Navigates back in the history.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the WebView.
+- goForward: Navigates forward in the history.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the WebView.
+- evaluateJS: Runs Javascript code in the WebView.
+  - Parameters:
+    - aid: The id of the Activity the View is in.
+    - id: The id of the WebView.
+    - code: The Javascript code.
 
 
 
@@ -399,7 +438,7 @@ Due to Android limitations, you can only have a specific number of distinct View
   - params:
     - rid: id of the remote Layout.
     - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
-- addRemoteButton: creates a Button in a remote Layout. Returns the View id in the Layout. The Activity id for the Button click event will be the remote Layout id.
+- addRemoteButton: creates a Button in a remote Layout. Returns the View id in the Layout.
   - params:
     - rid: id of the remote Layout.
     - parent: id of the parent View. If not specified, it is added to the remote Layout itself.
@@ -466,18 +505,28 @@ Custom Notifications:
     - id: The id of the created notification channel. Notification channels are shared between all clients using Termux:GUI, so choose a unique name.
     - importance: 0: min, shows the icon in the tray, 1: low, shows the notification, 2: default, can make noise, 3: high, intrusive, 4: max, very intrusive
     - name: The displayed name for the channel in the Android notification settings.
-- createNotification: creates a custom notification. If you need more standard notifications, use Termux:API instead. Returns the notification id used for further calls.
+- createNotification: Creates a notification. Returns the notification id used for further calls. layout, expandedLayout and hudLayout are incompatible with title, content, largeImage and largeText.
   - params:
     - id: The id of the notification to update. If not specified, generates a new id.
-    - ongoing: If true, the Notification cannot be dismissed by the user, but the Notification is automatically dismissed when you close the connection to the plugin.
+    - ongoing: If true, the notification cannot be dismissed by the user, but the notification is automatically dismissed when you close the connection to the plugin.
     - layout: The id of the remote Layout to use.
-    - expandedLayout: The id of the remote Layout to use when the Notification has been expanded. Optional.
+    - expandedLayout: The id of the remote Layout to use when the notification has been expanded. Optional.
+    - hudLayout: The id of the remote Layout to use when the notification is shown as a head-up notification Optional.
+    - title: The notification title.
+    - content: The notification content text.
+    - largeImage: A large image to display in the expanded view. You can only set either largeImage or largeText.
+    - largeText: A large block of text to display in the expanded view. HTML formatting is supported. You can only set either largeImage or largeText.
+    - largeImageAsThumbnail: If true, the largeImage is shown as a thumbnail in the collapsed view.
     - icon: An image for the Notification in PNG or JPEG. Defaults to the Termux:GUI app icon if left empty.
     - channel: The notification channel id.
     - importance: The same as for createNotificationChannel. This is the importance used on Android versions lower than 8.0.
     - alertOnce: If this call is used to update a notification, don't alert the user again.
-
-
+    - showTimestamp: Shows the timestamp of the notification.
+    - timestamp: Optional. The timestamp to use in form of milliseconds since start of the epoch.
+    - actions: Optional. An array of strings with the names of actions. Pressing actions will generate a notificationaction event
+- cancelNotification: Cancels a notification.
+  - params:
+    - id: The id of the notification to cancel.
 
 
 
@@ -493,7 +542,7 @@ Events that are enabled by default:
 - refresh for SwipeRefreshLayout
 - selected for RadioGroup
 - itemselected for Spinner/TabLayout
-- 
+
 
 Event types:  
 - [Input Events](https://developer.android.com/guide/topics/ui/ui-events#EventListeners) :
@@ -518,6 +567,23 @@ Event types:
   - text: Send when the Text of the View changed, even when the text was changed with setText.
     - Additional values: text: The new text of the view
   - back: Send when you set an Activity to intercept the back button press and the back button is pressed. No id, since it originates from the Activity.
+  - webviewNavigation: Whenever JS or the user tries to navigate.
+    - value:
+      - url: The URL that will/would be loaded
+  - webviewHTTPError: When the WebView receives an HTTP error code
+    - value:
+      - url: The URL the error came from
+      - code: The error code
+  - webviewError: When the WebView can't load something, but it's not an HTTP error.
+    - value:
+      - url: The URL the error came from
+  - webviewDestroyed: When Android kills the WebView renderer process, the WebView is removed and this event is fired.
+  - webviewProgress: The progress of loading the current site.
+    - value:
+      - progress: The percentage of progress.
+  - webviewConsoleMessage: When JS wants to print a message in the console.
+    - value:
+      - msg: The message.
 - [Activity Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) :
   - values for all:
     - aid: The id of the Activity.
@@ -543,7 +609,16 @@ Event types:
   - screen_off: Gets fired when the screen is turned off.
   - timezone: Gets fired when the time zone changes.
   - overlayTouch: Like touch, but is dispatched for every touch in an overlay window. The coordinates are the absolute screen coordinates
-  - overlayScale: 
+  - notification: Generated when the user taps a notification.
+    - value: id: The id of the notification
+  - notificationaction: Generated when the user clicks a notification action.
+    - value:
+      - id: The id of the notification
+      - action: The index of the action, starting at 0.
+  - remoteclick: Like click, but for buttons in RemoteViews.
+    - value:
+      - rid: Id of the remote layout.
+      - id: id of the remote Button.
 
 #### Touch events
 

@@ -17,6 +17,8 @@ class Settings private constructor() {
         private const val BACKGROUND_DEFAULT = false
         private const val LOGLEVEL_KEY = "loglevel"
         private const val LOGLEVEL_DEFAULT = 0
+        private const val JAVASCRIPT_KEY = "javascript"
+        private const val JAVASCRIPT_DEFAULT = false
         val instance = Settings()
     }
     
@@ -25,6 +27,7 @@ class Settings private constructor() {
     var timeout: Int = TIMEOUT_DEFAULT
     var background: Boolean = BACKGROUND_DEFAULT
     var loglevel: Int = LOGLEVEL_DEFAULT
+    var javascript: Boolean = JAVASCRIPT_DEFAULT
     
     @Suppress("DEPRECATION")
     private fun settingsPreferences(c: Context): EncryptedSharedPreferences? {
@@ -50,6 +53,7 @@ class Settings private constructor() {
             timeout = prefs.getInt(TIMEOUT_KEY, TIMEOUT_DEFAULT)
             background = prefs.getBoolean(BACKGROUND_KEY, BACKGROUND_DEFAULT)
             loglevel = prefs.getInt(LOGLEVEL_KEY, LOGLEVEL_DEFAULT)
+            javascript = prefs.getBoolean(JAVASCRIPT_KEY, JAVASCRIPT_DEFAULT)
         }
     }
     
@@ -62,6 +66,7 @@ class Settings private constructor() {
             e.putInt(TIMEOUT_KEY, timeout)
             e.putBoolean(BACKGROUND_KEY, background)
             e.putInt(LOGLEVEL_KEY, loglevel)
+            e.putBoolean(JAVASCRIPT_KEY, javascript)
             e.commit()
         }
     }
