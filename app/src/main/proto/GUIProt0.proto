@@ -85,7 +85,7 @@ message Size {
 // Activity, Task and global methods
 
 message NewActivityRequest {
-  string tid = 1;
+  int32 tid = 1;
   enum ActivityType {
     normal = 0;
     dialog = 1;
@@ -100,7 +100,7 @@ message NewActivityRequest {
 
 message NewActivityResponse {
   string aid = 1;
-  string tid = 2;
+  int32 tid = 2;
 }
 
 
@@ -1316,7 +1316,14 @@ message SendTextEventResponse {
 }
 
 
+message SendOverlayTouchEventRequest {
+  string aid = 1;
+  bool send = 2;
+}
 
+message SendOverlayTouchEventResponse {
+  bool success = 1;
+}
 
 
 
@@ -1458,7 +1465,7 @@ message Method {
     SendTouchEventRequest sendTouchEvent = 603;
     SendGestureEventRequest sendGestureEvent = 604;
     SendTextEventRequest sendTextEvent = 605;
-    
+    SendOverlayTouchEventRequest sendOverlayTouch = 606;
     
   }
 }
@@ -1647,6 +1654,14 @@ message NotificationActionEvent {
   uint32 action = 2;
 }
 
+
+message OverlayScaleEvent {
+  string aid = 1;
+  float span = 2;
+}
+
+
+
 // Debug events
 
 message ExceptionDebugEvent {
@@ -1691,7 +1706,7 @@ message Event {
     RemoteClickEvent remoteClick = 44;
     NotificationEvent notification = 45;
     NotificationActionEvent notificationAction = 46;
-    
+    OverlayScaleEvent overlayScale = 48;
     
     
     // Debug events

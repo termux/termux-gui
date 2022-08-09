@@ -1,6 +1,5 @@
 package com.termux.gui.protocol.json.v0
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
@@ -59,7 +58,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                 when (m?.method) {
                     // Activity and Task methods
                     "newActivity" -> {
-                        handleActivity(m, activities, tasks, wm, overlays, out, app, eventQueue)
+                        handleActivity(m, tasks, wm, overlays, out, app, eventQueue)
                         continue
                     }
                     "finishActivity" -> {
@@ -165,7 +164,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
     }
     
     @Suppress("DEPRECATION")
-    private fun handleActivity(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>, wm: WindowManager,
+    private fun handleActivity(m: ConnectionHandler.Message, tasks: LinkedList<ActivityManager.AppTask>, wm: WindowManager,
                                overlays: MutableMap<String, DataClasses.Overlay>, out: DataOutputStream, app: Context, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
         for (t in tasks) {
             try {
@@ -255,72 +254,29 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
             }
             return
         }
-        Util.sendMessage(out, newActivityJSON(tasks, activities, m.params?.get("tid")?.asInt,
-                m.params?.get("pip")?.asBoolean
-                        ?: false, m.params?.get("dialog")?.asBoolean
+        val a = newActivity(m.params?.get("tid")?.asInt,
+            m.params?.get("pip")?.asBoolean
+                ?: false, m.params?.get("dialog")?.asBoolean
                 ?: false,
-                m.params?.get("lockscreen")?.asBoolean ?: false, m.params?.get("canceloutside")?.asBoolean ?: true,
-            m.params?.get("intercept")?.asBoolean ?: false))
-    }
-
-
-    @Suppress("DEPRECATION")
-    private fun newActivityJSON(tasks: LinkedList<ActivityManager.AppTask>, activities: MutableMap<String, DataClasses.ActivityState>, ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, canceloutside: Boolean, interceptBackButton: Boolean): String {
-        //println("ptid: $ptid")
-        val i = Intent(app, GUIActivity::class.java)
-        if (ptid == null) {
-            i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-        }
-        val aid = generateActivityID()
-        i.data = Uri.parse(aid)
-        
-        activities[aid] = DataClasses.ActivityState(null)
-        i.putExtra("pip", pip)
-        i.putExtra("intercept", interceptBackButton)
-        when {
-            pip -> {
-                i.flags = i.flags or Intent.FLAG_ACTIVITY_NO_ANIMATION
-            }
-            dialog -> { // pip overrides dialog
-                i.setClass(app, GUIActivityDialog::class.java)
-                i.putExtra("canceloutside", canceloutside)
-            }
-            lockscreen -> { // dialog overrides lockscreen
-                i.setClass(app, GUIActivityLockscreen::class.java)
-            }
-        }
-        
-        var task: ActivityManager.AppTask? = null
-        if (ptid == null) {
-            app.startActivity(i)
-        } else {
-            for (t in tasks) {
-                if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            t.taskInfo?.taskId == ptid
-                        } else {
-                            t.taskInfo?.id == ptid
-                        }) {
-                    task = t
-                    break
+            m.params?.get("lockscreen")?.asBoolean ?: false, m.params?.get("canceloutside")?.asBoolean ?: true,
+            m.params?.get("intercept")?.asBoolean ?: false)
+        val aid = a?.aid
+        Util.sendMessage(out, 
+            if (m.params?.contains("tid") == true) {
+                if (aid != null) {
+                    ConnectionHandler.gson.toJson(aid)
+                } else {
+                    ConnectionHandler.gson.toJson("-1")
                 }
-            }
-            if (task == null) {
-                return ConnectionHandler.gson.toJson(arrayOf("-1",-1))
-            }
-            task.startActivity(app, i, null)
-        }
-        while (true) {
-            if (activities[aid]?.a != null) {
-                break
-            }
-            Thread.sleep(1)
-        }
-        return if (ptid == null) {
-            ConnectionHandler.gson.toJson(arrayOf(aid, activities[aid]?.a?.taskId ?: 0))
-        } else {
-            ConnectionHandler.gson.toJson(aid)
-        }
+            } else {
+                if (aid != null) {
+                    ConnectionHandler.gson.toJson(arrayOf(aid, a.taskId))
+                } else {
+                    ConnectionHandler.gson.toJson(arrayOf("-1", -1))
+                }
+            })
     }
+    
 
     override fun onActivityCreated(state: DataClasses.ActivityState) {
         val map = HashMap<String, Any?>()

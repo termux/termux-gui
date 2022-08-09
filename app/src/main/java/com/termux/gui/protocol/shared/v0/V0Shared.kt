@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.os.SharedMemory
 import android.view.View
@@ -127,6 +128,62 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         activityID++
         return aid
     }
+
+
+    @Suppress("DEPRECATION")
+    fun newActivity(ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, canceloutside: Boolean, interceptBackButton: Boolean): GUIActivity? {
+        //println("ptid: $ptid")
+        val i = Intent(app, GUIActivity::class.java)
+        if (ptid == null) {
+            i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+        }
+        val aid = generateActivityID()
+        i.data = Uri.parse(aid)
+
+        activities[aid] = DataClasses.ActivityState(null)
+        i.putExtra(GUIActivity.PIP_KEY, pip)
+        i.putExtra(GUIActivity.INTERCEPT_KEY, interceptBackButton)
+        when {
+            pip -> {
+                i.flags = i.flags or Intent.FLAG_ACTIVITY_NO_ANIMATION
+            }
+            dialog -> { // pip overrides dialog
+                i.setClass(app, GUIActivityDialog::class.java)
+                i.putExtra(GUIActivityDialog.CANCELOUTSIDE_KEY, canceloutside)
+            }
+            lockscreen -> { // dialog overrides lockscreen
+                i.setClass(app, GUIActivityLockscreen::class.java)
+            }
+        }
+
+        var task: ActivityManager.AppTask? = null
+        if (ptid == null) {
+            app.startActivity(i)
+        } else {
+            for (t in tasks) {
+                if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        t.taskInfo?.taskId == ptid
+                    } else {
+                        t.taskInfo?.id == ptid
+                    }) {
+                    task = t
+                    break
+                }
+            }
+            if (task == null) {
+                return null
+            }
+            task.startActivity(app, i, null)
+        }
+        while (true) {
+            if (activities[aid]?.a != null) {
+                break
+            }
+            Thread.sleep(1)
+        }
+        return activities[aid]?.a
+    }
+    
     
     companion object {
         private val TAG: String? = V0Shared::class.java.canonicalName

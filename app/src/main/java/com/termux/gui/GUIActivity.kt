@@ -30,6 +30,8 @@ open class GUIActivity : AppCompatActivity() {
         private val TAG: String? = GUIActivity::class.java.canonicalName
         private const val THEME_KEY = "gui_theme"
         private const val DATA_KEY = "gui_data"
+        public const val INTERCEPT_KEY = "intercept"
+        public const val PIP_KEY = "pip"
     }
     val usedIds: TreeSet<Int> = TreeSet()
     init {
@@ -54,14 +56,14 @@ open class GUIActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Logger.log(2, TAG, "oncreate activity")
-        if (intent.getBooleanExtra("pip", false)) {
+        if (intent.getBooleanExtra(PIP_KEY, false)) {
             Logger.log(2, TAG, "pip")
             setTheme(R.style.Theme_TermuxGUI_NoAnimation)
             @Suppress("DEPRECATION")
             enterPictureInPictureMode()
             overridePendingTransition(0,0)
         }
-        if (intent.getBooleanExtra("intercept", false)) {
+        if (intent.getBooleanExtra(INTERCEPT_KEY, false)) {
             data.backEvent = true
         }
         setContentView(R.layout.activity_gui)
