@@ -42,15 +42,13 @@ android {
             keyPassword 'xrj45yWGLbsO7W0v'
         }
     }
-    
-    aaptOptions {
-        cruncherEnabled = false
-    }
-    
     packagingOptions {
-        doNotStrip '**/*.so'
+        jniLibs {
+            keepDebugSymbols += ['**/*.so']
+        }
     }
-    
+
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug

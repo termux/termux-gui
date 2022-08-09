@@ -20,11 +20,13 @@ android {
             }
         }
     }
-
     packagingOptions {
-        doNotStrip '**/*.so'
+        jniLibs {
+            keepDebugSymbols += ['**/*.so']
+        }
     }
-    
+
+
     buildTypes {
         debug {
             minifyEnabled false
