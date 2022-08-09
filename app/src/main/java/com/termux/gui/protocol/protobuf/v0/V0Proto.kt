@@ -23,52 +23,14 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<GUIProt0
         withSystemListenersAndCleanup(am, wm) {
             val input = main.inputStream
             while (! Thread.currentThread().isInterrupted) {
+                /*
                 val m = GUIProt0.Method.parseDelimitedFrom(input)
                 when (m.methodCase) {
-                    GUIProt0.Method.MethodCase.NEWACTIVITY -> newActivity(m.newActivity)
-                    GUIProt0.Method.MethodCase.FINISHACTIVITY -> TODO()
-                    GUIProt0.Method.MethodCase.FINISHTASK -> TODO()
-                    GUIProt0.Method.MethodCase.BRINGTASKTOFRONT -> TODO()
-                    GUIProt0.Method.MethodCase.MOVETASKTOBACK -> TODO()
-                    GUIProt0.Method.MethodCase.SETTHEME -> TODO()
-                    GUIProt0.Method.MethodCase.SETTASKDESCRIPTION -> TODO()
-                    GUIProt0.Method.MethodCase.METHOD_NOT_SET -> TODO()
-                    GUIProt0.Method.MethodCase.SETPIPPARAMS -> TODO()
-                    GUIProt0.Method.MethodCase.SETINPUTMODE -> TODO()
-                    GUIProt0.Method.MethodCase.SETPIPMODE -> TODO()
-                    GUIProt0.Method.MethodCase.SETPIPMODEAUTO -> TODO()
-                    GUIProt0.Method.MethodCase.TOAST -> TODO()
-                    GUIProt0.Method.MethodCase.KEEPSCREENON -> TODO()
-                    GUIProt0.Method.MethodCase.SETORIENTATION -> TODO()
-                    GUIProt0.Method.MethodCase.SETPOSITION -> TODO()
-                    GUIProt0.Method.MethodCase.GETCONFIGURATION -> TODO()
-                    GUIProt0.Method.MethodCase.TURNSCREENON -> TODO()
-                    GUIProt0.Method.MethodCase.ISLOCKED -> TODO()
-                    GUIProt0.Method.MethodCase.REQUESTUNLOCK -> TODO()
-                    GUIProt0.Method.MethodCase.HIDESOFTKEYBOARD -> TODO()
-                    GUIProt0.Method.MethodCase.INTERCEPTBACKBUTTON -> TODO()
-                    GUIProt0.Method.MethodCase.VERSION -> TODO()
-                    GUIProt0.Method.MethodCase.CREATELINEARLAYOUT -> TODO()
-                    GUIProt0.Method.MethodCase.CREATEFRAMELAYOUT -> TODO()
-                    GUIProt0.Method.MethodCase.CREATESWIPEREFRESHLAYOUT -> TODO()
-                    GUIProt0.Method.MethodCase.CREATETEXTVIEW -> TODO()
-                    GUIProt0.Method.MethodCase.CREATEEDITTEXT -> TODO()
-                    GUIProt0.Method.MethodCase.CREATEBUTTON -> TODO()
-                    GUIProt0.Method.MethodCase.CREATEIMAGEVIEW -> TODO()
-                    GUIProt0.Method.MethodCase.CREATESPACE -> TODO()
-                    GUIProt0.Method.MethodCase.CREATENESTEDSCROLLVIEW -> TODO()
-                    GUIProt0.Method.MethodCase.CREATEHORIZONTALSCROLLVIEW -> TODO()
-                    GUIProt0.Method.MethodCase.CREATERADIOGROUP -> TODO()
-                    GUIProt0.Method.MethodCase.CREATERADIOBUTTON -> TODO()
-                    GUIProt0.Method.MethodCase.CREATECHECKBOX -> TODO()
-                    GUIProt0.Method.MethodCase.CREATETOGGLEBUTTON -> TODO()
-                    GUIProt0.Method.MethodCase.CREATESWITCH -> TODO()
-                    GUIProt0.Method.MethodCase.CREATESPINNER -> TODO()
-                    GUIProt0.Method.MethodCase.CREATEPROGRESSBAR -> TODO()
-                    GUIProt0.Method.MethodCase.CREATETABLAYOUT -> TODO()
-                    GUIProt0.Method.MethodCase.CREATEWEBVIEW -> TODO()
-                    null -> { return@withSystemListenersAndCleanup } // terminate the connection when nothing is in the oneof
+                    //GUIProt0.Method.MethodCase.NEWACTIVITY -> newActivity(m.newActivity)
+                    //null -> { return@withSystemListenersAndCleanup } // terminate the connection when nothing is in the oneof
                 }
+                
+                 */
             }
         }
     }

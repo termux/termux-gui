@@ -324,7 +324,7 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - img: The image data in PNG or JPEG format.
 - addBuffer: Adds a buffer to be used for ImageViews. Returns to id of the generated buffer. Returns -1 in case of an error. This should be a file descriptor to a shared memory file. You can then write to the shared memory and use the image in the plugin without having to transmit it. When successful, it transfers a file descriptor via SCM_RIGHTS. That file descriptor can then be mapped.
   - Parameters:
-    - format: the Image buffer format. Supported: "ARGB888". The order in memory will be rgba with one byte each.
+    - format: the Image buffer format. Supported: "ARGB8888". The order in memory will be rgba with one byte each.
     - w: The width of the buffer.
     - h: The height of the buffer.
 - deleteBuffer: Deletes a shared buffer. You have to do this when you aren't using a buffer anymore (eg. it is to small and you want a larger one), because Buffers consume a lot of memory. Only call this once no ImageView uses this buffer anymore, by setting another buffer, an image or removing the ImageView.
@@ -656,8 +656,9 @@ The general flow after establishing a connection is this:
 - The plugin sends back the corresponding *Response message.
 
 The only exception to this is the addBuffer method:  
-Instead of a response message the plugin just sends one byte with a file descriptor as ancillary data.  
-If there is no ancillary data, the request failed. The value of the byte can be discarded.  
+Instead of a response message the plugin sends a 32 bit big-endian signed integer and after that one byte with a file descriptor as ancillary data.
+If the integer is negative, a buffer could not be created and there will be no byte with a file descriptor.
+
 
 The events are a stream of Event messages with the actual Event inside the event oneof.
 

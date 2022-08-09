@@ -42,6 +42,22 @@ message View {
   int32 id = 2;
 }
 
+enum Direction {
+  ALL = 0;
+  TOP = 1;
+  LEFT = 2;
+  BOTTOM = 3;
+  RIGHT = 4;
+}
+
+enum Importance {
+  DEFAULT = 0;
+  MIN = 1;
+  LOW = 2;
+  HIGH = 3;
+  MAX = 4;
+}
+
 message Size {
   float value = 1;
   // see https://developer.android.com/guide/topics/resources/more-resources.html#Dimension
@@ -539,23 +555,765 @@ message CreateWebViewResponse {
 
 // View manipulation methods
 
+message ShowCursorRequest {
+  View v = 1;
+  bool show = 2;
+}
+
+message ShowCursorResponse {
+  bool success = 1;
+}
+
+
+message SetLinearLayoutParamsRequest {
+  View v = 1;
+  float weight = 2;
+  int32 position = 3;
+}
+
+message SetLinearLayoutParamsResponse {
+  bool success = 1;
+}
+
+
+message SetGridLayoutParamsRequest {
+  View v = 1;
+  int32 row = 2;
+  int32 col = 3;
+  int32 rowSize = 4;
+  int32 colSize = 5;
+  enum Alignment {
+    CENTER = 0;
+    TOP = 1;
+    BOTTOM = 2;
+    LEFT = 3;
+    RIGHT = 4;
+    BASELINE = 5;
+    FILL = 6;
+  }
+  Alignment rowAlign = 6;
+  Alignment colAlign = 7;
+}
+
+message SetGridLayoutParamsResponse {
+  bool success = 1;
+}
+
+
+message SetViewLocationRequest {
+  View v = 1;
+  Size.Unit unit = 2;
+  int32 x = 3;
+  int32 y = 4;
+  bool top = 5;
+}
+
+message SetViewLocationResponse {
+  bool success = 1;
+}
+
+
+message SetRelativeLayoutParamsRequest {
+  View v = 1;
+}
+
+message SetRelativeLayoutParamsResponse {
+  bool success = 1;
+}
+
+
+message SetVisibilityRequest {
+  View v = 1;
+  Visibility vis = 2;
+}
+
+message SetVisibilityResponse {
+  bool success = 1;
+}
+
+
+message SetWidthRequest {
+  View v = 1;
+  Size s = 2;
+}
+
+message SetWidthResponse {
+  bool success = 1;
+}
+
+
+message SetHeightRequest {
+  View v = 1;
+  Size s = 2;
+}
+
+message SetHeightResponse {
+  bool success = 1;
+}
+
+
+message GetDimensionsRequest {
+  View v = 1;
+  Size.Unit unit = 2;
+}
+
+message GetDimensionsResponse {
+  float width = 1;
+  float height = 2;
+}
+
+
+message DeleteViewRequest {
+  View v = 1;
+}
+
+message DeleteViewResponse {
+  bool success = 1;
+}
+
+
+message DeleteChildrenRequest {
+  View v = 1;
+}
+
+message DeleteChildrenResponse {
+  bool success = 1;
+}
+
+
+message SetMarginRequest {
+  View v = 1;
+  Size s = 2;
+  Direction dir = 3;
+}
+
+message SetMarginResponse {
+  bool success = 1;
+}
+
+
+message SetPaddingRequest {
+  View v = 1;
+  Size s = 2;
+  Direction dir = 3;
+}
+
+message SetPaddingResponse {
+  bool success = 1;
+}
+
+
+message SetBackgroundColorRequest {
+  View v = 1;
+  uint32 color = 2;
+}
+
+message SetBackgroundColorResponse {
+  bool success = 1;
+}
+
+
+message SetTextColorRequest {
+  View v = 1;
+  uint32 color = 2;
+}
+
+message SetTextColorResponse {
+  bool success = 1;
+}
+
+
+message SetProgressRequest {
+  View v = 1;
+  uint32 progress = 2;
+}
+
+message SetProgressResponse {
+  bool success = 1;
+}
+
+
+message SetRefreshingRequest {
+  View v = 1;
+  bool refreshing = 2;
+}
+
+message SetRefreshingResponse {
+  bool success = 1;
+}
+
+
+message SetTextRequest {
+  View v = 1;
+  string text = 2;
+}
+
+message SetTextResponse {
+  bool success = 1;
+}
+
+
+message SetGravityRequest {
+  View v = 1;
+  enum Gravity {
+    CENTER = 0;
+    LEFTTOP = 1;
+    RIGHTBOTTOM = 2;
+  }
+  Gravity horizontal = 2;
+  Gravity vertical = 3;
+}
+
+message SetGravityResponse {
+  bool success = 1;
+}
+
+
+message SetTextSizeRequest {
+  View v = 1;
+  Size s = 2;
+}
+
+message SetTextSizeResponse {
+  bool success = 1;
+}
+
+
+message GetTextRequest {
+  View v = 1;
+}
+
+message GetTextResponse {
+  string text = 1;
+}
+
+
+message SetCheckedRequest {
+  View v = 1;
+  bool checked = 2;
+}
+
+message SetCheckedResponse {
+  bool success = 1;
+}
+
+
+message RequestFocusRequest {
+  View v = 1;
+  bool forcesoft = 2;
+}
+
+message TequestFocusResponse {
+  bool success = 1;
+}
+
+
+message GetScrollPositionRequest {
+  View v = 1;
+  Size.Unit unit = 2;
+}
+
+message GetScrollPositionResponse {
+  float x = 1;
+  float y = 2;
+}
+
+
+message SetScrollPositionRequest {
+  View v = 1;
+  Size x = 2;
+  Size y = 3;
+  bool smooth = 4;
+}
+
+message SetScrollPositionResponse {
+  bool success = 1;
+}
+
+
+message SetListRequest {
+  View v = 1;
+  repeated string list = 2;
+}
+
+message SetListResponse {
+  bool success = 1;
+}
+
+
+message SetImageRequest {
+  View v = 1;
+  bytes image = 2;
+}
+
+message SetImageResponse {
+  bool success = 1;
+}
+
+
+message AddBufferRequest {
+  enum Format {
+    ARGB8888 = 0;
+  }
+  Format f = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+}
+
+
+message DeleteBufferRequest {
+  int32 buffer = 1;
+}
+
+message DeleteBufferResponse {
+  bool success = 1;
+}
+
+
+message BlitBufferRequest {
+  int32 buffer = 1;
+}
+
+message BlitBufferResponse {
+  bool success = 1;
+}
+
+
+message SetBufferRequest {
+  View v = 1;
+  int32 buffer = 2;
+}
+
+message SetBufferResponse {
+  bool success = 1;
+}
+
+
+message RefreshImageViewRequest {
+  View v = 1;
+}
+
+message RefreshImageViewResponse {
+  bool success = 1;
+}
+
+
+message SelectTabRequest {
+  View v = 1;
+  uint32 tab = 2;
+}
+
+message SelectTabResponse {
+  bool success = 1;
+}
+
+
+message SetClickableRequest {
+  View v = 1;
+  bool clickable = 2;
+}
+
+message SetClickableResponse {
+  bool success = 1;
+}
+
+
+
+
+
+
 
 
 
 
 // RemoteViews methods
 
+message CreateRemoteLayoutRequest {
+  
+}
+
+message CreateRemoteLayoutResponse {
+  int32 rid = 1;
+}
+
+
+message DeleteRemoteLayoutRequest {
+  int32 rid = 1;
+}
+
+message DeleteRemoteLayoutResponse {
+  bool success = 1;
+}
+
+
+message AddRemoteFrameLayoutRequest {
+  int32 rid = 1;
+  int32 parent = 2;
+}
+
+message AddRemoteFrameLayoutResponse {
+  int32 id = 1;
+}
+
+
+message AddRemoteLinearLayoutRequest {
+  int32 rid = 1;
+  int32 parent = 2;
+  bool horizontal = 3;
+}
+
+message AddRemoteLinearLayoutResponse {
+  int32 id = 1;
+}
+
+
+message AddRemoteTextViewRequest {
+  int32 rid = 1;
+  int32 parent = 2;
+}
+
+message AddRemoteTextViewResponse {
+  int32 id = 1;
+}
+
+
+message AddRemoteButtonRequest {
+  int32 rid = 1;
+  int32 parent = 2;
+}
+
+message AddRemoteButtonResponse {
+  int32 id = 1;
+}
+
+
+message AddRemoteImageViewRequest {
+  int32 rid = 1;
+  int32 parent = 2;
+}
+
+message AddRemoteImageViewResponse {
+  int32 id = 1;
+}
+
+
+message AddRemoteProgressBarRequest {
+  int32 rid = 1;
+  int32 parent = 2;
+}
+
+message AddRemoteProgressBarResponse {
+  int32 id = 1;
+}
+
+
+message SetRemoteBackgroundColorRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  uint32 color = 3;
+}
+
+message SetRemoteBackgroundColorResponse {
+  bool success = 1;
+}
+
+
+message SetRemoteProgressBarRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  uint32 progress = 3;
+  uint32 max = 4;
+}
+
+message SetRemoteProgressBarResponse {
+  bool success = 1;
+}
+
+
+message SetRemoteTextRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  string text = 3;
+}
+
+message SetRemoteTextResponse {
+  bool success = 1;
+}
+
+
+message SetRemoteTextSizeRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  Size s = 3;
+}
+
+message SetRemoteTextSizeResponse {
+  bool success = 1;
+}
+
+
+message SetRemoteTextColorRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  uint32 color = 3;
+}
+
+message SetRemoteTextColorResponse {
+  bool success = 1;
+}
+
+
+message SetRemoteVisibilityRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  Visibility v = 3;
+}
+
+message SetRemoteVisibilityResponse {
+  bool success = 1;
+}
+
+
+message SetRemotePaddingRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  Direction d = 3;
+}
+
+message SetRemotePaddingResponse {
+  bool success = 1;
+}
+
+
+message SetRemoteImageRequest {
+  int32 rid = 1;
+  int32 id = 2;
+  bytes image = 3;
+}
+
+message SetRemoteImageResponse {
+  bool success = 1;
+}
+
+
+message SetWidgetLayoutRequest {
+  int32 rid = 1;
+  string wid = 2;
+}
+
+message SetWidgetLayoutResponse {
+  bool success = 1;
+}
 
 
 
 
 // WebView methods
 
+message AllowJavascriptRequest {
+  View v = 1;
+  bool allow = 2;
+}
+
+message AllowJavascriptResponse {
+  bool allowed = 1;
+}
+
+
+message AllowContentURIRequest {
+  View v = 1;
+  bool allow = 2;
+}
+
+message AllowContentURIResponse {
+  bool success = 1;
+}
+
+
+message SetDataRequest {
+  View v = 1;
+  string data = 2;
+}
+
+message SetDataResponse {
+  bool success = 1;
+}
+
+
+message LoadURIRequest {
+  View v = 1;
+  string uri = 2;
+}
+
+message LoadURIResponse {
+  bool success = 1;
+}
+
+
+message AllowNavigationRequest {
+  View v = 1;
+  bool allow = 2;
+}
+
+message AllowNavigationResponse {
+  bool success = 1;
+}
+
+
+message GoBackRequest {
+  View v = 1;
+}
+
+message GoBackResponse {
+  bool success = 1;
+}
+
+
+message GoForwardRequest {
+  View v = 1;
+}
+
+message GoForwardResponse {
+  bool success = 1;
+}
+
+
+message EvaluateJSRequest {
+  View v = 1;
+  string code = 2;
+}
+
+message EvaluateJSResponse {
+  bool success = 1;
+}
+
+
+// Notification methods
+
+message CreateNotificationChannelRequest {
+  string id = 1;
+  string name = 2;
+  Importance importance = 3;
+}
+
+message CreateNotificationChannelResponse {
+  bool success = 1;
+}
+
+
+message CreateNotificationRequest {
+  message NormalNotification {
+    string title = 1;
+    string content = 2;
+  }
+  message LongTextNotification {
+    string title = 1;
+    string content = 2;
+  }
+  message BigImageNotification {
+    string title = 1;
+    string content = 2;
+    bytes image = 3;
+    bool asThumbnail = 4;
+  }
+  message CustomNotification {
+    int32 layout = 1;
+    int32 layoutExpanded = 2;
+    int32 layoutHUD = 3;
+  }
+  oneof type {
+    NormalNotification normal = 8;
+    LongTextNotification longText = 9;
+    BigImageNotification bigImage = 10;
+    CustomNotification custom = 11;
+  }
+  bytes icon = 1;
+  string channel = 2;
+  Importance importance = 3;
+  bool alertOnce = 4;
+  bool showTimestamp = 5;
+  int64 timestamp = 6;
+  repeated string actions = 7;
+}
+
+message CreateNotificationResponse {
+  int32 id = 1;
+}
+
+
+message CancelNotificationRequest {
+  int32 id = 1;
+}
+
+message CancelNotificationResponse {
+  bool success = 1;
+}
+
+
 
 
 
 
 // Event control methods
+
+message SendClickEventRequest {
+  View v = 1;
+  bool send = 2;
+}
+
+message SendClickEventResponse {
+  bool success = 1;
+}
+
+
+message SendLongClickEventRequest {
+  View v = 1;
+  bool send = 2;
+}
+
+message SendLongClickEventResponse {
+  bool success = 1;
+}
+
+
+message SendFocusChangeEventRequest {
+  View v = 1;
+  bool send = 2;
+}
+
+message SendFocusChangeEventResponse {
+  bool success = 1;
+}
+
+
+message SendTouchEventRequest {
+  View v = 1;
+  bool send = 2;
+}
+
+message SendTouchEventResponse {
+  bool success = 1;
+}
+
+
+message SendGestureEventRequest {
+  View v = 1;
+  bool send = 2;
+}
+
+message SendGestureEventResponse {
+  bool success = 1;
+}
+
+
+message SendTextEventRequest {
+  View v = 1;
+  bool send = 2;
+}
+
+message SendTextEventResponse {
+  bool success = 1;
+}
 
 
 
@@ -615,26 +1373,91 @@ message Method {
     
     // View manipulation methods
     
-    // = 200;
-    
+    ShowCursorRequest showCursor = 200;
+    SetLinearLayoutParamsRequest setLinearLayout = 201;
+    SetGridLayoutParamsRequest setGridLayout = 202;
+    SetViewLocationRequest setLocation = 203;
+    SetRelativeLayoutParamsRequest setRelative = 204;
+    SetVisibilityRequest setVisibility = 205;
+    SetWidthRequest setWidth = 206;
+    SetHeightRequest setHeight = 207;
+    GetDimensionsRequest getDimensions = 209;
+    DeleteViewRequest deleteView = 210;
+    DeleteChildrenRequest deleteChildren = 211;
+    SetMarginRequest setMargin = 212;
+    SetPaddingRequest setPadding = 213;
+    SetBackgroundColorRequest setBackgroundColor = 214;
+    SetTextColorRequest setTextColor = 215;
+    SetProgressRequest setProgress = 216;
+    SetRefreshingRequest setRefreshing = 217;
+    SetTextRequest setText = 218;
+    SetGravityRequest setGravity = 219;
+    SetTextSizeRequest setTextSize = 220;
+    GetTextRequest getText = 221;
+    RequestFocusRequest requestFocus = 222;
+    GetScrollPositionRequest getScrollPosition = 223;
+    SetScrollPositionRequest setScrollPosition = 224;
+    SetListRequest setList = 225;
+    SetImageRequest setImage = 226;
+    AddBufferRequest addBuffer = 227;
+    DeleteBufferRequest deleteBuffer = 228;
+    BlitBufferRequest blitBuffer = 229;
+    SetBufferRequest setBuffer = 230;
+    RefreshImageViewRequest refreshImageView = 231;
+    SelectTabRequest selectTab = 232;
+    SetClickableRequest setClickable = 233;
     
     
     // RemoteViews methods
     
-    // = 300;
+    CreateRemoteLayoutRequest createRemoteLayout = 300;
+    DeleteRemoteLayoutRequest deleteRemoteLayout = 301;
+    AddRemoteFrameLayoutRequest addRemoteFrameLayout = 302;
+    AddRemoteLinearLayoutRequest addRemoteLinearLayout = 303;
+    AddRemoteTextViewRequest addRemoteTextView = 304;
+    AddRemoteButtonRequest addRemoteButton = 305;
+    AddRemoteImageViewRequest addRemoteImageView = 306;
+    AddRemoteProgressBarRequest addRemoteProgressBar = 307;
+    SetRemoteBackgroundColorRequest setRemoteBackgroundColor = 308;
+    SetRemoteProgressBarRequest setRemoteProgressBar = 309;
+    SetRemoteTextRequest setRemoteText = 310;
+    SetRemoteTextSizeRequest setRemoteTextSize = 311;
+    SetRemoteTextColorRequest setRemoteTextColor = 312;
+    SetRemoteVisibilityRequest setRemoteVisibility = 313;
+    SetRemotePaddingRequest setRemotePadding = 314;
+    SetRemoteImageRequest setRemoteImage = 315;
+    SetWidgetLayoutRequest setWidgetLayout = 316;
     
     
     
     // WebView methods
     
-    // = 400;
+    AllowJavascriptRequest allowJS = 400;
+    AllowContentURIRequest allowContent = 401;
+    SetDataRequest setData = 402;
+    LoadURIRequest loadURI = 403;
+    AllowNavigationRequest allowNavigation = 404;
+    GoBackRequest goBack = 405;
+    GoForwardRequest goForward = 406;
+    EvaluateJSRequest evaluateJS = 407;
+    
+    
+    // Notification methods
+
+    CreateNotificationChannelRequest createChannel = 500;
+    CreateNotificationRequest createNotification = 501;
+    CancelNotificationRequest cancelNotification = 502;
     
     
     
     // Event control methods
     
-    // = 500;
-    
+    SendClickEventRequest sendClickEvent = 600;
+    SendLongClickEventRequest sendLongClickEvent = 601;
+    SendFocusChangeEventRequest sendFocusChangeEvent = 602;
+    SendTouchEventRequest sendTouchEvent = 603;
+    SendGestureEventRequest sendGestureEvent = 604;
+    SendTextEventRequest sendTextEvent = 605;
     
     
   }
@@ -681,27 +1504,23 @@ message ConfigEvent {
 }
 
 message ClickEvent {
-  string aid = 1;
-  int32 id = 2;
-  int32 x = 3;
-  int32 y = 4;
-  bool set = 5;
+  View v = 1;
+  int32 x = 2;
+  int32 y = 3;
+  bool set = 4;
 }
 
 message LongClickEvent {
-  string aid = 1;
-  int32 id = 2;
+  View v = 1;
 }
 
 message FocusChangeEvent {
-  string aid = 1;
-  int32 id = 2;
-  bool focus = 3;
+  View v = 1;
+  bool focus = 2;
 }
 
 message TouchEvent {
-  string aid = 1;
-  int32 id = 2;
+  View v = 1;
   enum Action {
     down = 0;
     up = 1;
@@ -710,7 +1529,7 @@ message TouchEvent {
     cancel = 4;
     move = 5;
   }
-  Action action = 3;
+  Action action = 2;
   message Touch {
     message Pointer {
       int32 x = 1;
@@ -719,37 +1538,68 @@ message TouchEvent {
     }
     repeated Pointer pointers = 4;
   }
-  repeated Touch touches = 4;
-  int32 index = 5;
-  uint64 time = 6;
-}
-
-message TextEvent {
-  string aid = 1;
-  int32 id = 2;
+  repeated Touch touches = 3;
+  int32 index = 4;
+  uint64 time = 5;
 }
 
 message RefreshEvent {
-  string aid = 1;
-  int32 id = 2;
+  View v = 1;
 }
 
 message SelectedEvent {
-  string aid = 1;
-  int32 id = 2;
-  int32 selected = 3;
+  View v = 1;
+  int32 selected = 2;
 }
 
 message ItemSelectedEvent {
-  string aid = 1;
-  int32 id = 2;
-  string selected = 3;
+  View v = 1;
+  string selected = 2;
 }
 
 message TabSelectedEvent {
+  View v = 1;
+  int32 tab = 2;
+}
+
+message BackButtonEvent {
   string aid = 1;
-  int32 id = 2;
-  int32 tab = 4;
+}
+
+message TextEvent {
+  View v = 1;
+  string text = 2;
+}
+
+
+message WebViewNavigationEvent {
+  View v = 1;
+  string url = 2;
+}
+
+message WebViewHTTPErrorEvent {
+  View v = 1;
+  string url = 2;
+  int32 code = 3;
+}
+
+message WebViewErrorEvent {
+  View v = 1;
+  string url = 2;
+}
+
+message WebViewDestroyedEvent {
+  View v = 1;
+}
+
+message WebViewProgressEvent {
+  View v = 1;
+  uint32 progress = 2;
+}
+
+message WebViewConsoleMessageEvent {
+  View v = 1;
+  string message = 2;
 }
 
 
@@ -782,9 +1632,6 @@ message PiPChangedEvent {
   bool pip = 2;
 }
 
-message BackButtonEvent {
-  string aid = 1;
-}
 
 message RemoteClickEvent {
   uint32 rid = 1;
@@ -812,6 +1659,8 @@ message Event {
     ClickEvent click = 1;
     TouchEvent touch = 2;
     TextEvent text = 3;
+    
+    
     CreateEvent create = 16;
     StartEvent start = 17;
     ResumeEvent resume = 18;
@@ -825,17 +1674,23 @@ message Event {
     SelectedEvent selected = 27;
     ItemSelectedEvent itemSelected = 28;
     TabSelectedEvent tabSelected = 29;
-    AirplaneEvent airplane = 30;
-    LocaleEvent locale = 31;
-    TimezoneEvent timezone = 32;
-    ScreenOffEvent screenOff = 33;
-    ScreenOnEvent screenOn = 34;
-    UserLeaveHintEvent userLeaveHint = 35;
-    PiPChangedEvent pip = 36;
-    BackButtonEvent back = 37;
-    RemoteClickEvent remoteClick = 38;
-    NotificationEvent notification = 39;
-    NotificationActionEvent notificationAction = 40;
+    BackButtonEvent back = 30;
+    WebViewNavigationEvent webNavigation = 31;
+    WebViewHTTPErrorEvent webHTTPError = 32;
+    WebViewErrorEvent webError = 33;
+    WebViewDestroyedEvent webDestroyed = 34;
+    WebViewProgressEvent webProgress = 35;
+    WebViewConsoleMessageEvent webConsoleMessage = 36;
+    AirplaneEvent airplane = 37;
+    LocaleEvent locale = 38;
+    TimezoneEvent timezone = 39;
+    ScreenOffEvent screenOff = 40;
+    ScreenOnEvent screenOn = 41;
+    UserLeaveHintEvent userLeaveHint = 42;
+    PiPChangedEvent pip = 43;
+    RemoteClickEvent remoteClick = 44;
+    NotificationEvent notification = 45;
+    NotificationActionEvent notificationAction = 46;
     
     
     
