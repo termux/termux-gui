@@ -8,8 +8,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Base64
-import android.util.Log
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -375,6 +375,51 @@ class HandleView {
                             if (o != null) {
                                 Util.runOnUIThreadBlocking {
                                     o.root.findViewReimplemented<TextView>(id)?.text = text
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setGravity" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asString
+                        val id = m.params?.get("id")?.asInt
+                        val horizontal = m.params?.get("horizontal")?.asInt
+                        val vertical = m.params?.get("vertical")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && horizontal != null && vertical != null) {
+                            if (a != null) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
+                                    val tv = it.findViewReimplemented<TextView>(id)
+                                    var grav = when (horizontal) {
+                                        0 -> Gravity.START
+                                        2 -> Gravity.END
+                                        else -> Gravity.CENTER_HORIZONTAL
+                                    }
+                                    grav = grav or when (vertical) {
+                                        0 -> Gravity.TOP
+                                        2 -> Gravity.BOTTOM
+                                        else -> Gravity.CENTER_VERTICAL
+                                    }
+                                    tv?.gravity = grav
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    val tv = o.root.findViewReimplemented<TextView>(id)
+                                    var grav = when (horizontal) {
+                                        0 -> Gravity.START
+                                        2 -> Gravity.END
+                                        else -> Gravity.CENTER_HORIZONTAL
+                                    }
+                                    grav = grav or when (vertical) {
+                                        0 -> Gravity.TOP
+                                        2 -> Gravity.BOTTOM
+                                        else -> Gravity.CENTER_VERTICAL
+                                    }
+                                    tv?.gravity = grav
                                 }
                             }
                         }

@@ -280,6 +280,12 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - id: The View id of a TextView, Button or EditText.
     - aid: The id of the Activity the View is in.
     - text: The text.
+- setGravity: Sets the gravity of the text of the View.
+  - Parameters:
+    - id: The View id of a TextView, Button or EditText.
+    - aid: The id of the Activity the View is in.
+    - horizontal: 0: left/top, 1: center, 2: right/bottom. Right and left are inverted for right-to-left layouts.
+    - vertical: Same values as for horizontal.
 - setTextSize: Sets the text size.
   - Parameters:
     - id: The View id of a TextView, Button or EditText.
