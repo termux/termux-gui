@@ -1629,19 +1629,13 @@ message SelectedEvent {
   int32 selected = 2;
 }
 
-/*
-The itemselected event is split up into ItemSelected for Spinners and TabSelected for TabLayout.
- */
 
 message ItemSelectedEvent {
   View v = 1;
-  string selected = 2;
+  // For Spinners, this is the index in the list you provided, and not the string of the option like for JSON
+  int32 selected = 2;
 }
 
-message TabSelectedEvent {
-  View v = 1;
-  int32 tab = 2;
-}
 
 message BackButtonEvent {
   string aid = 1;
@@ -1766,26 +1760,25 @@ message Event {
     RefreshEvent refresh = 26;
     SelectedEvent selected = 27;
     ItemSelectedEvent itemSelected = 28;
-    TabSelectedEvent tabSelected = 29;
-    BackButtonEvent back = 30;
-    WebViewNavigationEvent webNavigation = 31;
-    WebViewHTTPErrorEvent webHTTPError = 32;
-    WebViewErrorEvent webError = 33;
-    WebViewDestroyedEvent webDestroyed = 34;
-    WebViewProgressEvent webProgress = 35;
-    WebViewConsoleMessageEvent webConsoleMessage = 36;
-    AirplaneEvent airplane = 37;
-    LocaleEvent locale = 38;
-    TimezoneEvent timezone = 39;
-    ScreenOffEvent screenOff = 40;
-    ScreenOnEvent screenOn = 41;
-    UserLeaveHintEvent userLeaveHint = 42;
-    PiPChangedEvent pip = 43;
-    RemoteClickEvent remoteClick = 44;
-    NotificationEvent notification = 45;
-    NotificationDismissedEvent notificationDismissed = 46;
-    NotificationActionEvent notificationAction = 47;
-    OverlayScaleEvent overlayScale = 48;
+    BackButtonEvent back = 29;
+    WebViewNavigationEvent webNavigation = 30;
+    WebViewHTTPErrorEvent webHTTPError = 31;
+    WebViewErrorEvent webError = 32;
+    WebViewDestroyedEvent webDestroyed = 33;
+    WebViewProgressEvent webProgress = 34;
+    WebViewConsoleMessageEvent webConsoleMessage = 35;
+    AirplaneEvent airplane = 36;
+    LocaleEvent locale = 37;
+    TimezoneEvent timezone = 38;
+    ScreenOffEvent screenOff = 39;
+    ScreenOnEvent screenOn = 40;
+    UserLeaveHintEvent userLeaveHint = 41;
+    PiPChangedEvent pip = 42;
+    RemoteClickEvent remoteClick = 43;
+    NotificationEvent notification = 44;
+    NotificationDismissedEvent notificationDismissed = 45;
+    NotificationActionEvent notificationAction = 46;
+    OverlayScaleEvent overlayScale = 47;
     
     
     // Debug events
