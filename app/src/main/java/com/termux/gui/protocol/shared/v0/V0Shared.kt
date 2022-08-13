@@ -151,7 +151,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         val aid = generateActivityID()
         i.data = Uri.parse(Util.activityIDData(aid))
 
-        activities[aid] = DataClasses.ActivityState(null)
+        activities[aid] = DataClasses.ActivityState(Util.connectionID())
         i.putExtra(GUIActivity.PIP_KEY, pip)
         i.putExtra(GUIActivity.INTERCEPT_KEY, interceptBackButton)
         when {

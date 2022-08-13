@@ -3,6 +3,7 @@ package com.termux.gui.protocol.shared.v0
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.SharedMemory
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.RemoteViews
@@ -17,7 +18,22 @@ import kotlin.reflect.KClass
 class DataClasses {
     data class SharedBuffer(val btm: Bitmap, val shm: SharedMemory?, val buff: ByteBuffer, val fd: Int?)
     data class RemoteLayoutRepresentation(var root: RemoteViews?, val viewCount: HashMap<KClass<*>, Int> = HashMap())
-    data class ActivityState(var a: GUIActivity?, @Volatile var saved: Boolean = false, val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(100))
+    data class ActivityState(val connectionID: Long, ) {
+        @Volatile private var _a: GUIActivity? = null
+        @Volatile var saved: Boolean = false
+        val queued: LinkedBlockingQueue<(activity: GUIActivity) -> Unit> = LinkedBlockingQueue<(activity: GUIActivity) -> Unit>(100)
+        var a: GUIActivity? get() {return _a} set(value) {
+            if (value != null) {
+                if (value.connection == connectionID) {
+                    _a = value
+                } else {
+                    Log.d("AID", "connection doesn't match")
+                }
+            } else {
+                _a = null
+            }
+        }
+    }
     data class Overlay(val context: Context) {
         val usedIds: TreeSet<Int> = TreeSet()
         var theme: GUIActivity.GUITheme? = null
