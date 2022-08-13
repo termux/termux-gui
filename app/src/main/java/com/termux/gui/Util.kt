@@ -149,7 +149,7 @@ class Util {
             }
         }
         
-        fun setClickListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setClickListener(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 if (v is CompoundButton) {
                     val map = HashMap<String, Any>()
@@ -171,7 +171,7 @@ class Util {
             }
         }
 
-        fun setLongClickListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setLongClickListener(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 val map = HashMap<String, Any>()
                 map["id"] = v.id
@@ -183,7 +183,7 @@ class Util {
             }
         }
 
-        fun setFocusChangeListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setFocusChangeListener(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 val map = HashMap<String, Any>()
                 map["id"] = v.id
@@ -197,7 +197,7 @@ class Util {
             }
         }
         
-        fun setCheckedListener(v: RadioGroup, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setCheckedListener(v: RadioGroup, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             val args = HashMap<String, Any>()
             args["aid"] = aid
             args["id"] = v.id
@@ -207,7 +207,7 @@ class Util {
             }
         }
 
-        fun setSpinnerListener(v: Spinner, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setSpinnerListener(v: Spinner, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             v.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
                 val args = HashMap<String, Any?>()
                 init {
@@ -225,7 +225,7 @@ class Util {
             }
         }
 
-        fun setRefreshListener(v: SwipeRefreshLayout, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setRefreshListener(v: SwipeRefreshLayout, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             val args = HashMap<String, Any>()
             args["aid"] = aid
             args["id"] = v.id
@@ -237,7 +237,7 @@ class Util {
             }
         }
         
-        fun setTabSelectedListener(v: TabLayout, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setTabSelectedListener(v: TabLayout, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             val args = HashMap<String, Any>()
             args["aid"] = aid
             args["id"] = v.id
@@ -265,7 +265,7 @@ class Util {
             TOUCH_EVENT_MAP = Collections.unmodifiableMap(map)
         }
         
-        fun setTextWatcher(v: TextView, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setTextWatcher(v: TextView, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 v.addTextChangedListener(object: TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -286,7 +286,7 @@ class Util {
         
         
         @SuppressLint("ClickableViewAccessibility")
-        fun setTouchListenerJSON(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setTouchListenerJSON(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 val map = HashMap<String, Any>()
                 map["id"] = v.id
@@ -367,6 +367,14 @@ class Util {
                 }
                 usedIds.remove(v.id)
             }
+        }
+        
+        fun connectionID(): Long {
+            return Thread.currentThread().id
+        }
+        
+        fun activityIDData(aid: Int): String {
+            return connectionID().toString()+"-"+aid.toString()
         }
     }
 }

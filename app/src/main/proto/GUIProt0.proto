@@ -61,14 +61,14 @@ enum Visibility {
 }
 
 message Create {
-  string aid = 1;
+  int32 aid = 1;
   int32 parent = 2;
   Visibility v = 3;
 }
 
 
 message View {
-  string aid = 1;
+  int32 aid = 1;
   int32 id = 2;
 }
 
@@ -140,13 +140,13 @@ Otherwise unlike for JSON, the tid is always returned.
 For overlays, the tid is invalid though.
  */
 message NewActivityResponse {
-  string aid = 1;
+  int32 aid = 1;
   int32 tid = 2;
 }
 
 
 message FinishActivityRequest {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message FinishActivityResponse {
@@ -172,7 +172,7 @@ message BringTaskToFrontResponse {
 
 
 message MoveTaskToBackRequest {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message MoveTaskToBackResponse {
@@ -181,7 +181,7 @@ message MoveTaskToBackResponse {
 
 
 message SetThemeRequest {
-  string aid = 1;
+  int32 aid = 1;
   uint32 statusBarColor = 2;
   uint32 colorPrimary = 3;
   uint32 windowBackground = 4;
@@ -195,7 +195,7 @@ message SetThemeResponse {
 
 
 message SetTaskDescriptionRequest {
-  string aid = 1;
+  int32 aid = 1;
   /*
   Images have to be a PNG or JPEG file in binary format (not base64 encoded like for JSON).
    */
@@ -209,7 +209,7 @@ message SetTaskDescriptionResponse {
 
 
 message SetPiPParamsRequest {
-  string aid = 1;
+  int32 aid = 1;
   uint32 num = 2;
   uint32 den = 3;
 }
@@ -220,7 +220,7 @@ message SetPiPParamsResponse {
 
 
 message SetInputModeRequest {
-  string aid = 1;
+  int32 aid = 1;
   enum InputMode {
     pan = 0;
     resize = 1;
@@ -234,7 +234,7 @@ message SetInputModeResponse {
 
 
 message SetPiPModeRequest {
-  string aid = 1;
+  int32 aid = 1;
   bool pip = 2;
 }
 
@@ -244,7 +244,7 @@ message SetPiPModeResponse {
 
 
 message SetPiPModeAutoRequest {
-  string aid = 1;
+  int32 aid = 1;
   bool pip = 2;
 }
 
@@ -264,7 +264,7 @@ message ToastResponse {
 
 
 message KeepScreenOnRequest {
-  string aid = 1;
+  int32 aid = 1;
   bool on = 2;
 }
 
@@ -274,7 +274,7 @@ message KeepScreenOnResponse {
 
 
 message SetOrientationRequest {
-  string aid = 1;
+  int32 aid = 1;
   /*
   The orientation is determined with an enum instead of a string.
    */
@@ -305,7 +305,7 @@ message SetOrientationResponse {
 
 
 message SetPositionRequest {
-  string aid = 1;
+  int32 aid = 1;
   uint32 x = 2;
   uint32 y = 3;
 }
@@ -316,7 +316,7 @@ message SetPositionResponse {
 
 
 message GetConfigurationRequest {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message GetConfigurationResponse {
@@ -344,7 +344,7 @@ message IsLockedResponse {
 
 
 message RequestUnlockRequest {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message RequestUnlockResponse {
@@ -353,7 +353,7 @@ message RequestUnlockResponse {
 
 
 message HideSoftKeyboardRequest {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message HideSoftKeyboardResponse {
@@ -1387,7 +1387,7 @@ message SendTextEventResponse {
 
 
 message SendOverlayTouchEventRequest {
-  string aid = 1;
+  int32 aid = 1;
   bool send = 2;
 }
 
@@ -1549,34 +1549,34 @@ message Method {
 
 
 message CreateEvent {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message StartEvent {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message ResumeEvent {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message PauseEvent {
-  string aid = 1;
+  int32 aid = 1;
   bool finishing = 2;
 }
 
 message StopEvent {
-  string aid = 1;
+  int32 aid = 1;
   bool finishing = 2;
 }
 
 message DestroyEvent {
-  string aid = 1;
+  int32 aid = 1;
   bool finishing = 2;
 }
 
 message ConfigEvent {
-  string aid = 1;
+  int32 aid = 1;
   Configuration configuration = 2;
 }
 
@@ -1638,7 +1638,7 @@ message ItemSelectedEvent {
 
 
 message BackButtonEvent {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message TextEvent {
@@ -1699,11 +1699,11 @@ message ScreenOnEvent {
 }
 
 message UserLeaveHintEvent {
-  string aid = 1;
+  int32 aid = 1;
 }
 
 message PiPChangedEvent {
-  string aid = 1;
+  int32 aid = 1;
   bool pip = 2;
 }
 
@@ -1728,7 +1728,7 @@ message NotificationActionEvent {
 
 
 message OverlayScaleEvent {
-  string aid = 1;
+  int32 aid = 1;
   float span = 2;
 }
 

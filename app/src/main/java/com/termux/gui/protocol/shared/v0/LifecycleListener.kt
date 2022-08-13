@@ -8,12 +8,12 @@ import com.termux.gui.GUIActivity
 import com.termux.gui.Util
 import java.util.*
 
-class LifecycleListener(private val v0: V0Shared, private val activities: MutableMap<String, DataClasses.ActivityState>,
-                        private val tasks: LinkedList<ActivityManager.AppTask>, private val am: ActivityManager) : Application.ActivityLifecycleCallbacks {
+class LifecycleListener(private val v0: V0Shared, private val activities: MutableMap<Int, DataClasses.ActivityState>,
+                        private val tasks: LinkedList<ActivityManager.AppTask>, private val am: ActivityManager, private val connectionID: Long) : Application.ActivityLifecycleCallbacks {
     override fun onActivityCreated(a: Activity, savedInstanceState: Bundle?) {
         //println("create")
-        if (a is GUIActivity) {
-            val f = activities[a.intent.dataString]
+        if (a is GUIActivity && a.connection == connectionID) {
+            val f = activities[a.aid]
             if (f != null) {
                 if (tasks.find { Util.getTaskInfo(tasks, it)?.let { it1 -> Util.getTaskId(it1) } == a.taskId } == null) {
                     for (t in am.appTasks) {
@@ -32,8 +32,8 @@ class LifecycleListener(private val v0: V0Shared, private val activities: Mutabl
     }
     override fun onActivityStarted(a: Activity) {
         //println("start")
-        if (a is GUIActivity) {
-            val f = activities[a.intent.dataString]
+        if (a is GUIActivity && a.connection == connectionID) {
+            val f = activities[a.aid]
             if (f != null) {
                 f.saved = false
                 for (r in f.queued) {
@@ -51,8 +51,8 @@ class LifecycleListener(private val v0: V0Shared, private val activities: Mutabl
     override fun onActivityResumed(a: Activity) {
         //println("resume")
         try {
-            if (a is GUIActivity) {
-                val f = activities[a.intent.dataString]
+            if (a is GUIActivity && a.connection == connectionID) {
+                val f = activities[a.aid]
                 if (f != null) {
                     v0.onActivityResumed(f)
                 }
@@ -64,8 +64,8 @@ class LifecycleListener(private val v0: V0Shared, private val activities: Mutabl
     override fun onActivityPaused(a: Activity) {
         //println("pause")
         try {
-            if (a is GUIActivity) {
-                val f = activities[a.intent.dataString]
+            if (a is GUIActivity && a.connection == connectionID) {
+                val f = activities[a.aid]
                 if (f != null) {
                     v0.onActivityPaused(f)
                 }
@@ -77,8 +77,8 @@ class LifecycleListener(private val v0: V0Shared, private val activities: Mutabl
     override fun onActivityStopped(a: Activity) {
         //println("stop")
         try {
-            if (a is GUIActivity) {
-                val f = activities[a.intent.dataString]
+            if (a is GUIActivity && a.connection == connectionID) {
+                val f = activities[a.aid]
                 if (f != null) {
                     v0.onActivityStopped(f)
                 }
@@ -91,9 +91,8 @@ class LifecycleListener(private val v0: V0Shared, private val activities: Mutabl
     override fun onActivitySaveInstanceState(a: Activity, outState: Bundle) {
         //println("saveInstanceState")
         try {
-            if (a is GUIActivity) {
-                val aid = a.intent.dataString
-                val f = activities[aid]
+            if (a is GUIActivity && a.connection == connectionID) {
+                val f = activities[a.aid]
                 if (f != null) {
                     f.saved = true
                 }
@@ -104,8 +103,8 @@ class LifecycleListener(private val v0: V0Shared, private val activities: Mutabl
     }
     override fun onActivityDestroyed(a: Activity) {
         try {
-            if (a is GUIActivity) {
-                val aid = a.intent.dataString
+            if (a is GUIActivity && a.connection == connectionID) {
+                val aid = a.aid
                 val f = activities[aid]
                 if (f != null) {
                     v0.onActivityDestroyed(f)

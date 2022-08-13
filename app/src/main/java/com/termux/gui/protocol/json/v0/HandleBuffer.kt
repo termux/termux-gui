@@ -17,7 +17,7 @@ import java.util.*
 
 class HandleBuffer {
     companion object {
-        fun handleBuffer(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, overlays: MutableMap<String, DataClasses.Overlay>,
+        fun handleBuffer(m: ConnectionHandler.Message, activities: MutableMap<Int, DataClasses.ActivityState>, overlays: MutableMap<Int, DataClasses.Overlay>,
                          rand: Random, out: DataOutputStream, buffers: MutableMap<Int, DataClasses.SharedBuffer>, main: LocalSocket): Boolean {
             when (m.method) {
                 "addBuffer" -> {
@@ -129,7 +129,7 @@ class HandleBuffer {
                     return true
                 }
                 "setBuffer" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val id = m.params?.get("id")?.asInt
                     val buffer = buffers[m.params?.get("bid")?.asInt]
@@ -149,7 +149,7 @@ class HandleBuffer {
                     return true
                 }
                 "refreshImageView" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val id = m.params?.get("id")?.asInt
                     val o = overlays[aid]

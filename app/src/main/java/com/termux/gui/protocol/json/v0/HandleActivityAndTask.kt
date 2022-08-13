@@ -23,7 +23,7 @@ import java.util.*
 class HandleActivityAndTask {
     companion object {
         @Suppress("DEPRECATION")
-        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>, overlays: MutableMap<String, DataClasses.Overlay>, app: Context, wm: WindowManager, out: DataOutputStream) : Boolean {
+        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<Int, DataClasses.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>, overlays: MutableMap<Int, DataClasses.Overlay>, app: Context, wm: WindowManager, out: DataOutputStream) : Boolean {
             when (m.method) {
                 "finishTask" -> {
                     tasks.find { t -> Util.getTaskInfo(tasks, t)?.let { it1 -> Util.getTaskId(it1) } == m.params?.get("tid")?.asInt }?.finishAndRemoveTask()
@@ -34,7 +34,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "moveTaskToBack" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     if (a != null) {
                         V0Shared.runOnUIThreadActivityStarted(a) {
@@ -62,7 +62,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "requestUnlock" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val kg = App.APP?.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -71,7 +71,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "getConfiguration" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]?.a
                     if (a != null) {
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(a.configToJson(a.resources.configuration)))
@@ -79,7 +79,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setTheme" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val s = m.params?.get("statusBarColor")?.asInt
                     val t = m.params?.get("textColor")?.asInt
@@ -100,7 +100,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setTaskDescription" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val img = m.params?.get("img")?.asString
                     if (a != null) {
@@ -123,7 +123,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setPiPParams" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val num = m.params?.get("num")?.asInt
                     val den = m.params?.get("den")?.asInt
                     val a = activities[aid]
@@ -136,7 +136,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setInputMode" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val mode = m.params?.get("mode")?.asString
                     val a = activities[aid]
                     if (a != null && mode != null) {
@@ -154,7 +154,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setPiPMode" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val pip = m.params?.get("pip")?.asBoolean ?: false
                     val a = activities[aid]
                     if (a != null) {
@@ -169,7 +169,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setPiPModeAuto" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val pip = m.params?.get("pip")?.asBoolean ?: false
                     val a = activities[aid]
                     if (a != null) {
@@ -188,7 +188,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "keepScreenOn" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val on = m.params?.get("on")?.asBoolean ?: false
                     val a = activities[aid]
                     if (a != null) {
@@ -203,7 +203,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setOrientation" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val orientation = m.params?.get("orientation")?.asString
                     val a = activities[aid]
                     if (a != null && orientation != null) {
@@ -230,7 +230,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "setPosition" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val x = m.params?.get("x")?.asInt
                     val y = m.params?.get("y")?.asInt
                     val o = overlays[aid]
@@ -245,7 +245,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "hideSoftKeyboard" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val o = overlays[aid]
                     if (a != null) {
@@ -263,7 +263,7 @@ class HandleActivityAndTask {
                     return true
                 }
                 "interceptBackButton" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val intercept = m.params?.get("intercept")?.asBoolean
                     val a = activities[aid]
                     if (a != null && intercept != null) {

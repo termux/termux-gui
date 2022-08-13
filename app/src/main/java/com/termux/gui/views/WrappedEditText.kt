@@ -13,7 +13,7 @@ import java.util.HashMap
 import java.util.concurrent.LinkedBlockingQueue
 
 @SuppressLint("ViewConstructor")
-class WrappedEditText(private val a: Context, private val aid: String, private val eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : androidx.appcompat.widget.AppCompatEditText(a) {
+class WrappedEditText(private val a: Context, private val aid: Int, private val eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : androidx.appcompat.widget.AppCompatEditText(a) {
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection {
         return InputWrapper(super.onCreateInputConnection(outAttrs), true)
     }

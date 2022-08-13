@@ -62,7 +62,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                         continue
                     }
                     "finishActivity" -> {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val a = activities[aid]
                         val o = overlays[aid]
                         if (a != null) {
@@ -81,7 +81,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                     }
                     // Event methods
                     in Regex("send.*Event") -> {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val a = activities[aid]
                         val id = m.params?.get("id")?.asInt
                         val o = overlays[aid]
@@ -165,7 +165,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
     
     @Suppress("DEPRECATION")
     private fun handleActivity(m: ConnectionHandler.Message, tasks: LinkedList<ActivityManager.AppTask>, wm: WindowManager,
-                               overlays: MutableMap<String, DataClasses.Overlay>, out: DataOutputStream, app: Context, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+                               overlays: MutableMap<Int, DataClasses.Overlay>, out: DataOutputStream, app: Context, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
         for (t in tasks) {
             try {
                 if (t.taskInfo == null) {
@@ -281,48 +281,48 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
     override fun onActivityCreated(state: DataClasses.ActivityState) {
         val map = HashMap<String, Any?>()
         map["finishing"] = state.a?.isFinishing
-        map["aid"] = state.a?.intent?.dataString
+        map["aid"] = state.a?.aid
         eventQueue.offer(ConnectionHandler.Event("create", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onActivityStarted(state: DataClasses.ActivityState) {
         val map = HashMap<String, Any?>()
         map["finishing"] = state.a?.isFinishing
-        map["aid"] = state.a?.intent?.dataString
+        map["aid"] = state.a?.aid
         eventQueue.offer(ConnectionHandler.Event("start", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onActivityResumed(state: DataClasses.ActivityState) {
         val map = HashMap<String, Any?>()
         map["finishing"] = state.a?.isFinishing
-        map["aid"] = state.a?.intent?.dataString
+        map["aid"] = state.a?.aid
         eventQueue.offer(ConnectionHandler.Event("resume", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onActivityPaused(state: DataClasses.ActivityState) {
         val map = HashMap<String, Any?>()
         map["finishing"] = state.a?.isFinishing
-        map["aid"] = state.a?.intent?.dataString
+        map["aid"] = state.a?.aid
         eventQueue.offer(ConnectionHandler.Event("pause", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onActivityStopped(state: DataClasses.ActivityState) {
         val map = HashMap<String, Any?>()
         map["finishing"] = state.a?.isFinishing
-        map["aid"] = state.a?.intent?.dataString
+        map["aid"] = state.a?.aid
         eventQueue.offer(ConnectionHandler.Event("stop", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onActivityDestroyed(state: DataClasses.ActivityState) {
         val map = HashMap<String, Any?>()
         map["finishing"] = state.a?.isFinishing
-        map["aid"] = state.a?.intent?.dataString
+        map["aid"] = state.a?.aid
         eventQueue.offer(ConnectionHandler.Event("destroy", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onBackButton(a: GUIActivity) {
         val map = HashMap<String, Any?>()
-        map["aid"] = a.intent?.dataString
+        map["aid"] = a.aid
         eventQueue.offer(ConnectionHandler.Event("back", ConnectionHandler.gson.toJsonTree(map)))
     }
     
@@ -385,7 +385,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
     override fun onUserLeaveHint(a: GUIActivity) {
         try {
             val map = HashMap<String, Any?>()
-            map["aid"] = a.intent?.dataString
+            map["aid"] = a.aid
             eventQueue.add(ConnectionHandler.Event("UserLeaveHint", ConnectionHandler.gson.toJsonTree(map)))
         } catch (ignored: Exception) {}
     }

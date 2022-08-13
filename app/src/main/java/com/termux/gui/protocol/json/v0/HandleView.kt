@@ -33,7 +33,7 @@ import java.util.concurrent.LinkedBlockingQueue
 class HandleView {
     companion object {
         @SuppressLint("WebViewApiAvailability")
-        fun handleView(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, overlays: MutableMap<String, DataClasses.Overlay>,
+        fun handleView(m: ConnectionHandler.Message, activities: MutableMap<Int, DataClasses.ActivityState>, overlays: MutableMap<Int, DataClasses.Overlay>,
                        rand: Random, out: DataOutputStream, app: Context,
                        eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : Boolean {
             operator fun Regex.contains(text: String?): Boolean = if (text == null) false else this.matches(text)
@@ -45,7 +45,7 @@ class HandleView {
                     return true
                 }
                 "showCursor" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val id = m.params?.get("id")?.asInt
                     val show = m.params?.get("show")?.asBoolean ?: true
                     val a = activities[aid]
@@ -63,7 +63,7 @@ class HandleView {
                     return true
                 }
                 "deleteView" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val id = m.params?.get("id")?.asInt
                     val a = activities[aid]
                     val o = overlays[aid]
@@ -80,7 +80,7 @@ class HandleView {
                     return true
                 }
                 "deleteChildren" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val id = m.params?.get("id")?.asInt
                     val a = activities[aid]
                     val o = overlays[aid]
@@ -108,7 +108,7 @@ class HandleView {
                 }
                 "setTextSize" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val size = m.params?.get("size")?.asInt
                         val a = activities[aid]
@@ -130,7 +130,7 @@ class HandleView {
                     return true
                 }
                 "setImage" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val id = m.params?.get("id")?.asInt
                     val img = m.params?.get("img")?.asString
@@ -155,7 +155,7 @@ class HandleView {
                 }
                 "setMargin" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val margin = m.params?.get("margin")?.asInt
                         val a = activities[aid]
@@ -196,7 +196,7 @@ class HandleView {
                     return true
                 }
                 "setLinearLayoutParams" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val id = m.params?.get("id")?.asInt
                     var weight = m.params?.get("weight")
@@ -245,7 +245,7 @@ class HandleView {
                     return true
                 }
                 "setGridLayoutParams" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val id = m.params?.get("id")?.asInt
                     val row = m.params?.get("row")?.asInt
@@ -283,7 +283,7 @@ class HandleView {
                     return true
                 }
                 "setViewLocation" -> {
-                    val aid = m.params?.get("aid")?.asString
+                    val aid = m.params?.get("aid")?.asInt
                     val a = activities[aid]
                     val id = m.params?.get("id")?.asInt
                     val x = m.params?.get("x")?.asInt
@@ -329,7 +329,7 @@ class HandleView {
                 }
                 "getDimensions" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val o = overlays[aid]
@@ -360,7 +360,7 @@ class HandleView {
                 }
                 "setText" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val text = m.params?.get("text")?.asString
                         val a = activities[aid]
@@ -383,7 +383,7 @@ class HandleView {
                 }
                 "setGravity" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val horizontal = m.params?.get("horizontal")?.asInt
                         val vertical = m.params?.get("vertical")?.asInt
@@ -428,7 +428,7 @@ class HandleView {
                 }
                 "setBackgroundColor" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val color = m.params?.get("color")?.asInt
                         val a = activities[aid]
@@ -450,7 +450,7 @@ class HandleView {
                 }
                 "setTextColor" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val color = m.params?.get("color")?.asInt
                         val a = activities[aid]
@@ -472,7 +472,7 @@ class HandleView {
                 }
                 "setProgress" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val progress = m.params?.get("progress")?.asInt
                         val a = activities[aid]
@@ -494,7 +494,7 @@ class HandleView {
                 }
                 "setRefreshing" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val refresh = m.params?.get("refresh")?.asBoolean
                         val a = activities[aid]
@@ -516,7 +516,7 @@ class HandleView {
                 }
                 "getText" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         var text: String? = null
                         val a = activities[aid]
@@ -541,7 +541,7 @@ class HandleView {
                 }
                 "setChecked" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val o = overlays[aid]
@@ -562,7 +562,7 @@ class HandleView {
                 }
                 "requestFocus" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val o = overlays[aid]
@@ -597,7 +597,7 @@ class HandleView {
                 }
                 "setScrollPosition" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val x = m.params?.get("x")?.asInt
                         val y = m.params?.get("y")?.asInt
@@ -651,7 +651,7 @@ class HandleView {
                 }
                 "getScrollPosition" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val o = overlays[aid]
@@ -682,7 +682,7 @@ class HandleView {
                 }
                 "setList" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val list = m.params?.get("list")?.asJsonArray
                         val options = LinkedList<String>()
@@ -736,7 +736,7 @@ class HandleView {
                 }
                 "setVisibility" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val vis = m.params?.get("vis")?.asInt
                         val a = activities[aid]
@@ -768,7 +768,7 @@ class HandleView {
                 }
                 "setClickable" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val clickable = m.params?.get("clickable")?.asBoolean
                         val a = activities[aid]
@@ -790,7 +790,7 @@ class HandleView {
                 }
                 "selectTab" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val tab = m.params?.get("tab")?.asInt
                         val a = activities[aid]
@@ -812,7 +812,7 @@ class HandleView {
                 }
                 "allowJavascript" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val allow = m.params?.get("allow")?.asBoolean
@@ -862,7 +862,7 @@ class HandleView {
                 }
                 "allowContentURI" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val allow = m.params?.get("allow")?.asBoolean
@@ -876,7 +876,7 @@ class HandleView {
                 }
                 "setData" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val doc = m.params?.get("doc")?.asString
@@ -890,7 +890,7 @@ class HandleView {
                 }
                 "loadURI" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val uri = m.params?.get("uri")?.asString
@@ -905,7 +905,7 @@ class HandleView {
                 "allowNavigation" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         if (m.params != null) {
-                            val aid = m.params?.get("aid")?.asString
+                            val aid = m.params?.get("aid")?.asInt
                             val id = m.params?.get("id")?.asInt
                             val a = activities[aid]
                             val allow = m.params?.get("allow")?.asBoolean
@@ -920,7 +920,7 @@ class HandleView {
                 }
                 "goBack" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         if (a != null && id != null) {
@@ -933,7 +933,7 @@ class HandleView {
                 }
                 "goForward" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         if (a != null && id != null) {
@@ -946,7 +946,7 @@ class HandleView {
                 }
                 "evaluateJS" -> {
                     if (m.params != null) {
-                        val aid = m.params?.get("aid")?.asString
+                        val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
                         val a = activities[aid]
                         val code = m.params?.get("code")?.asString
@@ -964,8 +964,8 @@ class HandleView {
             return false
         }
 
-        private fun setDimension(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>, overlays: MutableMap<String, DataClasses.Overlay>, app: Context) {
-            val aid = m.params?.get("aid")?.asString
+        private fun setDimension(m: ConnectionHandler.Message, activities: MutableMap<Int, DataClasses.ActivityState>, overlays: MutableMap<Int, DataClasses.Overlay>, app: Context) {
+            val aid = m.params?.get("aid")?.asInt
             val a = activities[aid]
             val id = m.params?.get("id")?.asInt
             val width = m.params?.get("width")

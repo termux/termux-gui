@@ -11,8 +11,8 @@ import java.io.OutputStream
 import java.lang.Exception
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 
-class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: MutableMap<String, DataClasses.ActivityState>,
-                     val wm: WindowManager, val overlays: MutableMap<String, DataClasses.Overlay>) {
+class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: MutableMap<Int, DataClasses.ActivityState>,
+                     val wm: WindowManager, val overlays: MutableMap<Int, DataClasses.Overlay>) {
     
     
     
@@ -36,7 +36,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                 NewActivityRequest.ActivityType.lockscreen -> lockscreen = true
                 NewActivityRequest.ActivityType.overlay -> overlay = true
                 NewActivityRequest.ActivityType.UNRECOGNIZED -> {
-                    ret.setAid("").setTid(-1).build().writeDelimitedTo(main)
+                    ret.setAid(-1).setTid(-1).build().writeDelimitedTo(main)
                     return
                 }
                 null -> {}
@@ -46,17 +46,18 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                 ret.tid = -1
             } else {
                 val a = v.newActivity(m.tid, pip, dialog, lockscreen, canceloutside, m.interceptBackButton)
-                if (a != null) {
-                    ret.aid = a.aid
+                val aid = a?.aid
+                if (a != null && aid != null) {
+                    ret.aid = aid
                     ret.tid = a.taskId
                 } else {
-                    ret.aid = ""
+                    ret.aid = -1
                     ret.tid = -1
                 }
             }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
-            ret.aid = ""
+            ret.aid = -1
             ret.tid = -1
         }
         ProtoUtils.write(ret, main)

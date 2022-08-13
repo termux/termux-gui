@@ -24,10 +24,10 @@ import java.util.concurrent.LinkedBlockingQueue
 class Create {
     companion object {
         @Suppress("DEPRECATION")
-        fun handleCreateMessage(m: ConnectionHandler.Message, activities: MutableMap<String, DataClasses.ActivityState>,
-                                overlays: MutableMap<String, DataClasses.Overlay>, rand: Random, out: DataOutputStream, app: Context,
+        fun handleCreateMessage(m: ConnectionHandler.Message, activities: MutableMap<Int, DataClasses.ActivityState>,
+                                overlays: MutableMap<Int, DataClasses.Overlay>, rand: Random, out: DataOutputStream, app: Context,
                                 eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
-            val aid = m.params?.get("aid")?.asString
+            val aid = m.params?.get("aid")?.asInt
             val parent = m.params?.get("parent")?.asInt
             val a = activities[aid]
             val o = overlays[aid]
@@ -707,7 +707,7 @@ class Create {
             }
         }
 
-        private fun getCustomEditText(it : Context, aid: String, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>): EditText {
+        private fun getCustomEditText(it : Context, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>): EditText {
             return WrappedEditText(it, aid, eventQueue)
         }
     }

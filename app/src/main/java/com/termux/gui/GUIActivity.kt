@@ -76,7 +76,8 @@ open class GUIActivity : AppCompatActivity() {
         }
     }
     
-    val aid: String? get() {return intent.dataString}
+    val aid: Int? get() {return intent.dataString?.split('-')?.get(1)?.toInt()}
+    val connection: Long? get() {return intent.dataString?.split('-')?.get(0)?.toLong()}
 
     override fun onBackPressed() {
         if (data.backEvent) {

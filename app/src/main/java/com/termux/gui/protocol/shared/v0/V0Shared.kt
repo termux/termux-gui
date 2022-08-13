@@ -31,14 +31,14 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     protected val rand = Random()
 
     protected val tasks = LinkedList<ActivityManager.AppTask>()
-    protected val activities: MutableMap<String, DataClasses.ActivityState> = Collections.synchronizedMap(HashMap())
+    protected val activities: MutableMap<Int, DataClasses.ActivityState> = Collections.synchronizedMap(HashMap())
     protected val buffers: MutableMap<Int, DataClasses.SharedBuffer> = HashMap()
     protected val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation> = HashMap()
-    protected val overlays: MutableMap<String, DataClasses.Overlay> = Collections.synchronizedMap(HashMap())
+    protected val overlays: MutableMap<Int, DataClasses.Overlay> = Collections.synchronizedMap(HashMap())
     protected val notifications: MutableSet<Int> = Collections.synchronizedSet(HashSet())
     
     protected fun withSystemListenersAndCleanup(am: ActivityManager, wm: WindowManager, clos: () -> Unit) {
-        val lifecycleCallbacks = LifecycleListener(this, activities, tasks, am)
+        val lifecycleCallbacks = LifecycleListener(this, activities, tasks, am, Util.connectionID())
         App.APP?.registerActivityLifecycleCallbacks(lifecycleCallbacks)
         val sysrec = SystemBroadcastReceiver(this)
         val filter = IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED)
@@ -128,9 +128,15 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     abstract fun onNotificationDismissed(nid: Int)
     abstract fun onNotificationAction(nid: Int, action: Int)
     
-    protected fun generateActivityID(): String {
-        val aid = Thread.currentThread().id.toString()+"-"+activityID.toString()
+    protected fun generateActivityID(): Int {
+        // to make the aid unique even on integer overflow
+        while (activities.containsKey(activityID)) {
+            activityID++
+            if (activityID < 0) activityID = 0
+        }
+        val aid = activityID
         activityID++
+        if (activityID < 0) activityID = 0
         return aid
     }
 
@@ -143,7 +149,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
             i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
         }
         val aid = generateActivityID()
-        i.data = Uri.parse(aid)
+        i.data = Uri.parse(Util.activityIDData(aid))
 
         activities[aid] = DataClasses.ActivityState(null)
         i.putExtra(GUIActivity.PIP_KEY, pip)

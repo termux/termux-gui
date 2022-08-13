@@ -155,27 +155,29 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
     }
 
     override fun onActivityCreated(state: DataClasses.ActivityState) {
-        eventQueue.offer(Event.newBuilder().setCreate(CreateEvent.newBuilder().setAid(state.a?.aid)).build())
+        state.a?.aid?.let { eventQueue.offer(Event.newBuilder().setCreate(CreateEvent.newBuilder().setAid(it)).build()) }
     }
 
     override fun onActivityStarted(state: DataClasses.ActivityState) {
-        eventQueue.offer(Event.newBuilder().setStart(StartEvent.newBuilder().setAid(state.a?.aid)).build())
+        state.a?.aid?.let { eventQueue.offer(Event.newBuilder().setStart(StartEvent.newBuilder().setAid(it)).build()) } 
     }
 
     override fun onActivityResumed(state: DataClasses.ActivityState) {
-        eventQueue.offer(Event.newBuilder().setResume(ResumeEvent.newBuilder().setAid(state.a?.aid)).build())
+        state.a?.aid?.let { eventQueue.offer(Event.newBuilder().setResume(ResumeEvent.newBuilder().setAid(it)).build()) }
     }
 
     override fun onActivityPaused(state: DataClasses.ActivityState) {
-        eventQueue.offer(Event.newBuilder().setPause(PauseEvent.newBuilder().setAid(state.a?.aid).setFinishing(state.a?.isFinishing ?: false)).build())
+        state.a?.aid?.let { eventQueue.offer(Event.newBuilder().setPause(PauseEvent.newBuilder().setAid(it).setFinishing(state.a?.isFinishing ?: false)).build()) }
     }
 
     override fun onActivityStopped(state: DataClasses.ActivityState) {
-        eventQueue.offer(Event.newBuilder().setStop(StopEvent.newBuilder().setAid(state.a?.aid).setFinishing(state.a?.isFinishing ?: false)).build())
+        state.a?.aid?.let { eventQueue.offer(Event.newBuilder().setStop(StopEvent.newBuilder().setAid(it).setFinishing(state.a?.isFinishing ?: false)).build()) }
     }
 
     override fun onActivityDestroyed(state: DataClasses.ActivityState) {
-        eventQueue.offer(Event.newBuilder().setDestroy(DestroyEvent.newBuilder().setAid(state.a?.aid).setFinishing(state.a?.isFinishing ?: false)).build())
+        state.a?.aid?.let {
+            eventQueue.offer(Event.newBuilder().setDestroy(DestroyEvent.newBuilder().setAid(it).setFinishing(state.a?.isFinishing ?: false)).build())
+        }
     }
 
     override fun onAirplaneModeChanged(c: Context, i: Intent) {
@@ -199,7 +201,9 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
     }
     
     override fun onBackButton(a: GUIActivity) {
-        eventQueue.offer(Event.newBuilder().setBack(BackButtonEvent.newBuilder().setAid(a.aid)).build())
+        a.aid?.let {
+            eventQueue.offer(Event.newBuilder().setBack(BackButtonEvent.newBuilder().setAid(it)).build())
+        }
     }
 
     override fun onRemoteButton(rid: Int, id: Int) {
@@ -219,9 +223,10 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
     }
 
     override fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration) {
+        val aid = a.aid ?: return
         val e = ConfigEvent.newBuilder()
         val c = GUIProt0.Configuration.newBuilder()
-        e.aid = a.aid
+        e.aid = aid
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             c.darkMode = newConfig.isNightModeActive
         }
@@ -247,15 +252,19 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
     }
 
     override fun onPictureInPictureModeChanged(a: GUIActivity, isInPictureInPictureMode: Boolean) {
-        eventQueue.offer(Event.newBuilder().setPip(PiPChangedEvent.newBuilder().setPip(isInPictureInPictureMode).setAid(a.aid)).build())
+        a.aid?.let {
+            eventQueue.offer(Event.newBuilder().setPip(PiPChangedEvent.newBuilder().setPip(isInPictureInPictureMode).setAid(it)).build())
+        }
     }
 
     override fun onUserLeaveHint(a: GUIActivity) {
-        eventQueue.offer(Event.newBuilder().setUserLeaveHint(UserLeaveHintEvent.newBuilder().setAid(a.aid)).build())
+        a.aid?.let {
+            eventQueue.offer(Event.newBuilder().setUserLeaveHint(UserLeaveHintEvent.newBuilder().setAid(it)).build())
+        }
     }
 
     @Suppress("DEPRECATION")
-    fun generateOverlay(): String {
+    fun generateOverlay(): Int {
         val wm = app.getSystemService(WindowManager::class.java)
         if (!Settings.canDrawOverlays(app)) {
             try {
@@ -268,7 +277,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Toast.makeText(app, R.string.overlay_settings, Toast.LENGTH_LONG).show()
                 }
             }
-            return ""
+            return -1
         } else {
             val aid = generateActivityID()
             val o = DataClasses.Overlay(app)
@@ -346,7 +355,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
             } catch (e: Exception) {
                 e.printStackTrace()
                 overlays.remove(aid)
-                return ""
+                return -1
             }
         }
     }
