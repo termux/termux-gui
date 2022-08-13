@@ -10,9 +10,29 @@ For more information, please refer to https://unlicense.org
 
 syntax = "proto3";
 
+// Feel free to change these values to fit the structure of your own implementation.
 package tgui.proto0;
 option java_package = "com.termux.gui.protocol.protobuf.v0";
 
+
+/*
+Protocol
+
+For establishing the connection, see https://github.com/termux/termux-gui/blob/main/Protocol.md#connection .
+
+Each message is send delimited, that is the size of the message is send as a varint first.  
+All protocol buffer implementations should allow you to read the varint or a delimited message directly.
+
+Events are send via the Event message, with the oneof sent to the actual event.
+Methods are called with the Method message, with the oneof set to the request you want to do.
+After a request, the corresponding response is send back.
+
+The methods provided are the same as for the JSON protocol, but may include additional functionality or differ slightly in parameters.
+Only the additional functions and changes are documented here.
+
+
+
+ */
 
 
 
@@ -68,6 +88,9 @@ enum Importance {
   MAX = 4;
 }
 
+/*
+The protobuf implementation allows you to specify more size units.
+ */
 message Size {
   float value = 1;
   // see https://developer.android.com/guide/topics/resources/more-resources.html#Dimension
@@ -96,6 +119,9 @@ message Size {
 
 message NewActivityRequest {
   int32 tid = 1;
+  /*
+  The Activity type isn't determined by a set of booleans like for JSON, but using an enum.
+   */
   enum ActivityType {
     normal = 0;
     dialog = 1;
@@ -108,6 +134,11 @@ message NewActivityRequest {
   bool interceptBackButton = 3;
 }
 
+/*
+A message with aid = "" and tid = -1 indicates an error.
+Otherwise unlike for JSON, the tid is always returned.
+For overlays, the tid is invalid though.
+ */
 message NewActivityResponse {
   string aid = 1;
   int32 tid = 2;
@@ -124,7 +155,7 @@ message FinishActivityResponse {
 
 
 message FinishTaskRequest {
-  string tid = 1;
+  int32 tid = 1;
 }
 message FinishTaskResponse {
   bool success = 1;
@@ -132,7 +163,7 @@ message FinishTaskResponse {
 
 
 message BringTaskToFrontRequest {
-  string tid = 1;
+  int32 tid = 1;
 }
 
 message BringTaskToFrontResponse {
@@ -165,6 +196,9 @@ message SetThemeResponse {
 
 message SetTaskDescriptionRequest {
   string aid = 1;
+  /*
+  Images have to be a PNG or JPEG file in binary format (not base64 encoded like for JSON).
+   */
   bytes img = 2;
   string label = 3;
 }
@@ -241,6 +275,9 @@ message KeepScreenOnResponse {
 
 message SetOrientationRequest {
   string aid = 1;
+  /*
+  The orientation is determined with an enum instead of a string.
+   */
   enum Orientation {
       unspecified = 0;
       behind = 1;
@@ -344,6 +381,11 @@ message GetVersionResponse {
 
 // View creation methods
 
+/*
+For all creating responses, an id of -1 indicates a failure.
+ */
+
+
 message CreateLinearLayoutRequest {
   Create data = 1;
   bool horizontal = 2;
@@ -388,6 +430,9 @@ message CreateEditTextRequest {
   Create data = 1;
   bool noline = 2;
   bool blockinput = 3;
+  /*
+  The type is an enum instead of a string.
+   */
   enum Type {
     text = 0;
     textMultiLine = 1;
@@ -578,6 +623,7 @@ message ShowCursorResponse {
 message SetLinearLayoutParamsRequest {
   View v = 1;
   float weight = 2;
+  // Use 0 to keep the current position. The position starts at 1, to make the default message smaller.
   int32 position = 3;
 }
 
@@ -592,6 +638,9 @@ message SetGridLayoutParamsRequest {
   int32 col = 3;
   int32 rowSize = 4;
   int32 colSize = 5;
+  /*
+  Alignment is an enum instead of a string.
+   */
   enum Alignment {
     CENTER = 0;
     TOP = 1;
@@ -612,6 +661,7 @@ message SetGridLayoutParamsResponse {
 
 message SetViewLocationRequest {
   View v = 1;
+  // The unit for x and y
   Size.Unit unit = 2;
   int32 x = 3;
   int32 y = 4;
@@ -664,6 +714,9 @@ message SetHeightResponse {
 
 message GetDimensionsRequest {
   View v = 1;
+  /*
+  Here you can specify the unit you want the dimensions in.
+   */
   Size.Unit unit = 2;
 }
 
@@ -813,13 +866,16 @@ message RequestFocusRequest {
   bool forcesoft = 2;
 }
 
-message TequestFocusResponse {
+message RequestFocusResponse {
   bool success = 1;
 }
 
 
 message GetScrollPositionRequest {
   View v = 1;
+  /*
+  For JSON the unit was in px, here you can choose the unit.
+   */
   Size.Unit unit = 2;
 }
 
@@ -943,6 +999,7 @@ message CreateRemoteLayoutRequest {
 }
 
 message CreateRemoteLayoutResponse {
+  // an rid of -1 indicates a failure.
   int32 rid = 1;
 }
 
@@ -955,6 +1012,9 @@ message DeleteRemoteLayoutResponse {
   bool success = 1;
 }
 
+/*
+As with the normal create messages, an id of -1 indicates a failure.
+ */
 
 message AddRemoteFrameLayoutRequest {
   int32 rid = 1;
@@ -1569,6 +1629,10 @@ message SelectedEvent {
   int32 selected = 2;
 }
 
+/*
+The itemselected event is split up into ItemSelected for Spinners and TabSelected for TabLayout.
+ */
+
 message ItemSelectedEvent {
   View v = 1;
   string selected = 2;
@@ -1659,6 +1723,10 @@ message NotificationEvent {
   uint32 id = 1;
 }
 
+message NotificationDismissedEvent {
+  uint32 id = 1;
+}
+
 message NotificationActionEvent {
   uint32 id = 1;
   uint32 action = 2;
@@ -1715,7 +1783,8 @@ message Event {
     PiPChangedEvent pip = 43;
     RemoteClickEvent remoteClick = 44;
     NotificationEvent notification = 45;
-    NotificationActionEvent notificationAction = 46;
+    NotificationDismissedEvent notificationDismissed = 46;
+    NotificationActionEvent notificationAction = 47;
     OverlayScaleEvent overlayScale = 48;
     
     
