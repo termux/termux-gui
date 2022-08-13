@@ -300,6 +300,14 @@ class HandleRemote {
                                 Pair(PendingIntentReceiver.THREAD, Thread.currentThread().id))).toString()),
                         app, PendingIntentReceiver::class.java),
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT))
+                    b.setDeleteIntent(PendingIntent.getBroadcast(app, 0, Intent(
+                        Intent.ACTION_DEFAULT, Uri.parse(
+                            ConnectionHandler.gson.toJsonTree(mapOf(
+                                Pair(PendingIntentReceiver.NID, id),
+                                Pair(PendingIntentReceiver.THREAD, Thread.currentThread().id),
+                                Pair(PendingIntentReceiver.DISMISSED, true))).toString()),
+                        app, PendingIntentReceiver::class.java),
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT))
                     NotificationManagerCompat.from(app).notify(Thread.currentThread().id.toString(), id, b.build())
                     notifications.add(id)
                     Util.sendMessage(out, ConnectionHandler.gson.toJson(id))

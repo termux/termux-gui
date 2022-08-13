@@ -74,7 +74,6 @@ class HandleActivityAndTask {
                     val aid = m.params?.get("aid")?.asString
                     val a = activities[aid]?.a
                     if (a != null) {
-                        println(ConnectionHandler.gson.toJson(a.configToJson(a.resources.configuration)))
                         Util.sendMessage(out, ConnectionHandler.gson.toJson(a.configToJson(a.resources.configuration)))
                     }
                     return true

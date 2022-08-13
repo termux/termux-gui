@@ -7,7 +7,7 @@ import java.io.OutputStream
 
 class ProtoUtils {
     companion object {
-        fun <T : MessageLite> ViewActionOrFail(main: OutputStream, activities: Map<String, DataClasses.ActivityState>, 
+        fun <T : MessageLite> viewActionOrFail(main: OutputStream, activities: Map<String, DataClasses.ActivityState>,
                                                overlays: Map<String, DataClasses.Overlay>, aid: String, ifActivity: (a: GUIActivity) -> T,
                                                ifOverlay: (o: DataClasses.Overlay) -> T, ifFail: () -> T) {
             val s = activities[aid]
@@ -28,9 +28,13 @@ class ProtoUtils {
             }.writeDelimitedTo(main)
         }
         
-        
-        
-        
+        fun <T : MessageLite.Builder> write(builder: T, out: OutputStream) {
+            write(builder.build(), out)
+        }
+
+        fun <T : MessageLite> write(m: T, out: OutputStream) {
+            m.writeDelimitedTo(out)
+        }
         
         
         

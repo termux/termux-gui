@@ -8,6 +8,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonSyntaxException
 import com.termux.gui.Util.Companion.sendMessage
 import com.termux.gui.protocol.json.v0.V0Json
+import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0
 import com.termux.gui.protocol.protobuf.v0.V0Proto
 import kotlinx.coroutines.Runnable
@@ -107,7 +108,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, priva
                             0 -> {
                                 while (! Thread.currentThread().isInterrupted) {
                                     try {
-                                        Util.sendProto(event.outputStream, eventQueueProto.take())
+                                        ProtoUtils.write(eventQueueProto.take(), event.outputStream)
                                     } catch (ignored: Exception) {}
                                 }
                             }

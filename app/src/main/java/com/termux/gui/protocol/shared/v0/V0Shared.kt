@@ -52,13 +52,17 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
             val id = m[PendingIntentReceiver.ID]?.asInt
             val action = m[PendingIntentReceiver.ACTION]?.asInt
             val nid = m[PendingIntentReceiver.NID]?.asInt
+            val dismissed = m[PendingIntentReceiver.DISMISSED]?.asBoolean
             if (rid != null && id != null && rid != -1 && id != -1) {
                 onRemoteButton(rid, id)
                 return
             }
             if (nid != null) {
                 if (action == null) {
-                    onNotification(nid)
+                    if (dismissed == true)
+                        onNotificationDismissed(nid)
+                    else
+                        onNotification(nid)
                 } else {
                     onNotificationAction(nid, action)
                 }
@@ -121,6 +125,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     
     abstract fun onRemoteButton(rid: Int, id: Int)
     abstract fun onNotification(nid: Int)
+    abstract fun onNotificationDismissed(nid: Int)
     abstract fun onNotificationAction(nid: Int, action: Int)
     
     protected fun generateActivityID(): String {
@@ -249,7 +254,11 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
             }
         }
 
-        fun runOnUIThreadActivityStartedBlocking(a: DataClasses.ActivityState, r: (activity: GUIActivity) -> Unit) : Boolean {
+        /**
+         * Returns true if the activity is stopped or not found and the runnable wasn't run
+         */
+        fun runOnUIThreadActivityStartedBlocking(a: DataClasses.ActivityState?, r: (activity: GUIActivity) -> Unit) : Boolean {
+            if (a == null) return true
             var e: Exception? = null
             var stopped = false
             runBlocking(Dispatchers.Main) {
@@ -270,7 +279,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
             if (ex != null) {
                 throw ex
             }
-            return ! stopped
+            return stopped
         }
         
         // this can only be used in API 31, where you can set the ID of the root element of the Layout in a RemoteViews

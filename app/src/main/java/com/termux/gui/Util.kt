@@ -84,11 +84,6 @@ class Util {
                 }
             }
         }
-        
-        fun sendProto(o: OutputStream, m: MessageLite) {
-            m.writeDelimitedTo(o)
-            o.flush()
-        }
 
         fun generateViewID(rand: Random, a: GUIActivity): Int {
             return generateViewIDRaw(rand, a.usedIds)
@@ -291,7 +286,7 @@ class Util {
         
         
         @SuppressLint("ClickableViewAccessibility")
-        fun setTouchListener(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
+        fun setTouchListenerJSON(v: View, aid: String, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 val map = HashMap<String, Any>()
                 map["id"] = v.id

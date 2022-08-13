@@ -37,7 +37,7 @@ The first byte send specifies the desired protocol type and version:
 
 The plugin then responds with a single byte unsigned integer. A response of 0 means the plugin supports the desired protocol type and version. Any other value denotes an error and the plugin will close the connection.
 
-## <a name="methods"></a>Protocol methods
+## <a name="methods"></a>Protocol methods (JSON)
 
 Each message invokes a method on the plugin.  
 Methods may return values, the number of return values can vary with the parameters.  
@@ -616,6 +616,8 @@ Event types:
   - timezone: Gets fired when the time zone changes.
   - overlayTouch: Like touch, but is dispatched for every touch in an overlay window. The coordinates are the absolute screen coordinates
   - notification: Generated when the user taps a notification.
+    - value: id: The id of the notification
+  - notificationDismissed: Generated when the user swipes away a notification.
     - value: id: The id of the notification
   - notificationaction: Generated when the user clicks a notification action.
     - value:

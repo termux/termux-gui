@@ -13,6 +13,7 @@ class PendingIntentReceiver : BroadcastReceiver() {
         const val ID = "id"
         const val ACTION = "action"
         const val NID = "nid"
+        const val DISMISSED = "dismissed"
         val threadCallbacks: MutableMap<Long, (JsonObject) -> Unit> = Collections.synchronizedMap(HashMap())
     }
     

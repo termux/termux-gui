@@ -93,12 +93,12 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                             if (m.method == "sendTouchEvent") {
                                 if (a != null) {
                                     runOnUIThreadActivityStarted(a) {
-                                        it.findViewReimplemented<View>(id)?.let { Util.setTouchListener(it, aid, send, eventQueue) }
+                                        it.findViewReimplemented<View>(id)?.let { Util.setTouchListenerJSON(it, aid, send, eventQueue) }
                                     }
                                 }
                                 if (o != null) {
                                     runOnUIThreadBlocking {
-                                        o.root.findViewReimplemented<View>(id)?.let { Util.setTouchListener(it, aid, send, eventQueue) }
+                                        o.root.findViewReimplemented<View>(id)?.let { Util.setTouchListenerJSON(it, aid, send, eventQueue) }
                                     }
                                 }
                             }
@@ -357,6 +357,12 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
         val map = HashMap<String, Any?>()
         map["id"] = nid
         eventQueue.offer(ConnectionHandler.Event("notification", ConnectionHandler.gson.toJsonTree(map)))
+    }
+
+    override fun onNotificationDismissed(nid: Int) {
+        val map = HashMap<String, Any?>()
+        map["id"] = nid
+        eventQueue.offer(ConnectionHandler.Event("notificationDismissed", ConnectionHandler.gson.toJsonTree(map)))
     }
 
     override fun onNotificationAction(nid: Int, action: Int) {
