@@ -38,6 +38,13 @@ Roadmap:
                 [x] WebView
                 [x] normal notifications
                 [x] custom notifications
+        [ ] OOP python library
+            [ ] abstract Activity class
+                [ ] Activity lifecycle events dispatched to methods
+            [ ] connection.launch() for starting activities
+            [ ] connection.main_loop() to start listening for events
+            [ ] layouts subclassable to create views on creation
+            [ ] stateful Views (e.g. Checkbox keeps track of whether it's checked)
         [ ] binary protocol with protobuf
             [ ] Activity and Task methods
             [ ] View creation methods
@@ -46,6 +53,7 @@ Roadmap:
             [ ] widget and notification methods
         [ ] make the C library
             [ ] test it
+        [ ] Bash library
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots
@@ -64,6 +72,7 @@ Roadmap:
         [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
         [ ] RelativeLayout
         [ ] ConstraintLayout
+        [ ] Dialogs in DialogFragments, so they stay in the Activity they're started in and don't close on leaving
         [ ] add the ability to intercept touch events in layouts
         [ ] fullscreen mode for Activities (hiding the 3 buttons and the notification bar)
         [ ] the rest of the views in the protocol

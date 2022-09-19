@@ -24,7 +24,7 @@ For additional security, the program may check if the connected peer has the sam
 
 2 Protocol types are supported right now:
 - JSON: For better compatibility with high-level languages, messages can be transferred in JSON.
-- Binary: For Increased throughput and compatibility with low-level languages, a protobuf-based protocol can be used. This will eventually be the default and the JSOn protocol will be removed.
+- Binary: For Increased throughput and compatibility with low-level languages, a protobuf-based protocol can be used. This will eventually be the default and the JSON protocol will be removed.
 
 For the JSON Protocol, each message must be preceded by the length of the message (without this length value) as a 4 byte unsigned integer, the same with the return messages from the plugin.
 This integer is send big-endian.
@@ -51,11 +51,11 @@ These methods control Android [Activities](https://developer.android.com/referen
     - tid: the task in which the Activity should be started. If not specified, a new Task is created and the id is returned after the Activity id.
     - One of:
       - dialog: boolean value. If true, the Activity will be launched as a dialog.
-      - canceloutside: boolean value, optional. Sets whether the Activity is destroyed when it is displayed as a dialog and the user clicks outside. Default is true.
       - pip: boolean. Whether or not to start the Activity in [Picture-in-Picture mode](https://developer.android.com/guide/topics/ui/picture-in-picture). Default is false. This should only be used to create Activities in a new Task.
       - lockscreen: displays this Activity on the lockscreen.
       - overlay: uses a system overlay window to display above everything else. Overlays are never in a Task and creating one doesn't return a Task id. Overlays don't get Activity lifecycle events.
     - intercept: A boolean, whether to intercept back button presses and send an event or to use the default action of finishing the Activity. Default value is false.
+    - canceloutside: boolean value, optional. Sets whether the Activity is destroyed when it is displayed as a dialog and the user clicks outside. Default is true.
 - finishActivity: Closes an Activity.
   - Parameters:
      - aid: The id of the Activity to close.
