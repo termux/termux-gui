@@ -347,6 +347,11 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - id: The View id of a TabLayout.
     - aid: The id of the Activity the View is in.
     - tab: The index of the tab to select, starting at 0.
+- selectItem: Selects a item in a Spinner. The corresponding itemselected event is also send.
+  - Parameters:
+    - id: The View id of a Spinner.
+    - aid: The id of the Activity the View is in.
+    - item: The index of the item to select, starting at 0.
 - setClickable: Sets whether a View can be clicked by the user (if yes, emits a sound and animation when clicked and sends a click event (if click events are enabled))).
   - Parameters:
     - id: The View id of a View.

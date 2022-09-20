@@ -810,6 +810,28 @@ class HandleView {
                     }
                     return true
                 }
+                "selectItem" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asInt
+                        val id = m.params?.get("id")?.asInt
+                        val item = m.params?.get("item")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && item != null) {
+                            if (a != null) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
+                                    it.findViewReimplemented<Spinner>(id)?.setSelection(item)
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    o.root.findViewReimplemented<Spinner>(id)?.setSelection(item)
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
                 "allowJavascript" -> {
                     if (m.params != null) {
                         val aid = m.params?.get("aid")?.asInt

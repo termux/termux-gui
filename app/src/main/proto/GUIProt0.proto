@@ -973,6 +973,15 @@ message SelectTabResponse {
   bool success = 1;
 }
 
+message SelectItemRequest {
+  View v = 1;
+  uint32 item = 2;
+}
+
+message SelectItemResponse {
+  bool success = 1;
+}
+
 
 message SetClickableRequest {
   View v = 1;
@@ -1482,7 +1491,8 @@ message Method {
     SetBufferRequest setBuffer = 230;
     RefreshImageViewRequest refreshImageView = 231;
     SelectTabRequest selectTab = 232;
-    SetClickableRequest setClickable = 233;
+    SelectItemRequest selectItem = 233;
+    SetClickableRequest setClickable = 234;
     
     
     // RemoteViews methods
