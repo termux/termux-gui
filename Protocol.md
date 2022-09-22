@@ -24,7 +24,7 @@ For additional security, the program may check if the connected peer has the sam
 
 2 Protocol types are supported right now:
 - JSON: For better compatibility with high-level languages, messages can be transferred in JSON.
-- Binary: For Increased throughput and compatibility with low-level languages, a protobuf-based protocol can be used. This will eventually be the default and the JSON protocol will be removed.
+- Binary: For Increased throughput and compatibility with low-level languages, a protobuf-based protocol can be used. 
 
 For the JSON Protocol, each message must be preceded by the length of the message (without this length value) as a 4 byte unsigned integer, the same with the return messages from the plugin.
 This integer is send big-endian.
