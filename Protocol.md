@@ -305,8 +305,9 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - aid: The id of the Activity the View is in.
     - forcesoft: Forces the soft keyboard to show.
 - getScrollPosition: Gets the x and y scroll position of an NestedScrollView or HorizontalScrollView.
-  - Returns:
-    - The x and y scroll positions.
+  - Parameters:
+    - id: The View id.
+    - aid: The id of the Activity the View is in.
 - setScrollPosition: Sets the x and y scroll position of an NestedScrollView or HorizontalScrollView.
   - Parameters:
     - x
