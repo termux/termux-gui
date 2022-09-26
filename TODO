@@ -38,29 +38,30 @@ Roadmap:
                 [x] WebView
                 [x] normal notifications
                 [x] custom notifications
-        [ ] OOP python library
-            [ ] abstract Activity class
-                [ ] Activity lifecycle events dispatched to methods
-            [ ] connection.launch() for starting activities
-            [ ] connection.main_loop() to start listening for events
-            [ ] layouts subclassable to create views on creation
-            [ ] stateful Views (e.g. Checkbox keeps track of whether it's checked)
-        [ ] binary protocol with protobuf
-            [ ] Activity and Task methods
-            [ ] View creation methods
-            [ ] View manipulation methods
-            [ ] Event configuring methods
-            [ ] widget and notification methods
-        [ ] make the C library
-            [ ] test it
-        [ ] Bash library
-        [ ] update the f-droid metadata
-            [ ] write a changelog
-            [ ] more screenshots
-            [ ] update description and readme
+        [x] OOP python library
+            [x] abstract Activity class
+                [x] Activity lifecycle events dispatched to methods
+            [x] connection.launch() for starting activities
+            [x] connection.main_loop() to start listening for events
+            [x] layouts subclassable to create views on creation
+            [x] stateful Views (e.g. Checkbox keeps track of whether it's checked)
         [x] Rework the widgets
         [x] generate unique notification and widget ids in a certain range, so apps cannot guess each others ids
         [x] add a button in the settings to delete all notification channels
+    - 0.1.6:
+    [ ] binary protocol with protobuf
+        [ ] Activity and Task methods
+        [ ] View creation methods
+        [ ] View manipulation methods
+        [ ] Event configuring methods
+        [ ] widget and notification methods
+    [ ] make the C library
+        [ ] test it
+    [ ] Bash library
+    [ ] update the f-droid metadata
+        [ ] write a changelog
+        [ ] more screenshots
+        [ ] update description and readme
     - 1.0.0: !!! start semantic versioning from here !!!
         [ ] switch to the new plugin system, deprecate shared uid
         [ ] add more logging
