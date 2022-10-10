@@ -1212,6 +1212,8 @@ message AllowContentURIResponse {
 message SetDataRequest {
   View v = 1;
   string data = 2;
+  bool base64 = 3;
+  string mime = 4;
 }
 
 message SetDataResponse {

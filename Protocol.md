@@ -388,6 +388,8 @@ Methods:
     - aid: The id of the Activity the View is in.
     - id: The id of the WebView.
     - doc: A string containing the HTML document.
+    - mime: The mime type. Default is text/html.
+    - base64: Whether the data is base64-encoded or not. Default is false. [If false non-ASCII characters have to be escaped](https://developer.android.com/reference/android/webkit/WebView#loadData(java.lang.String,%20java.lang.String,%20java.lang.String)).
 - loadURI: Loads a document from the provided URI.
   - Parameters:
     - aid: The id of the Activity the View is in.

@@ -5,59 +5,27 @@
 
 
 Roadmap:
-    - 0.1.5:
-        [x] button to write logcat to file, as a preparation for separate UID, logcat won't work in Termux then for the plugin
-        [x] add aid to onUserLeaveHint event
-        [x] method to set selected tab for TabLayout
-        [x] method to set clickability of views
-        [x] option to specify View visibility at creation
-        [x] notifications with custom layout
-        [x] normal notifications in addition to custom ones
-        [x] method to get plugin version code
-        [x] method the set text gravity
-        [x] WebView
-            - catch all WebChromeClient and WebViewClient events
-            - Run javascript in the WebView with user consent.
-            - setting: always allow javascript in WebViews
-            [x] navigating history
-            [x] setData
-            [x] load from URI
-            [x] setJavascriptEnabled
-            [x] run Javascript code in the WebView
-        [x] GridLayout
-        [x] method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
-        [x] ability to catch the back button as an event: https://stackoverflow.com/questions/8094715/how-to-catch-event-with-hardware-back-button-on-android
-        [x] method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout
-        [x] add everything to the python library
-            [x] test it
-                [x] back button catching
-                [x] visibility at creation
-                [x] set clickable
-                [x] get version code
-                [x] select tab
-                [x] WebView
-                [x] normal notifications
-                [x] custom notifications
-        [x] OOP python library
-            [x] abstract Activity class
-                [x] Activity lifecycle events dispatched to methods
-            [x] connection.launch() for starting activities
-            [x] connection.main_loop() to start listening for events
-            [x] layouts subclassable to create views on creation
-            [x] stateful Views (e.g. Checkbox keeps track of whether it's checked)
-        [x] Rework the widgets
-        [x] generate unique notification and widget ids in a certain range, so apps cannot guess each others ids
-        [x] add a button in the settings to delete all notification channels
     - 0.1.6:
+    [x] WebView
+        [x] option for base64 encoding for setData
+        [x] option to set mime type for setData
     [ ] binary protocol with protobuf
         [ ] Activity and Task methods
         [ ] View creation methods
         [ ] View manipulation methods
         [ ] Event configuring methods
         [ ] widget and notification methods
+    [ ] set target version to android 13 and test it
+        [ ] also update AGP again
+        [ ] add methods for android 13 widget api to protocol buffers
+        [ ] request notification permission
     [ ] make the C library
         [ ] test it
-    [ ] Bash library
+        [ ] write a tutorial
+        [ ] make some example app with it
+            [ ] Conway's game of life with SDL?
+    [ ] Put all known applications using Termux:GUI in the readme, I made quite a few by now
+    [x] Bash library
     [ ] update the f-droid metadata
         [ ] write a changelog
         [ ] more screenshots
@@ -73,6 +41,7 @@ Roadmap:
         [ ] make the paged list used for termux-gui-pkg a component in the python library (custom class with methods around a NestedScrollView)
         [ ] RelativeLayout
         [ ] ConstraintLayout
+        [ ] scroll events
         [ ] Dialogs in DialogFragments, so they stay in the Activity they're started in and don't close on leaving
         [ ] add the ability to intercept touch events in layouts
         [ ] fullscreen mode for Activities (hiding the 3 buttons and the notification bar)
@@ -81,7 +50,6 @@ Roadmap:
         [ ] add Javadocs
     - 1.1.0
         [ ] remove shared uid
-        [ ] support for the new widget features for API 31
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] use dlopen("libandroid.so") for that in C/C++
@@ -92,11 +60,12 @@ Roadmap:
         [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .
             The id gets looked up once and cached in a Hashmap (delete when view is removed).
             Future methods with the same subtree argument can then use the cached value and don't have to traverse the whole View tree.
-        [ ] enable all methods to operate on a list of view ids rather than a specific view. A lot of time is spend waiting for the UI thread, so clustering
-            the methods should improve performance
-            [ ] You should also be able to replace the arguments with arrays, in case you want that argument to have a different value for each view, like the text for TextViews
-            [ ] think about creating a batch api to group multiple messages together into one runnable for the ui thread
-                
+            [ ] also add the subtree id to the events, so the client can do the same optimisation when processing events
+            [ ] or just keep all Views in a HashMap
+        [ ] Enable method batching, multiple requests are send in the same message and are all enqueued on the main thread as one.
+            Result messages are then returned in the order the messages were send.
+        [ ] Add a method to create a view tree from a representation. The view ids are returned from a flattened version of the tree.
+            [ ] add more arguments to the create messages like the tab/spinner list, so this is the only message you need to send to set up a full layout.
     
     Maybe in the future:
     - tooltip/context menus
@@ -154,20 +123,6 @@ https://developer.android.com/ndk/guides/graphics/getting-started
         - Views in Fragments can still be found from the Parent activity. Make a custom findViewById that doesn't search Fragments, also for performance reasons
 
 
-        
-
-
-[ ] method to move views in the hierarchy
-[ ] Action Bar with elements: https://developer.android.com/training/appbar/setting-up
-[ ] Notifications with custom Layout
-[ ] method to get the screen resolution, to change layout if needed
-[ ] Gesture events
-[ ] Multitouch
-[ ] setting explicit size for views
-[ ] setting ImageView size in px, so it can be exactly the size of the bitmap buffer 
-[ ] or query the current size of the ImageView to use a new buffer
-[ ] methods to get the size of Views and to set the scroll position in a NestedScrollView
-    [ ] also a scroll change event. But that should only fire after a minimum amount of pixel moved, 5 should be good
 
 
 

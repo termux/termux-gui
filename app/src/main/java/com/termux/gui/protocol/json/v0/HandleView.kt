@@ -900,11 +900,17 @@ class HandleView {
                     if (m.params != null) {
                         val aid = m.params?.get("aid")?.asInt
                         val id = m.params?.get("id")?.asInt
+                        val base64 = m.params?.get("base64")?.asBoolean
                         val a = activities[aid]
                         val doc = m.params?.get("doc")?.asString
+                        val mime = m.params?.get("mime")?.asString ?: "text/html"
                         if (a != null && id != null && doc != null) {
                             V0Shared.runOnUIThreadActivityStarted(a) {
-                                it.findViewReimplemented<WebView>(id)?.loadData(doc, null, null)
+                                if (base64 == true) {
+                                    it.findViewReimplemented<WebView>(id)?.loadData(doc, mime, "base64")
+                                } else {
+                                    it.findViewReimplemented<WebView>(id)?.loadData(doc, mime, null)
+                                }
                             }
                         }
                     }
