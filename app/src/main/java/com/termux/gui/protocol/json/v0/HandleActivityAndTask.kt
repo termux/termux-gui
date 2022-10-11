@@ -218,6 +218,7 @@ class HandleActivityAndTask {
                                 "portrait" -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                 "reverseLandscape" -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
                                 "reversePortrait" -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                                "sensor" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
                                 "sensorLandscape" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                                 "sensorPortrait" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
                                 "user" -> ActivityInfo.SCREEN_ORIENTATION_USER
