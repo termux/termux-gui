@@ -2,6 +2,8 @@ package com.termux.gui.protocol.protobuf.v0
 
 import android.app.ActivityManager
 import android.util.Log
+import android.widget.Toast
+import com.termux.gui.App
 import com.termux.gui.Util
 import com.termux.gui.protocol.protobuf.ProtoUtils
 import java.io.OutputStream
@@ -43,7 +45,19 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
         }
         ProtoUtils.write(ret, main)
     }
-    
+
+
+    fun toast(m: ToastRequest) {
+        val ret = ToastResponse.newBuilder()
+        try {
+            Toast.makeText(App.APP!!.applicationContext, m.text, if (m.long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+            ret.success = true
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+        }
+        ProtoUtils.write(ret, main)
+    }
     
     
 }

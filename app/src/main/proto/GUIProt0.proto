@@ -135,7 +135,7 @@ message NewActivityRequest {
 }
 
 /*
-A message with aid = "" and tid = -1 indicates an error.
+A message with aid = -1 and tid = -1 indicates an error.
 Otherwise unlike for JSON, the tid is always returned.
 For overlays, the tid is invalid though.
  */
@@ -198,6 +198,7 @@ message SetTaskDescriptionRequest {
   int32 aid = 1;
   /*
   Images have to be a PNG or JPEG file in binary format (not base64 encoded like for JSON).
+  If empty (length 0), resets the icon to the default.
    */
   bytes img = 2;
   string label = 3;
