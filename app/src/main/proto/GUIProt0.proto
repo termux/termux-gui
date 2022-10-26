@@ -38,15 +38,30 @@ Only the additional functions and changes are documented here.
 
 // Types used by multiple messages
 
+enum Orientation {
+  unspecified = 0;
+  behind = 1;
+  fullSensor = 2;
+  fullUser = 3;
+  landscape = 4;
+  locked = 5;
+  nosensor = 6;
+  portrait = 7;
+  reverseLandscape = 8;
+  reversePortrait = 9;
+  sensor = 10;
+  sensorLandscape = 11;
+  sensorPortrait = 12;
+  user = 13;
+  userLandscape = 14;
+  userPortrait = 15;
+}
+
 message Configuration {
   bool darkMode = 2;
   string country = 3;
   string language = 4;
-  enum Orientation {
-    portrait = 0;
-    landscape = 1;
-  }
-  Orientation orientation = 5;
+  Orientation orientation = 5; // Only valid values are landscape, portrait and unspecified
   bool keyboardHidden = 6;
   int32 screenWidth = 7;
   int32 screenHeight = 8;
@@ -279,24 +294,6 @@ message SetOrientationRequest {
   /*
   The orientation is determined with an enum instead of a string.
    */
-  enum Orientation {
-      unspecified = 0;
-      behind = 1;
-      fullSensor = 2;
-      fullUser = 3;
-      landscape = 4;
-      locked = 5;
-      nosensor = 6;
-      portrait = 7;
-      reverseLandscape = 8;
-      reversePortrait = 9;
-      sensor = 10;
-      sensorLandscape = 11;
-      sensorPortrait = 12;
-      user = 13;
-      userLandscape = 14;
-      userPortrait = 15;
-  }
   Orientation orientation = 2;
 }
 
@@ -340,7 +337,12 @@ message IsLockedRequest {
 }
 
 message IsLockedResponse {
-  bool locked = 1;
+  enum Locked {
+    UNKNOWN = 0;
+    LOCKED = 1;
+    UNLOCKED = 2;
+  }
+  Locked locked = 1;
 }
 
 
@@ -362,7 +364,7 @@ message HideSoftKeyboardResponse {
 }
 
 message InterceptBackButtonRequest {
-  string aig = 1;
+  int32 aid = 1;
   bool intercept = 2;
 }
 

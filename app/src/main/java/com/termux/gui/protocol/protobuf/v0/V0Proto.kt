@@ -53,13 +53,14 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.KEEPSCREENON -> handleActivity.keepScreenOn(m.keepScreenOn)
                     Method.MethodCase.SETORIENTATION -> handleActivity.setOrientation(m.setOrientation)
                     Method.MethodCase.SETPOSITION -> handleActivity.setPosition(m.setPosition)
-                    Method.MethodCase.GETCONFIGURATION -> TODO()
-                    Method.MethodCase.TURNSCREENON -> TODO()
-                    Method.MethodCase.ISLOCKED -> TODO()
-                    Method.MethodCase.REQUESTUNLOCK -> TODO()
-                    Method.MethodCase.HIDESOFTKEYBOARD -> TODO()
-                    Method.MethodCase.INTERCEPTBACKBUTTON -> TODO()
-                    Method.MethodCase.VERSION -> TODO()
+                    Method.MethodCase.GETCONFIGURATION -> handleActivity.getConfiguration(m.getConfiguration)
+                    Method.MethodCase.TURNSCREENON -> handleGlobal.turnScreenOn(m.turnScreenOn)
+                    Method.MethodCase.ISLOCKED -> handleGlobal.isLocked(m.isLocked)
+                    Method.MethodCase.REQUESTUNLOCK -> handleActivity.requestUnlock(m.requestUnlock)
+                    Method.MethodCase.HIDESOFTKEYBOARD -> handleActivity.hideSoftKeyboard(m.hideSoftKeyboard)
+                    Method.MethodCase.INTERCEPTBACKBUTTON -> handleActivity.interceptBackButton(m.interceptBackButton)
+                    Method.MethodCase.VERSION -> handleGlobal.version(m.version)
+                    
                     Method.MethodCase.CREATELINEARLAYOUT -> TODO()
                     Method.MethodCase.CREATEFRAMELAYOUT -> TODO()
                     Method.MethodCase.CREATESWIPEREFRESHLAYOUT -> TODO()
@@ -79,6 +80,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.CREATEPROGRESSBAR -> TODO()
                     Method.MethodCase.CREATETABLAYOUT -> TODO()
                     Method.MethodCase.CREATEWEBVIEW -> TODO()
+                    
                     Method.MethodCase.SHOWCURSOR -> TODO()
                     Method.MethodCase.SETLINEARLAYOUT -> TODO()
                     Method.MethodCase.SETGRIDLAYOUT -> TODO()
@@ -113,6 +115,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.SELECTTAB -> TODO()
                     Method.MethodCase.SELECTITEM -> TODO()
                     Method.MethodCase.SETCLICKABLE -> TODO()
+                    
                     Method.MethodCase.CREATEREMOTELAYOUT -> TODO()
                     Method.MethodCase.DELETEREMOTELAYOUT -> TODO()
                     Method.MethodCase.ADDREMOTEFRAMELAYOUT -> TODO()
@@ -130,6 +133,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.SETREMOTEPADDING -> TODO()
                     Method.MethodCase.SETREMOTEIMAGE -> TODO()
                     Method.MethodCase.SETWIDGETLAYOUT -> TODO()
+                    
                     Method.MethodCase.ALLOWJS -> TODO()
                     Method.MethodCase.ALLOWCONTENT -> TODO()
                     Method.MethodCase.SETDATA -> TODO()
@@ -138,9 +142,11 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.GOBACK -> TODO()
                     Method.MethodCase.GOFORWARD -> TODO()
                     Method.MethodCase.EVALUATEJS -> TODO()
+                    
                     Method.MethodCase.CREATECHANNEL -> TODO()
                     Method.MethodCase.CREATENOTIFICATION -> TODO()
                     Method.MethodCase.CANCELNOTIFICATION -> TODO()
+                    
                     Method.MethodCase.SENDCLICKEVENT -> TODO()
                     Method.MethodCase.SENDLONGCLICKEVENT -> TODO()
                     Method.MethodCase.SENDFOCUSCHANGEEVENT -> TODO()
@@ -224,31 +230,8 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
     }
 
     override fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration) {
-        val aid = a.aid ?: return
         val e = ConfigEvent.newBuilder()
-        val c = GUIProt0.Configuration.newBuilder()
-        e.aid = aid
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            c.darkMode = newConfig.isNightModeActive
-        }
-        val l = newConfig.locales.get(0)
-        c.country = l.country
-        c.language = l.language
-        c.orientation = when (newConfig.orientation) {
-            Configuration.ORIENTATION_LANDSCAPE -> GUIProt0.Configuration.Orientation.landscape
-            Configuration.ORIENTATION_PORTRAIT -> GUIProt0.Configuration.Orientation.portrait
-            else -> GUIProt0.Configuration.Orientation.portrait
-        }
-        c.keyboardHidden = when (newConfig.keyboardHidden) {
-            Configuration.KEYBOARDHIDDEN_NO -> false
-            Configuration.KEYBOARDHIDDEN_YES -> true
-            else -> true
-        }
-        c.screenWidth = newConfig.screenWidthDp
-        c.screenHeight = newConfig.screenHeightDp
-        c.fontscale = newConfig.fontScale
-        c.density = a.resources.displayMetrics.density
-        e.setConfiguration(c)
+        e.setConfiguration(configMessage(a, newConfig))
         eventQueue.offer(Event.newBuilder().setConfig(e).build())
     }
 
@@ -358,6 +341,33 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                 overlays.remove(aid)
                 return -1
             }
+        }
+    }
+    
+    companion object {
+        fun configMessage(a: GUIActivity, config: Configuration): GUIProt0.Configuration.Builder {
+            val c = GUIProt0.Configuration.newBuilder()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                c.darkMode = config.isNightModeActive
+            }
+            val l = config.locales.get(0)
+            c.country = l.country
+            c.language = l.language
+            c.orientation = when (config.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> Orientation.landscape
+                Configuration.ORIENTATION_PORTRAIT -> Orientation.portrait
+                else -> Orientation.portrait
+            }
+            c.keyboardHidden = when (config.keyboardHidden) {
+                Configuration.KEYBOARDHIDDEN_NO -> false
+                Configuration.KEYBOARDHIDDEN_YES -> true
+                else -> true
+            }
+            c.screenWidth = config.screenWidthDp
+            c.screenHeight = config.screenHeightDp
+            c.fontscale = config.fontScale
+            c.density = a.resources.displayMetrics.density
+            return c
         }
     }
     

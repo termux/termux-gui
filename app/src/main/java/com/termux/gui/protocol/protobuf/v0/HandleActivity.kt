@@ -1,14 +1,19 @@
 package com.termux.gui.protocol.protobuf.v0
 
 import android.app.ActivityManager
+import android.app.KeyguardManager
 import android.app.PictureInPictureParams
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import android.util.Rational
+import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
+import com.termux.gui.App
 import com.termux.gui.GUIActivity
 import com.termux.gui.R
 import com.termux.gui.Util
@@ -253,21 +258,21 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
             if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
                     ret.success = true
                     it.requestedOrientation = when (m.orientation) {
-                        SetOrientationRequest.Orientation.behind -> ActivityInfo.SCREEN_ORIENTATION_BEHIND
-                        SetOrientationRequest.Orientation.fullSensor -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
-                        SetOrientationRequest.Orientation.fullUser -> ActivityInfo.SCREEN_ORIENTATION_FULL_USER
-                        SetOrientationRequest.Orientation.landscape -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                        SetOrientationRequest.Orientation.locked -> ActivityInfo.SCREEN_ORIENTATION_LOCKED
-                        SetOrientationRequest.Orientation.nosensor -> ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
-                        SetOrientationRequest.Orientation.portrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                        SetOrientationRequest.Orientation.reverseLandscape -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                        SetOrientationRequest.Orientation.reversePortrait -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-                        SetOrientationRequest.Orientation.sensor -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
-                        SetOrientationRequest.Orientation.sensorLandscape -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                        SetOrientationRequest.Orientation.sensorPortrait -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                        SetOrientationRequest.Orientation.user -> ActivityInfo.SCREEN_ORIENTATION_USER
-                        SetOrientationRequest.Orientation.userLandscape -> ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
-                        SetOrientationRequest.Orientation.userPortrait -> ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+                        Orientation.behind -> ActivityInfo.SCREEN_ORIENTATION_BEHIND
+                        Orientation.fullSensor -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                        Orientation.fullUser -> ActivityInfo.SCREEN_ORIENTATION_FULL_USER
+                        Orientation.landscape -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                        Orientation.locked -> ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                        Orientation.nosensor -> ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+                        Orientation.portrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        Orientation.reverseLandscape -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                        Orientation.reversePortrait -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                        Orientation.sensor -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                        Orientation.sensorLandscape -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                        Orientation.sensorPortrait -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                        Orientation.user -> ActivityInfo.SCREEN_ORIENTATION_USER
+                        Orientation.userLandscape -> ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+                        Orientation.userPortrait -> ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
                         else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     }
                 }) ret.success = false
@@ -308,16 +313,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                     if (c == null) {
                         ret.success = false
                     } else {
-                        val build = GUIProt0.Configuration.newBuilder()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            build.darkMode = c.isNightModeActive
-                        }
-                        val l = c.locales.get(0)
-                        build.country = l.country
-                        build.language = l.language
-                        
-                        
-                        ret.setConfiguration(build)
+                        ret.setConfiguration(V0Proto.configMessage(it, c))
                         ret.success = true
                     }
                 }) ret.success = false
@@ -327,7 +323,78 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
         }
         ProtoUtils.write(ret, main)
     }
-    
+
+
+    fun requestUnlock(m: RequestUnlockRequest) {
+        val ret = RequestUnlockResponse.newBuilder()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            ret.success = false
+            ProtoUtils.write(ret, main)
+            return
+        }
+        try {
+            if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
+                    val kg = App.APP?.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+                    if (kg != null) {
+                        kg.requestDismissKeyguard(it, null)
+                        ret.success = true
+                    } else {
+                        ret.success = false
+                    }
+                }) ret.success = false
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+        }
+        ProtoUtils.write(ret, main)
+    }
+
+    fun hideSoftKeyboard(m: HideSoftKeyboardRequest) {
+        val ret = HideSoftKeyboardResponse.newBuilder()
+        try {
+            val a = activities[m.aid]
+            val o = overlays[m.aid]
+            if (a != null) {
+                V0Shared.runOnUIThreadActivityStarted(a) {
+                    val im = it.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    if (im != null) {
+                        im.hideSoftInputFromWindow(it.findViewById<View>(R.id.root).windowToken, 0)
+                        ret.success = true
+                    } else {
+                        ret.success = false
+                    }
+                }
+            }
+            if (o != null) {
+                Util.runOnUIThreadBlocking {
+                    val im = App.APP?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    if (im != null) {
+                        im.hideSoftInputFromWindow(o.root.windowToken, 0)
+                        ret.success = true
+                    } else {
+                        ret.success = false
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+        }
+        ProtoUtils.write(ret, main)
+    }
+
+    fun interceptBackButton(m: InterceptBackButtonRequest) {
+        val ret = InterceptBackButtonResponse.newBuilder()
+        try {
+            if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
+                    it.data.backEvent = m.intercept
+                }) ret.success = false
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+        }
+        ProtoUtils.write(ret, main)
+    }
     
     
 }
