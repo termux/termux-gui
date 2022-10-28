@@ -8,7 +8,6 @@ import android.util.Log
 import android.widget.Toast
 import com.termux.gui.App
 import com.termux.gui.BuildConfig
-import com.termux.gui.ConnectionHandler
 import com.termux.gui.Util
 import com.termux.gui.protocol.protobuf.ProtoUtils
 import java.io.OutputStream
@@ -100,7 +99,7 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
         ProtoUtils.write(ret, main)
     }
 
-    fun version(m: GetVersionRequest) {
+    fun version() {
         val ret = GetVersionResponse.newBuilder()
         ret.versionCode = BuildConfig.VERSION_CODE
         ProtoUtils.write(ret, main)

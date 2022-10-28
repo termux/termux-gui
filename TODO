@@ -10,14 +10,14 @@ Roadmap:
         [x] option for base64 encoding for setData
         [x] option to set mime type for setData
     [ ] binary protocol with protobuf
-        [ ] Activity and Task methods
+        [x] Activity and Task methods
         [ ] View creation methods
         [ ] View manipulation methods
         [ ] Event configuring methods
         [ ] widget and notification methods
     [ ] set target version to android 13 and test it
         [ ] also update AGP again
-        [ ] add methods for android 13 widget api to protocol buffers
+        [ ] add methods for android 12 widget api
         [ ] request notification permission
     [ ] make the C library
         [ ] test it
@@ -48,7 +48,6 @@ Roadmap:
         [ ] make the readme nicer
         [ ] add Javadocs
     - 1.1.0
-        [ ] remove shared uid
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] use dlopen("libandroid.so") for that in C/C++
@@ -56,6 +55,7 @@ Roadmap:
                 [ ] https://stackoverflow.com/questions/5419766/how-to-capture-soft-keyboard-input-in-a-view
                 [ ] Also for ImageView
     - 1.2.0:
+        [ ] remove shared uid
         [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .
             The id gets looked up once and cached in a Hashmap (delete when view is removed).
             Future methods with the same subtree argument can then use the cached value and don't have to traverse the whole View tree.
@@ -69,15 +69,9 @@ Roadmap:
     Maybe in the future:
     - tooltip/context menus
     - action bar with configurable actions
-    - scroll change event
-    - gestures
      
 
 
-
-
-interesting ideas for the future:
-- QTile is a tiling window manager and wayland compositor, it may be possible to adapt it to Termux:GUI
 
 
 

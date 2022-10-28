@@ -16,7 +16,6 @@ import com.termux.gui.Util
 import com.termux.gui.protocol.shared.v0.*
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
-import com.termux.gui.views.WrappedEditText
 import java.io.DataOutputStream
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
@@ -54,7 +53,7 @@ class Create {
                     if (m.method == "createEditText") {
                         var id = -1
                         V0Shared.runOnUIThreadActivityStartedBlocking(a) {
-                            val v = if (m.params?.get("blockinput")?.asBoolean == true) getCustomEditText(it, aid, eventQueue) else EditText(it)
+                            val v = EditText(it)
                             id = Util.generateViewID(rand, it)
                             v.id = id
                             when (m.params?.get("type")?.asString) {
@@ -453,7 +452,7 @@ class Create {
                         return
                     }
                     if (m.method == "createEditText") {
-                        val v = if (m.params?.get("blockinput")?.asBoolean == true) getCustomEditText(app, aid, eventQueue) else EditText(app)
+                        val v = EditText(app)
                         val id = Util.generateViewIDRaw(rand, o.usedIds)
                         Util.runOnUIThreadBlocking {
                             v.id = id
@@ -705,10 +704,6 @@ class Create {
                     }
                 }
             }
-        }
-
-        private fun getCustomEditText(it : Context, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>): EditText {
-            return WrappedEditText(it, aid, eventQueue)
         }
     }
 }

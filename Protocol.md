@@ -186,7 +186,6 @@ Due to Android limitations, methods that return a value fail when the Activity i
     - checked: Whether a RadioButton, CheckBox, Switch or ToggleButton should be checked. Defaults to false.
     - singleline: Whether an EditText should enable multiple lines to be entered.
     - line: Whether the line below an EditText should be shown.
-    - blockinput: Disables adding the typed key automatically to a EditText and instead sends a key event.
     - type: For EditText this specifies the [input type](https://developer.android.com/reference/android/widget/TextView#attr_android:inputType) : can be one of "text", "textMultiLine", "phone", "date", "time", "datetime", "number", "numberDecimal", "numberPassword", "numberSigned", "numberDecimalSigned", "textEmailAddress", "textPassword". "text" is the default. Specifying singleline as true sets this to "text".
     - rows, cols: Row and column count for GridLayout
     - visibility: Visibility of the View. See setVisibility. If not present, visible is assumed.
@@ -564,7 +563,6 @@ Event types:
     - id: The id of the View that fired the event.
     - aid: The id of the Activity the View is in.
   - click
-    - Additional values for ImageView: x and y position in the view
     - Additional values for CheckBox, Switch and ToggleButton: set: whether the View is set or not
   - longClick
   - focusChange
@@ -575,9 +573,6 @@ Event types:
     - Additional values: selected: The id of the now selected RadioButton
   - itemselected: When a Item is selected in a Spinner / a tab clicked in TabLayout
     - Additional values: selected: The item as a String, or null if no item was selected, or the tab id that was selected for TabLayout.
-  - input: Send from EditText where you set the input to blocked
-  - cut: Send from EditText where you set the input to blocked
-  - paste: Send from EditText where you set the input to blocked
   - text: Send when the Text of the View changed, even when the text was changed with setText.
     - Additional values: text: The new text of the view
   - back: Send when you set an Activity to intercept the back button press and the back button is pressed. No id, since it originates from the Activity.

@@ -385,7 +385,7 @@ message GetVersionResponse {
 // View creation methods
 
 /*
-For all creating responses, an id of -1 indicates a failure.
+For all creation responses, an id of -1 indicates a failure.
  */
 
 
@@ -432,7 +432,7 @@ message CreateTextViewResponse {
 message CreateEditTextRequest {
   Create data = 1;
   bool noline = 2;
-  bool blockinput = 3;
+  // blockinput is removed, because it never worked correctly and custom views will be supported with ImageView and GLSurfaceView
   /*
   The type is an enum instead of a string.
    */
@@ -451,8 +451,8 @@ message CreateEditTextRequest {
     textEmailAddress = 12;
     textPassword = 13;
   }
-  Type type = 4;
-  string txt = 5;
+  Type type = 3;
+  string txt = 4;
 }
 
 message CreateEditTextResponse {
@@ -462,7 +462,8 @@ message CreateEditTextResponse {
 
 message CreateButtonRequest {
   Create data = 1;
-  string text = 2;
+  bool allcaps = 2;
+  string text = 3;
 }
 
 message CreateButtonResponse {
@@ -1597,8 +1598,6 @@ message ConfigEvent {
 
 message ClickEvent {
   View v = 1;
-  int32 x = 2;
-  int32 y = 3;
   bool set = 4;
 }
 
