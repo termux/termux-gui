@@ -424,7 +424,7 @@ Event control:
     - FocusChange
     - Touch
     - Gesture: not implemented yet. You can detect gestures like pinch yourself with touch events.
-    - Text: emits an event every time the text of the View is changed. This listener cannot be unset.
+    - Text: emits an event every time the text of the View is changed.
   - Parameters:
     - id: The View id.
     - aid: The id of the Activity the View is in.

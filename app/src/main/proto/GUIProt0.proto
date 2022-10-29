@@ -1646,7 +1646,8 @@ message SelectedEvent {
 
 message ItemSelectedEvent {
   View v = 1;
-  // For Spinners, this is the index in the list you provided, and not the string of the option like for JSON
+  // For Spinners, this is the index in the list you provided, and not the string of the option like for JSON.
+  // -1 if nothing was selected.
   int32 selected = 2;
 }
 

@@ -265,6 +265,7 @@ class Util {
             TOUCH_EVENT_MAP = Collections.unmodifiableMap(map)
         }
         
+        @SuppressLint("DiscouragedPrivateApi")
         fun setTextWatcher(v: TextView, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 v.addTextChangedListener(object: TextWatcher {
@@ -280,7 +281,7 @@ class Util {
                         }
                     }
                 })
-            }
+            } else (TextView::class.java.getDeclaredField("mListeners").get(v) as ArrayList<*>).clear()
         }
         
         

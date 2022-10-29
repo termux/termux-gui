@@ -1,20 +1,27 @@
 package com.termux.gui.protocol.protobuf.v0
 
 import android.content.Context
+import android.os.Build
 import android.text.method.LinkMovementMethod
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import android.webkit.ConsoleMessage
+import android.webkit.WebView
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.tabs.TabLayout
+import com.google.protobuf.MessageLite
+import com.termux.gui.App
 import com.termux.gui.ConnectionHandler
 import com.termux.gui.Util
 import com.termux.gui.protocol.json.v0.Create
 import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
-import com.termux.gui.protocol.shared.v0.DataClasses
-import com.termux.gui.protocol.shared.v0.V0Shared
+import com.termux.gui.protocol.shared.v0.*
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
 import java.io.OutputStream
@@ -134,9 +141,149 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
             create.createView(m, init)
         }
     }
+
+    fun radioGroup(m: CreateRadioGroupRequest) {
+        create.createView<RadioGroup>(m) {
+            ProtoUtils.setCheckedListener(it, m.data.aid, true, eventQueue)
+        }
+    }
+
+    fun radio(m: CreateRadioButtonRequest) {
+        create.createView<RadioButton>(m) {
+            it.text = m.text
+            it.freezesText = true
+            it.isChecked = m.checked
+        }
+    }
+
+    fun checkbox(m: CreateCheckboxRequest) {
+        create.createView<CheckBox>(m) {
+            it.text = m.text
+            it.freezesText = true
+            it.isChecked = m.checked
+            ProtoUtils.setClickListener(it, m.data.aid, true, eventQueue)
+        }
+    }
+
+    fun toggleButton(m: CreateToggleButtonRequest) {
+        create.createView<ToggleButton>(m) {
+            it.freezesText = true
+            it.isChecked = m.checked
+            ProtoUtils.setClickListener(it, m.data.aid, true, eventQueue)
+        }
+    }
+
+    fun switch(m: CreateSwitchRequest) {
+        create.createView<SwitchCompat>(m) {
+            it.text = m.text
+            it.freezesText = true
+            it.isChecked = m.checked
+            ProtoUtils.setClickListener(it, m.data.aid, true, eventQueue)
+        }
+    }
     
-    
-    
+    fun spinner(m: CreateSpinnerRequest) {
+        create.createView<Spinner>(m) {
+            ProtoUtils.setSpinnerListener(it, m.data.aid, eventQueue)
+        }
+    }
+
+    fun progressBar(m: CreateProgressBarRequest) {
+        val create = m.data
+        val ret = CreateProgressBarResponse.newBuilder()
+        try {
+            val o = overlays[create.aid]
+            if (o != null) {
+                val v = ProgressBar(App.APP, null, android.R.attr.progressBarStyleHorizontal)
+                v.id = Util.generateViewIDRaw(rand, o.usedIds)
+                v.visibility = when (create.v) {
+                    Visibility.visible -> View.VISIBLE
+                    Visibility.hidden -> View.INVISIBLE
+                    Visibility.gone -> View.GONE
+                    else -> View.VISIBLE
+                }
+                V0Shared.setViewOverlay(o, v, create.parent)
+                ret.id = v.id
+            } else {
+                if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[create.aid]) {
+                        val v = ProgressBar(App.APP, null, android.R.attr.progressBarStyleHorizontal)
+                        v.id = Util.generateViewID(rand, it)
+                        v.visibility = when (create.v) {
+                            Visibility.visible -> View.VISIBLE
+                            Visibility.hidden -> View.INVISIBLE
+                            Visibility.gone -> View.GONE
+                            else -> View.VISIBLE
+                        }
+                        Util.setViewActivity(it, v, create.parent)
+                        ret.id = v.id
+                    }) ret.id = -1
+            }
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.id = -1
+        }
+        ProtoUtils.write(ret as MessageLite.Builder, main)
+    }
+
+    fun tab(m: CreateTabLayoutRequest) {
+        create.createView<TabLayout>(m) {
+            ProtoUtils.setTabSelectedListener(it, m.data.aid, true, eventQueue)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    fun webView(m: CreateWebViewRequest) {
+        create.createView<WebView>(m) {
+            val settings = it.settings
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            settings.allowFileAccessFromFileURLs = false
+            settings.allowUniversalAccessFromFileURLs = false
+            settings.domStorageEnabled = true
+            settings.setGeolocationEnabled(false)
+            settings.mediaPlaybackRequiresUserGesture = false
+            settings.saveFormData = false
+            settings.savePassword = false
+
+            val l = object: WebEventListener {
+                override fun onNavigation(url: String) {
+                    eventQueue.offer(Event.newBuilder().setWebNavigation(WebViewNavigationEvent.newBuilder().setUrl(url).
+                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                }
+
+                override fun onHTTPError(url: String, code: Int) {
+                    eventQueue.offer(Event.newBuilder().setWebHTTPError(WebViewHTTPErrorEvent.newBuilder().setUrl(url).setCode(code).
+                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                }
+
+                override fun onReceivedError(url: String, description: String, code: Int) {
+                    eventQueue.offer(Event.newBuilder().setWebError(WebViewErrorEvent.newBuilder().setUrl(url).
+                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                }
+
+                override fun onRenderProcessGone(v: WebView) {
+                    eventQueue.offer(Event.newBuilder().setWebDestroyed(WebViewDestroyedEvent.newBuilder().
+                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                }
+
+                override fun onProgressChanged(progress: Int) {
+                    eventQueue.offer(Event.newBuilder().setWebProgress(WebViewProgressEvent.newBuilder().setProgress(progress).
+                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                }
+
+                override fun onConsoleMessage(msg: ConsoleMessage) {
+                    eventQueue.offer(Event.newBuilder().setWebConsoleMessage(WebViewConsoleMessageEvent.newBuilder().setMessage(msg.message()).
+                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                it.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, true)
+            }
+            it.webViewClient = GUIWebViewClient(l)
+            it.webChromeClient = GUIWebChromeClient(l)
+        }
+    }
     
     
     
