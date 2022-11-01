@@ -22,6 +22,7 @@ import com.termux.gui.protocol.json.v0.Create
 import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 import com.termux.gui.protocol.shared.v0.*
+import com.termux.gui.views.HorizontalProgressBar
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
 import java.io.OutputStream
@@ -189,40 +190,7 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
     }
 
     fun progressBar(m: CreateProgressBarRequest) {
-        val create = m.data
-        val ret = CreateProgressBarResponse.newBuilder()
-        try {
-            val o = overlays[create.aid]
-            if (o != null) {
-                val v = ProgressBar(App.APP, null, android.R.attr.progressBarStyleHorizontal)
-                v.id = Util.generateViewIDRaw(rand, o.usedIds)
-                v.visibility = when (create.v) {
-                    Visibility.visible -> View.VISIBLE
-                    Visibility.hidden -> View.INVISIBLE
-                    Visibility.gone -> View.GONE
-                    else -> View.VISIBLE
-                }
-                V0Shared.setViewOverlay(o, v, create.parent)
-                ret.id = v.id
-            } else {
-                if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[create.aid]) {
-                        val v = ProgressBar(App.APP, null, android.R.attr.progressBarStyleHorizontal)
-                        v.id = Util.generateViewID(rand, it)
-                        v.visibility = when (create.v) {
-                            Visibility.visible -> View.VISIBLE
-                            Visibility.hidden -> View.INVISIBLE
-                            Visibility.gone -> View.GONE
-                            else -> View.VISIBLE
-                        }
-                        Util.setViewActivity(it, v, create.parent)
-                        ret.id = v.id
-                    }) ret.id = -1
-            }
-        } catch (e: Exception) {
-            Log.d(this.javaClass.name, "Exception: ", e)
-            ret.id = -1
-        }
-        ProtoUtils.write(ret as MessageLite.Builder, main)
+        create.createView<HorizontalProgressBar>(m) {}
     }
 
     fun tab(m: CreateTabLayoutRequest) {
