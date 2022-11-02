@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.webkit.WebView
 import android.widget.*
+import androidx.core.view.setPadding
 import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
@@ -189,6 +190,48 @@ class HandleView {
                                         else -> p?.setMargins(mar, mar, mar, mar)
                                     }
                                     v?.layoutParams = p
+                                }
+                            }
+                        }
+                    }
+                    return true
+                }
+                "setPadding" -> {
+                    if (m.params != null) {
+                        val aid = m.params?.get("aid")?.asInt
+                        val id = m.params?.get("id")?.asInt
+                        val padding = m.params?.get("padding")?.asInt
+                        val a = activities[aid]
+                        val o = overlays[aid]
+                        if (id != null && padding != null) {
+                            if (a != null) {
+                                V0Shared.runOnUIThreadActivityStarted(a) {
+                                    val px = Util.toPX(it, padding)
+                                    val v = it.findViewReimplemented<View>(id)
+                                    if (v != null) {
+                                        when (m.params?.get("dir")?.asString) {
+                                            "top" -> v.setPadding(v.paddingLeft, px, v.paddingRight, v.paddingBottom)
+                                            "bottom" -> v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, px)
+                                            "left" -> v.setPadding(px, v.paddingTop, v.paddingRight, v.paddingBottom)
+                                            "right" -> v.setPadding(v.paddingLeft, v.paddingTop, px, v.paddingBottom)
+                                            else -> v.setPadding(px)
+                                        }
+                                    }
+                                }
+                            }
+                            if (o != null) {
+                                Util.runOnUIThreadBlocking {
+                                    val px = Util.toPX(app, padding)
+                                    val v = o.root.findViewReimplemented<View>(id)
+                                    if (v != null) {
+                                        when (m.params?.get("dir")?.asString) {
+                                            "top" -> v.setPadding(v.paddingLeft, px, v.paddingRight, v.paddingBottom)
+                                            "bottom" -> v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, px)
+                                            "left" -> v.setPadding(px, v.paddingTop, v.paddingRight, v.paddingBottom)
+                                            "right" -> v.setPadding(v.paddingLeft, v.paddingTop, px, v.paddingBottom)
+                                            else -> v.setPadding(px)
+                                        }
+                                    }
                                 }
                             }
                         }
