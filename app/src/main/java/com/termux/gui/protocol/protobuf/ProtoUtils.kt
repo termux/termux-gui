@@ -3,9 +3,12 @@ package com.termux.gui.protocol.protobuf
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Matrix
+import android.net.LocalSocket
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
@@ -13,7 +16,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
 import com.google.protobuf.MessageLite
 import com.termux.gui.App
-import com.termux.gui.ConnectionHandler
 import com.termux.gui.GUIActivity
 import com.termux.gui.Util
 import com.termux.gui.protocol.protobuf.v0.GUIProt0
@@ -21,11 +23,12 @@ import com.termux.gui.protocol.protobuf.v0.GUIProt0.Create
 import com.termux.gui.protocol.protobuf.v0.V0Proto
 import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.V0Shared
+import java.io.DataOutputStream
+import java.io.FileDescriptor
 import java.io.OutputStream
-import java.lang.Exception
+import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
-import kotlin.collections.HashMap
 import kotlin.math.roundToInt
 
 class ProtoUtils {
@@ -58,6 +61,37 @@ class ProtoUtils {
         fun <T : MessageLite> write(m: T, out: OutputStream) {
             m.writeDelimitedTo(out)
         }
+
+        fun sendBufferFD(w: DataOutputStream, s: LocalSocket, fd: FileDescriptor) {
+            s.setFileDescriptorsForSend(arrayOf(fd))
+            w.write(0)
+            w.flush()
+        }
+        
+        fun unitToPX(u: GUIProt0.Size.Unit, v: Float, metrics: DisplayMetrics): Float {
+            return when (u) {
+                GUIProt0.Size.Unit.dp -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, metrics)
+                GUIProt0.Size.Unit.sp -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, v, metrics)
+                GUIProt0.Size.Unit.px -> v
+                GUIProt0.Size.Unit.mm -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, v, metrics)
+                GUIProt0.Size.Unit.`in` -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, v, metrics)
+                GUIProt0.Size.Unit.pt -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, v, metrics)
+                GUIProt0.Size.Unit.UNRECOGNIZED -> throw java.lang.NumberFormatException("Invalid size unit")
+            }
+        }
+
+        fun pxToUnit(u: GUIProt0.Size.Unit, v: Float, metrics: DisplayMetrics): Float {
+            return when (u) {
+                GUIProt0.Size.Unit.dp -> v / metrics.density
+                GUIProt0.Size.Unit.sp -> v / metrics.scaledDensity
+                GUIProt0.Size.Unit.px -> v
+                GUIProt0.Size.Unit.mm -> v / (metrics.xdpi * (1.0f / 25.4f))
+                GUIProt0.Size.Unit.`in` -> v / metrics.xdpi
+                GUIProt0.Size.Unit.pt -> v / (metrics.xdpi * (1.0f / 72))
+                GUIProt0.Size.Unit.UNRECOGNIZED -> throw java.lang.NumberFormatException("Invalid size unit")
+            }
+        }
+        
         
         fun setClickListener(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<GUIProt0.Event>) {
             if (enabled) {
@@ -299,6 +333,52 @@ class ProtoUtils {
                 } catch (e: Exception) {
                     Log.d(this.javaClass.name, "Exception: ", e)
                     retClass.getMethod("setId", Int::class.java).invoke(ret, -1)
+                }
+                write(ret as MessageLite.Builder, main)
+            }
+        }
+
+        class ViewHandler(
+            val v: V0Proto,
+            val main: OutputStream,
+            val activities: MutableMap<Int, DataClasses.ActivityState>,
+            val overlays: MutableMap<Int, DataClasses.Overlay>
+        ) {
+            inline fun <T : View, R : MessageLite.Builder> handleView(m: GUIProt0.View, ret: R, crossinline action: (R, T, Context) -> Unit, crossinline fail: (R) -> Unit) {
+                handleView(m, ret, { r: R, v: T, c: Context, _ -> 
+                    action(r, v, c)
+                }, fail)
+            }
+
+            inline fun <T : View, R : MessageLite.Builder> handleView(m: GUIProt0.View, ret: R, crossinline action: (R, T) -> Unit, crossinline fail: (R) -> Unit) {
+                handleView(m, ret, { r: R, v: T, _, _ ->
+                    action(r, v)
+                }, fail)
+            }
+
+            inline fun <T : View, R : MessageLite.Builder> handleView(m: GUIProt0.View, ret: R, crossinline action: (R, T, Context, MutableSet<Int>) -> Unit, crossinline fail: (R) -> Unit) {
+                try {
+                    val o = overlays[m.aid]
+                    if (o != null) {
+                        val v = o.root.findViewReimplemented<T>(m.id)
+                        if (v != null) {
+                            action(ret, v, o.context, o.usedIds)
+                        } else {
+                            fail(ret)
+                        }
+                    } else {
+                        if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
+                                val v = it.findViewReimplemented<T>(m.id)
+                                if (v != null) {
+                                    action(ret, v, it, it.usedIds)
+                                } else {
+                                    fail(ret)
+                                }
+                            }) fail(ret)
+                    }
+                } catch (e: Exception) {
+                    Log.d(this.javaClass.name, "Exception: ", e)
+                    fail(ret)
                 }
                 write(ret as MessageLite.Builder, main)
             }

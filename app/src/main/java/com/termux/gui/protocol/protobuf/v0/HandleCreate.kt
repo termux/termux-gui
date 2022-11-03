@@ -74,7 +74,7 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
 
     fun edit(m: CreateEditTextRequest) {
         create.createView<EditText>(m) {
-            when (m.type) {
+            when (m.type!!) {
                 CreateEditTextRequest.Type.text -> it.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_NORMAL
                 CreateEditTextRequest.Type.textMultiLine -> it.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE or EditorInfo.TYPE_TEXT_VARIATION_NORMAL
                 CreateEditTextRequest.Type.phone -> it.inputType = EditorInfo.TYPE_CLASS_PHONE
@@ -88,7 +88,7 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
                 CreateEditTextRequest.Type.numberDecimalSigned -> it.inputType = EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL or EditorInfo.TYPE_NUMBER_FLAG_SIGNED or EditorInfo.TYPE_NUMBER_VARIATION_NORMAL
                 CreateEditTextRequest.Type.textEmailAddress -> it.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
                 CreateEditTextRequest.Type.textPassword -> it.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
-                else -> it.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_NORMAL
+                CreateEditTextRequest.Type.UNRECOGNIZED -> it.inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_NORMAL
             }
             if (m.noline) {
                 it.setBackgroundResource(android.R.color.transparent)

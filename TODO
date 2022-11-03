@@ -11,7 +11,7 @@ Roadmap:
         [x] option to set mime type for setData
     [ ] binary protocol with protobuf
         [x] Activity and Task methods
-        [ ] View creation methods
+        [x] View creation methods
         [ ] View manipulation methods
         [ ] Event configuring methods
         [ ] widget and notification methods

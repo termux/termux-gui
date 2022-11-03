@@ -121,6 +121,19 @@ message Size {
 }
 
 
+/*
+Only used for setWidth and setHeight, to include the special constants MATCH_PARENT and WRAP_CONTENT
+ */
+message ViewSize {
+  enum Constant {
+    MATCH_PARENT = 0;
+    WRAP_CONTENT = 1;
+  }
+  oneof value {
+    Size size = 1;
+    Constant constant = 2;
+  }
+}
 
 
 
@@ -626,6 +639,7 @@ message ShowCursorResponse {
 
 message SetLinearLayoutParamsRequest {
   View v = 1;
+  // Use a negative number to keep the current weight.
   float weight = 2;
   // Use 0 to keep the current position. The position starts at 1, to make the default message smaller.
   int32 position = 3;
@@ -698,7 +712,7 @@ message SetVisibilityResponse {
 
 message SetWidthRequest {
   View v = 1;
-  Size s = 2;
+  ViewSize s = 2;
 }
 
 message SetWidthResponse {
@@ -708,7 +722,7 @@ message SetWidthResponse {
 
 message SetHeightRequest {
   View v = 1;
-  Size s = 2;
+  ViewSize s = 2;
 }
 
 message SetHeightResponse {
@@ -725,6 +739,9 @@ message GetDimensionsRequest {
 }
 
 message GetDimensionsResponse {
+  /*
+  Negative values for one of these denote an error.
+   */
   float width = 1;
   float height = 2;
 }
@@ -851,7 +868,8 @@ message GetTextRequest {
 }
 
 message GetTextResponse {
-  string text = 1;
+  bool success = 1;
+  string text = 2;
 }
 
 
@@ -884,6 +902,9 @@ message GetScrollPositionRequest {
 }
 
 message GetScrollPositionResponse {
+  /*
+  Negative values for one of these denote an error.
+   */
   float x = 1;
   float y = 2;
 }

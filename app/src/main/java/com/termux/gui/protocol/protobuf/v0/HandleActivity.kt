@@ -38,7 +38,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
         
         val ret = NewActivityResponse.newBuilder()
         try {
-            when (m.type) {
+            when (m.type!!) {
                 NewActivityRequest.ActivityType.normal -> {}
                 NewActivityRequest.ActivityType.dialog -> dialog = true
                 NewActivityRequest.ActivityType.dialogCancelOutside -> {
@@ -52,7 +52,6 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                     ret.setAid(-1).setTid(-1).build().writeDelimitedTo(main)
                     return
                 }
-                null -> {}
             }
             if (overlay) {
                 ret.aid = v.generateOverlay()
@@ -181,7 +180,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
         val ret = SetInputModeResponse.newBuilder()
         try {
             if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
-                    when (m.mode) {
+                    when (m.mode!!) {
                         SetInputModeRequest.InputMode.pan -> {
                             it.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
                             ret.success = true
@@ -190,7 +189,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                             it.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                             ret.success = true
                         }
-                        else -> ret.success = false
+                        SetInputModeRequest.InputMode.UNRECOGNIZED -> ret.success = false
                     }
                 }) ret.success = false
         } catch (e: Exception) {
