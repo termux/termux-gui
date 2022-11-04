@@ -287,8 +287,8 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     val scale = ScaleGestureDetector(
                         app,
                         object : ScaleGestureDetector.OnScaleGestureListener {
-                            override fun onScale(detector: ScaleGestureDetector?): Boolean {
-                                if (o.sendTouch && detector != null) {
+                            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                                if (o.sendTouch) {
                                     eventQueue.offer(Event.newBuilder().setOverlayScale(OverlayScaleEvent.newBuilder()
                                         .setAid(aid)
                                         .setSpan(detector.currentSpan)
@@ -297,11 +297,11 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                                 return true
                             }
 
-                            override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+                            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
                                 return true
                             }
 
-                            override fun onScaleEnd(detector: ScaleGestureDetector?) {}
+                            override fun onScaleEnd(detector: ScaleGestureDetector) {}
                         })
                     o.root.interceptListener = { e ->
                         if (o.sendTouch) {

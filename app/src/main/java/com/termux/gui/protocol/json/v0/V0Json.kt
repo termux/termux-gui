@@ -200,19 +200,19 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                         params.gravity = Gravity.START or Gravity.TOP
                         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         val scale = ScaleGestureDetector(app, object : ScaleGestureDetector.OnScaleGestureListener {
-                            override fun onScale(detector: ScaleGestureDetector?): Boolean {
+                            override fun onScale(detector: ScaleGestureDetector): Boolean {
                                 //println(detector?.currentSpan)
                                 if (o.sendTouch) {
-                                    eventQueue.offer(ConnectionHandler.Event("overlayScale", ConnectionHandler.gson.toJsonTree(detector?.currentSpan)))
+                                    eventQueue.offer(ConnectionHandler.Event("overlayScale", ConnectionHandler.gson.toJsonTree(detector.currentSpan)))
                                 }
                                 return true
                             }
 
-                            override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+                            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
                                 return true
                             }
 
-                            override fun onScaleEnd(detector: ScaleGestureDetector?) {}
+                            override fun onScaleEnd(detector: ScaleGestureDetector) {}
                         })
                         o.root.interceptListener = { e ->
                             //println(e)
