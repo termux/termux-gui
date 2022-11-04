@@ -65,6 +65,18 @@ class ProtoUtils {
             w.write(0)
             w.flush()
         }
+
+        fun unitToTypedValue(u: GUIProt0.Size.Unit): Int {
+            return when (u) {
+                GUIProt0.Size.Unit.dp -> TypedValue.COMPLEX_UNIT_DIP
+                GUIProt0.Size.Unit.sp -> TypedValue.COMPLEX_UNIT_SP
+                GUIProt0.Size.Unit.px -> TypedValue.COMPLEX_UNIT_PX
+                GUIProt0.Size.Unit.mm -> TypedValue.COMPLEX_UNIT_MM
+                GUIProt0.Size.Unit.`in` -> TypedValue.COMPLEX_UNIT_IN
+                GUIProt0.Size.Unit.pt -> TypedValue.COMPLEX_UNIT_PT
+                GUIProt0.Size.Unit.UNRECOGNIZED -> throw java.lang.NumberFormatException("Invalid size unit")
+            }
+        }
         
         fun unitToPX(u: GUIProt0.Size.Unit, v: Float, metrics: DisplayMetrics): Float {
             return when (u) {
@@ -330,6 +342,26 @@ class ProtoUtils {
                 } catch (e: Exception) {
                     Log.d(this.javaClass.name, "Exception: ", e)
                     retClass.getMethod("setId", Int::class.java).invoke(ret, -1)
+                }
+                write(ret as MessageLite.Builder, main)
+            }
+        }
+
+        class RemoteHandler(
+            val main: OutputStream,
+            val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>
+        ) {
+            inline fun <R : MessageLite.Builder> handleRemote(rid: Int, ret: R, crossinline action: (R, DataClasses.RemoteLayoutRepresentation) -> Unit, crossinline fail: (R) -> Unit) {
+                try {
+                    val r = remoteviews[rid]
+                    if (r != null) {
+                        action(ret, r)
+                    } else {
+                        fail(ret)
+                    }
+                } catch (e: Exception) {
+                    Log.d(this.javaClass.name, "Exception: ", e)
+                    fail(ret)
                 }
                 write(ret as MessageLite.Builder, main)
             }

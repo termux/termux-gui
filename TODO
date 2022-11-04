@@ -9,12 +9,12 @@ Roadmap:
     [x] WebView
         [x] option for base64 encoding for setData
         [x] option to set mime type for setData
-    [ ] binary protocol with protobuf
+    [x] binary protocol with protobuf
         [x] Activity and Task methods
         [x] View creation methods
-        [ ] View manipulation methods
-        [ ] Event configuring methods
-        [ ] widget and notification methods
+        [x] View manipulation methods
+        [x] Event configuring methods
+        [x] widget and notification methods
     [ ] set target version to android 13 and test it
         [ ] also update AGP again
         [ ] add methods for android 12 widget api

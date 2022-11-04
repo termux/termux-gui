@@ -1181,7 +1181,10 @@ message SetRemoteVisibilityResponse {
 message SetRemotePaddingRequest {
   int32 rid = 1;
   int32 id = 2;
-  Direction d = 3;
+  Size left = 3;
+  Size top = 4;
+  Size right = 5;
+  Size bottom = 6;
 }
 
 message SetRemotePaddingResponse {
@@ -1334,16 +1337,24 @@ message CreateNotificationRequest {
     BigImageNotification bigImage = 10;
     CustomNotification custom = 11;
   }
-  bytes icon = 1;
-  string channel = 2;
-  Importance importance = 3;
-  bool alertOnce = 4;
-  bool showTimestamp = 5;
-  int64 timestamp = 6;
+  /*
+  Use -1 to create a new notification.
+   */
+  int32 id = 1;
+  bytes icon = 2;
+  string channel = 3;
+  Importance importance = 4;
+  bool alertOnce = 5;
+  bool showTimestamp = 6;
   repeated string actions = 7;
+  int64 timestamp = 12;
+  bool ongoing = 13;
 }
 
 message CreateNotificationResponse {
+  /*
+  -1 indicates an error.
+   */
   int32 id = 1;
 }
 

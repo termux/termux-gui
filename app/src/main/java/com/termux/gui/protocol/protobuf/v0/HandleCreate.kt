@@ -45,7 +45,9 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
     }
 
     fun swipeRefresh(m: CreateSwipeRefreshLayoutRequest) {
-        create.createView<SwipeRefreshLayout>(m) {}
+        create.createView<SwipeRefreshLayout>(m) {
+            ProtoUtils.setRefreshListener(it, m.data.aid, true, eventQueue)
+        }
     }
     
     
