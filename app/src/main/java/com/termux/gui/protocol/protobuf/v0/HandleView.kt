@@ -7,6 +7,7 @@ import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -621,9 +622,70 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
             it.success = false
         })
     }
-    
-    
-    
+
+
+    fun sendClickEvent(m: SendClickEventRequest) {
+        handler.handleView(m.v, SendClickEventResponse.newBuilder(), { ret, v: android.view.View, _, _ ->
+            ProtoUtils.setClickListener(v, m.v.aid, m.send, eventQueue)
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun sendLongClickEvent(m: SendLongClickEventRequest) {
+        handler.handleView(m.v, SendLongClickEventResponse.newBuilder(), { ret, v: android.view.View, _, _ ->
+            ProtoUtils.setLongClickListener(v, m.v.aid, m.send, eventQueue)
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+
+    fun sendFocusChangeEvent(m: SendFocusChangeEventRequest) {
+        handler.handleView(m.v, SendFocusChangeEventResponse.newBuilder(), { ret, v: android.view.View, _, _ ->
+            ProtoUtils.setFocusChangeListener(v, m.v.aid, m.send, eventQueue)
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun sendTouchEvent(m: SendTouchEventRequest) {
+        handler.handleView(m.v, SendTouchEventResponse.newBuilder(), { ret, v: android.view.View, _, _ ->
+            ProtoUtils.setTouchListenerProto(v, m.v.aid, m.send, eventQueue)
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun sendTextEvent(m: SendTextEventRequest) {
+        handler.handleView(m.v, SendTextEventResponse.newBuilder(), { ret, v: TextView, _, _ ->
+            ProtoUtils.setTextWatcher(v, m.v.aid, m.send, eventQueue)
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun sendOverlayTouch(m: SendOverlayTouchEventRequest) {
+        val ret = SendOverlayTouchEventResponse.newBuilder()
+        try {
+            val o = overlays[m.aid]
+            if (o != null) {
+                o.sendTouch = m.send
+                ret.success = true
+            } else {
+                ret.success = false
+            }
+        } catch (e: java.lang.Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+        }
+        ProtoUtils.write(ret, main)
+    }
     
     
     

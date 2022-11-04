@@ -1403,16 +1403,6 @@ message SendTouchEventResponse {
 }
 
 
-message SendGestureEventRequest {
-  View v = 1;
-  bool send = 2;
-}
-
-message SendGestureEventResponse {
-  bool success = 1;
-}
-
-
 message SendTextEventRequest {
   View v = 1;
   bool send = 2;
@@ -1571,9 +1561,8 @@ message Method {
     SendLongClickEventRequest sendLongClickEvent = 601;
     SendFocusChangeEventRequest sendFocusChangeEvent = 602;
     SendTouchEventRequest sendTouchEvent = 603;
-    SendGestureEventRequest sendGestureEvent = 604;
-    SendTextEventRequest sendTextEvent = 605;
-    SendOverlayTouchEventRequest sendOverlayTouch = 606;
+    SendTextEventRequest sendTextEvent = 604;
+    SendOverlayTouchEventRequest sendOverlayTouch = 605;
     
   }
 }

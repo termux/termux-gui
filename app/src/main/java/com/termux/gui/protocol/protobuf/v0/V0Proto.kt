@@ -150,13 +150,12 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.CREATENOTIFICATION -> TODO()
                     Method.MethodCase.CANCELNOTIFICATION -> TODO()
                     
-                    Method.MethodCase.SENDCLICKEVENT -> TODO()
-                    Method.MethodCase.SENDLONGCLICKEVENT -> TODO()
-                    Method.MethodCase.SENDFOCUSCHANGEEVENT -> TODO()
-                    Method.MethodCase.SENDTOUCHEVENT -> TODO()
-                    Method.MethodCase.SENDGESTUREEVENT -> TODO()
-                    Method.MethodCase.SENDTEXTEVENT -> TODO()
-                    Method.MethodCase.SENDOVERLAYTOUCH -> TODO()
+                    Method.MethodCase.SENDCLICKEVENT -> handleView.sendClickEvent(m.sendClickEvent)
+                    Method.MethodCase.SENDLONGCLICKEVENT -> handleView.sendLongClickEvent(m.sendLongClickEvent)
+                    Method.MethodCase.SENDFOCUSCHANGEEVENT -> handleView.sendFocusChangeEvent(m.sendFocusChangeEvent)
+                    Method.MethodCase.SENDTOUCHEVENT -> handleView.sendTouchEvent(m.sendTouchEvent)
+                    Method.MethodCase.SENDTEXTEVENT -> handleView.sendTextEvent(m.sendTextEvent)
+                    Method.MethodCase.SENDOVERLAYTOUCH -> handleView.sendOverlayTouch(m.sendOverlayTouch)
                     Method.MethodCase.METHOD_NOT_SET -> { return@withSystemListenersAndCleanup } // terminate the connection when nothing is in the oneof
                     null -> { return@withSystemListenersAndCleanup } // terminate the connection when nothing is in the oneof
                 }
