@@ -6,12 +6,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.*
 
-class RawInputConnection(private val v: View) : InputConnection {
-    private var l: View.OnKeyListener? = null
-
-    fun setOnKeyListener(l: View.OnKeyListener?) {
-        this.l = l
-    }
+class RawInputConnection : InputConnection {
     
     override fun getTextBeforeCursor(n: Int, flags: Int): CharSequence? {
         return null
@@ -85,10 +80,8 @@ class RawInputConnection(private val v: View) : InputConnection {
         return false
     }
 
-    override fun sendKeyEvent(event: KeyEvent?): Boolean {
-        if (event != null)
-            l?.onKey(v, event.keyCode, event)
-        return true
+    override fun sendKeyEvent(event: KeyEvent): Boolean {
+        return false
     }
 
     override fun clearMetaKeyStates(states: Int): Boolean {

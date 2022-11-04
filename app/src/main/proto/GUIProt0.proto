@@ -486,6 +486,7 @@ message CreateButtonResponse {
 
 message CreateImageViewRequest {
   Create data = 1;
+  bool keyboard = 2; // If true, makes the ImageView work with the soft & hardware keyboard and send key events
 }
 
 message CreateImageViewResponse {
@@ -1770,6 +1771,24 @@ message OverlayScaleEvent {
 }
 
 
+message KeyEvent {
+  enum Modifier {
+    MOD_NONE = 0;
+    MOD_LSHIFT = 1;
+    MOD_RSHIFT = 2;
+    MOD_LCTRL = 4;
+    MOD_RCTRL = 8;
+    MOD_ALT = 16;
+    MOD_FN = 32;
+    MOD_CAPS_LOCK = 64;
+    MOD_ALT_GR = 128;
+    MOD_NUM_LOCK = 256;
+  }
+  uint32 code = 1; // may eventually return xkb keycodes here, but unused for now
+  uint32 modifiers = 2; // Bits are according to the Modifier enum
+  uint32 codePoint = 3; // The unicode code point of the character
+}
+
 
 // Debug events
 
@@ -1816,6 +1835,7 @@ message Event {
     NotificationDismissedEvent notificationDismissed = 45;
     NotificationActionEvent notificationAction = 46;
     OverlayScaleEvent overlayScale = 47;
+    KeyEvent keyEvent = 48;
     
     
     // Debug events

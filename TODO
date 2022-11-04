@@ -15,10 +15,10 @@ Roadmap:
         [x] View manipulation methods
         [x] Event configuring methods
         [x] widget and notification methods
-    [ ] set target version to android 13 and test it
+    [x] set target version to android 13 and test it
         [x] also update AGP again
-        [ ] add methods for android 12 widget api
-        [ ] request notification permission
+        [x] request notification permission
+    [x] ImageView that captures key events
     [ ] make the C library
         [ ] test it
         [ ] write a tutorial
@@ -48,12 +48,10 @@ Roadmap:
         [ ] make the readme nicer
         [ ] add Javadocs
     - 1.1.0
+        [ ] add methods for android 12 widget api
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] use dlopen("libandroid.so") for that in C/C++
-            [ ] Try to make a subclass of SurfaceView that can receive Input from the software and hardware keyboard and can be focused with requestFocus
-                [ ] https://stackoverflow.com/questions/5419766/how-to-capture-soft-keyboard-input-in-a-view
-                [ ] Also for ImageView
     - 1.2.0:
         [ ] remove shared uid
         [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .

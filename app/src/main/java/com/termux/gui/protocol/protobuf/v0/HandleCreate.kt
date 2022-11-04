@@ -14,6 +14,7 @@ import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 import com.termux.gui.protocol.shared.v0.*
 import com.termux.gui.views.HorizontalProgressBar
+import com.termux.gui.views.KeyboardImageView
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
 import java.io.OutputStream
@@ -98,7 +99,26 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
     }
 
     fun image(m: CreateImageViewRequest) {
-        create.createView<ImageView>(m) {}
+        if (m.keyboard) {
+            create.createView<KeyboardImageView>(m) {
+                it.setOnKeyListener { _, _, event ->
+                    val b = KeyEvent.newBuilder()
+                    b.codePoint = event.unicodeChar
+                    var mod = 0
+                    if (event.isShiftPressed) mod = KeyEvent.Modifier.MOD_LSHIFT_VALUE or KeyEvent.Modifier.MOD_RSHIFT_VALUE
+                    if (event.isCtrlPressed) mod = mod or KeyEvent.Modifier.MOD_LCTRL_VALUE or KeyEvent.Modifier.MOD_RCTRL_VALUE
+                    if (event.isAltPressed) mod = mod or KeyEvent.Modifier.MOD_ALT_VALUE
+                    if (event.isFunctionPressed) mod = mod or KeyEvent.Modifier.MOD_FN_VALUE
+                    if (event.isCapsLockOn) mod = mod or KeyEvent.Modifier.MOD_CAPS_LOCK_VALUE
+                    if (event.isNumLockOn) mod = mod or KeyEvent.Modifier.MOD_NUM_LOCK_VALUE
+                    b.modifiers = mod
+                    eventQueue.offer(Event.newBuilder().setKeyEvent(b).build())
+                    true
+                }
+            }
+        } else {
+            create.createView<ImageView>(m) {}
+        }
     }
 
     fun space(m: CreateSpaceRequest) {
