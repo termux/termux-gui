@@ -4,17 +4,17 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import com.termux.gui.ConnectionHandler
-import com.termux.gui.PendingIntentReceiver
-import com.termux.gui.R
-import com.termux.gui.Util
+import com.termux.gui.*
 import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 import com.termux.gui.protocol.shared.v0.DataClasses
@@ -22,7 +22,7 @@ import java.io.OutputStream
 import java.util.*
 
 class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>,
-                         val rand: Random, val app: Context, val notifications: MutableSet<Int>) {
+                         val rand: Random, val app: Context, val notifications: MutableSet<Int>, val activities: MutableMap<Int, DataClasses.ActivityState>) {
     
     
     fun createChannel(m: CreateNotificationChannelRequest) {
@@ -49,6 +49,25 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
     fun create(m: CreateNotificationRequest) {
         val ret = CreateNotificationResponse.newBuilder()
         try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (app.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+                    var a: GUIActivity? = null
+                    for (ac in activities) {
+                        if (ac.value.a?.isDestroyed == false) {
+                            a = ac.value.a
+                            break
+                        }
+                    }
+                    if (a == null) {
+                        Toast.makeText(app, "Please grant Termux:GUI the notification permission", Toast.LENGTH_LONG).show()
+                    } else {
+                        a.requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 0)
+                    }
+                    ret.id = -1
+                    ProtoUtils.write(ret, main)
+                    return
+                }
+            }
             val id = if (m.id >= 0) m.id else Util.generateIndex(rand, notifications)
             val b = NotificationCompat.Builder(app, m.channel)
             

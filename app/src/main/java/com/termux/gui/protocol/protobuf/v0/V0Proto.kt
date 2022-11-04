@@ -39,7 +39,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
             val handleView = HandleView(this, out, activities, overlays, eventQueue, buffers)
             val handleBuffer = HandleBuffer(buffers, out, rand, main)
             val handleRemote = HandleRemote(out, remoteviews, rand, app)
-            val handleNotification = HandleNotification(out, remoteviews, rand, app, notifications)
+            val handleNotification = HandleNotification(out, remoteviews, rand, app, notifications, activities)
             while (! Thread.currentThread().isInterrupted) {
                 val m = Method.parseDelimitedFrom(input)
                 when (m.methodCase) {

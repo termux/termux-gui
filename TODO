@@ -16,7 +16,7 @@ Roadmap:
         [x] Event configuring methods
         [x] widget and notification methods
     [ ] set target version to android 13 and test it
-        [ ] also update AGP again
+        [x] also update AGP again
         [ ] add methods for android 12 widget api
         [ ] request notification permission
     [ ] make the C library

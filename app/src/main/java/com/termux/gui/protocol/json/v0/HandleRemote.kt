@@ -5,8 +5,10 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.util.Base64
 import android.util.TypedValue
 import android.view.View
@@ -25,7 +27,7 @@ class HandleRemote {
     companion object {
         
         @SuppressLint("ApplySharedPref", "LaunchActivityFromNotification")
-        fun handleRemoteMessage(m: ConnectionHandler.Message, remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>, rand: Random, out: DataOutputStream, app: Context, notifications: MutableSet<Int>) : Boolean {
+        fun handleRemoteMessage(m: ConnectionHandler.Message, remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>, rand: Random, out: DataOutputStream, app: Context, notifications: MutableSet<Int>, activities: MutableMap<Int, DataClasses.ActivityState>) : Boolean {
             if ("createRemoteLayout" == m.method) {
                 val id = Util.generateIndex(rand, remoteviews.keys)
                 remoteviews[id] = DataClasses.RemoteLayoutRepresentation(RemoteViews(app.packageName, R.layout.remote_view_root))
@@ -220,6 +222,26 @@ class HandleRemote {
                 return true
             }
             if ("createNotification" == m.method) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (app.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+                        var a: GUIActivity? = null
+                        for (ac in activities) {
+                            if (ac.value.a?.isDestroyed == false) {
+                                a = ac.value.a
+                                break
+                            }
+                        }
+                        if (a == null) {
+                            Toast.makeText(app, "Please grant Termux:GUI the notification permission", Toast.LENGTH_LONG).show()
+                        } else {
+                            try {
+                                a.requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 0)
+                            } catch (_: java.lang.Exception) {}
+                        }
+                        Util.sendMessage(out, ConnectionHandler.gson.toJson(-1))
+                        return true
+                    }
+                }
                 val id = m.params?.get("id")?.asInt ?: Util.generateIndex(rand, notifications)
                 val ongoing = m.params?.get("ongoing")?.asBoolean ?: false
                 val layout = remoteviews[m.params?.get("layout")?.asInt]

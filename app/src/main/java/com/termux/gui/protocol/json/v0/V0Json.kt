@@ -50,7 +50,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
                 val m = ConnectionHandler.gson.fromJson(msg, ConnectionHandler.Message::class.java)
                 //println(m?.method)
                 if (m?.method != null) {
-                    if (HandleRemote.handleRemoteMessage(m, remoteviews, rand, out, app, notifications)) continue
+                    if (HandleRemote.handleRemoteMessage(m, remoteviews, rand, out, app, notifications, activities)) continue
                     if (handleActivityTaskMessage(m, activities, tasks, overlays, app, wm, out)) continue
                     if (handleView(m, activities, overlays, rand, out, app, eventQueue)) continue
                     if (HandleBuffer.handleBuffer(m, activities, overlays, rand, out, buffers, main)) continue
