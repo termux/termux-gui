@@ -1220,7 +1220,8 @@ message AllowJavascriptRequest {
 }
 
 message AllowJavascriptResponse {
-  bool allowed = 1;
+  bool success = 1;
+  bool allowed = 2;
 }
 
 

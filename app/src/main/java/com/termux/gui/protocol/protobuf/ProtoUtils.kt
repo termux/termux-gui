@@ -20,13 +20,11 @@ import com.termux.gui.GUIActivity
 import com.termux.gui.Util
 import com.termux.gui.protocol.protobuf.v0.GUIProt0
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.Create
-import com.termux.gui.protocol.protobuf.v0.V0Proto
 import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.DataOutputStream
 import java.io.FileDescriptor
 import java.io.OutputStream
-import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.math.roundToInt
@@ -299,7 +297,6 @@ class ProtoUtils {
         }
         
         class ViewCreator(
-            val v: V0Proto,
             val main: OutputStream,
             val activities: MutableMap<Int, DataClasses.ActivityState>,
             val overlays: MutableMap<Int, DataClasses.Overlay>,
@@ -339,7 +336,6 @@ class ProtoUtils {
         }
 
         class ViewHandler(
-            val v: V0Proto,
             val main: OutputStream,
             val activities: MutableMap<Int, DataClasses.ActivityState>,
             val overlays: MutableMap<Int, DataClasses.Overlay>

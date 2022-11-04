@@ -1,22 +1,28 @@
 package com.termux.gui.protocol.protobuf.v0
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.inputmethod.InputMethodManager
+import android.webkit.WebView
 import android.widget.*
 import androidx.core.view.setPadding
 import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
-import com.termux.gui.R
-import com.termux.gui.Util
+import com.termux.gui.*
 import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 import com.termux.gui.protocol.shared.v0.DataClasses
+import com.termux.gui.protocol.shared.v0.GUIWebViewClient
+import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.OutputStream
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -26,7 +32,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                  val buffers: MutableMap<Int, DataClasses.SharedBuffer>
 ) {
     
-    private val handler = ProtoUtils.Companion.ViewHandler(v, main, activities, overlays)
+    private val handler = ProtoUtils.Companion.ViewHandler(main, activities, overlays)
     
 
     fun showCursor(m: ShowCursorRequest) {
@@ -502,6 +508,123 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
             it.success = false
         })
     }
+
+
+    @SuppressLint("SetJavaScriptEnabled")
+    fun allowJS(m: AllowJavascriptRequest) {
+        handler.handleView(m.v, AllowJavascriptResponse.newBuilder(), { ret, v: WebView, c, _ ->
+            if (m.allow) {
+                if (! Settings.instance.javascript) {
+                    val data = Thread.currentThread().id.toString()
+                    val r = GUIWebViewJavascriptDialog.Companion.Request()
+                    GUIWebViewJavascriptDialog.requestMap[data] = r
+                    val i = Intent(c, GUIWebViewJavascriptDialog::class.java)
+                    i.data = Uri.parse(data)
+                    c.startActivity(i)
+                    synchronized(r.monitor) {
+                        while (r.allow == null)
+                            r.monitor.wait()
+                    }
+                    GUIWebViewJavascriptDialog.requestMap.remove(data)
+                    if (r.allow == true) {
+                        v.settings.javaScriptEnabled = true
+                        ret.allowed = true
+                        ret.success = true
+                    } else {
+                        ret.allowed = false
+                        ret.success = true
+                    }
+                } else {
+                    v.settings.javaScriptEnabled = true
+                    ret.allowed = true
+                    ret.success = true
+                }
+            } else {
+                v.settings.javaScriptEnabled = false
+                ret.allowed = false
+                ret.success = true
+            }
+        }, {
+            it.success = false
+        })
+    }
+    
+    fun allowContent(m: AllowContentURIRequest) {
+        handler.handleView(m.v, AllowContentURIResponse.newBuilder(), { ret, v: WebView, _, _ ->
+            v.settings.allowContentAccess = m.allow
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun setData(m: SetDataRequest) {
+        handler.handleView(m.v, SetDataResponse.newBuilder(), { ret, v: WebView, _, _ ->
+            val encoding = if (m.base64) "base64" else null
+            v.loadData(m.data, m.mime, encoding)
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun loadURI(m: LoadURIRequest) {
+        handler.handleView(m.v, LoadURIResponse.newBuilder(), { ret, v: WebView, _, _ ->
+            v.loadUrl(m.uri)
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    @SuppressLint("WebViewApiAvailability")
+    fun allowNavigation(m: AllowNavigationRequest) {
+        handler.handleView(m.v, AllowNavigationResponse.newBuilder(), { ret, v: WebView, _, _ ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                (v.webViewClient as GUIWebViewClient).allowNavigation = m.allow
+                ret.success = true
+            } else {
+                ret.success = false
+            }
+        }, {
+            it.success = false
+        })
+    }
+
+    fun goBack(m: GoBackRequest) {
+        handler.handleView(m.v, GoBackResponse.newBuilder(), { ret, v: WebView, _, _ ->
+            v.goBack()
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun goForward(m: GoForwardRequest) {
+        handler.handleView(m.v, GoForwardResponse.newBuilder(), { ret, v: WebView, _, _ ->
+            v.goForward()
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
+    fun evaluateJS(m: EvaluateJSRequest) {
+        handler.handleView(m.v, EvaluateJSResponse.newBuilder(), { ret, v: WebView, _, _ ->
+            if (v.settings.javaScriptEnabled) {
+                v.evaluateJavascript(m.code, null)
+                ret.success = true
+            } else {
+                ret.success = false
+            }
+        }, {
+            it.success = false
+        })
+    }
+    
+    
+    
+    
     
     
     

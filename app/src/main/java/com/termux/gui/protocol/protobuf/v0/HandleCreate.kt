@@ -1,11 +1,7 @@
 package com.termux.gui.protocol.protobuf.v0
 
-import android.content.Context
 import android.os.Build
 import android.text.method.LinkMovementMethod
-import android.util.Log
-import android.view.View
-import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.webkit.ConsoleMessage
 import android.webkit.WebView
@@ -14,11 +10,6 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
-import com.google.protobuf.MessageLite
-import com.termux.gui.App
-import com.termux.gui.ConnectionHandler
-import com.termux.gui.Util
-import com.termux.gui.protocol.json.v0.Create
 import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 import com.termux.gui.protocol.shared.v0.*
@@ -26,16 +17,13 @@ import com.termux.gui.views.HorizontalProgressBar
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
 import java.io.OutputStream
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: MutableMap<Int, DataClasses.ActivityState>,
-                   val wm: WindowManager, val overlays: MutableMap<Int, DataClasses.Overlay>, val rand: Random,
-                   val eventQueue: LinkedBlockingQueue<Event>) {
+                   val overlays: MutableMap<Int, DataClasses.Overlay>, val rand: Random, val eventQueue: LinkedBlockingQueue<Event>) {
     
     private val create: ProtoUtils.Companion.ViewCreator = ProtoUtils.Companion.ViewCreator(
-        v,
         main,
         activities,
         overlays,
