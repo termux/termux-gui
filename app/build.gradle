@@ -20,11 +20,11 @@ protobuf {
 }
 
 android {
-    compileSdk 31
+    compileSdk 33
     defaultConfig {
         applicationId "com.termux.gui"
         minSdk 24
-        targetSdk 31
+        targetSdk 33
         versionCode 7
         versionName "0.1.6"
         externalNativeBuild {
@@ -81,6 +81,7 @@ android {
         }
     }
     ndkVersion '23.1.7779620'
+    namespace 'com.termux.gui'
 }
 
 dependencies {
