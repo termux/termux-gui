@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: ./gradlew assembleDebugMinify
     - name: Upload APK
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: termux-gui-debug.apk
         path: ./app/build/outputs/apk/debugMinify/app-debugMinify.apk
