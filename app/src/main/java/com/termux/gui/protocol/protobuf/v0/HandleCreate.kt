@@ -226,32 +226,32 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
             val l = object: WebEventListener {
                 override fun onNavigation(url: String) {
                     eventQueue.offer(Event.newBuilder().setWebNavigation(WebViewNavigationEvent.newBuilder().setUrl(url).
-                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                    setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
                 }
 
                 override fun onHTTPError(url: String, code: Int) {
                     eventQueue.offer(Event.newBuilder().setWebHTTPError(WebViewHTTPErrorEvent.newBuilder().setUrl(url).setCode(code).
-                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                    setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
                 }
 
                 override fun onReceivedError(url: String, description: String, code: Int) {
                     eventQueue.offer(Event.newBuilder().setWebError(WebViewErrorEvent.newBuilder().setUrl(url).
-                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                    setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
                 }
 
                 override fun onRenderProcessGone(v: WebView) {
                     eventQueue.offer(Event.newBuilder().setWebDestroyed(WebViewDestroyedEvent.newBuilder().
-                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                    setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
                 }
 
                 override fun onProgressChanged(progress: Int) {
                     eventQueue.offer(Event.newBuilder().setWebProgress(WebViewProgressEvent.newBuilder().setProgress(progress).
-                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                    setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
                 }
 
                 override fun onConsoleMessage(msg: ConsoleMessage) {
                     eventQueue.offer(Event.newBuilder().setWebConsoleMessage(WebViewConsoleMessageEvent.newBuilder().setMessage(msg.message()).
-                    setV(GUIProt0.View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
+                    setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
                 }
             }
 

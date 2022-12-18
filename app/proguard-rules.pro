@@ -33,6 +33,8 @@
 
 -keep class com.termux.gui.** { *; }
 
+-keep class com.termux.gui.protocol.protobuf.v0.GUIProt0 { *; }
+
 # for protocol buffers
 -keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
 

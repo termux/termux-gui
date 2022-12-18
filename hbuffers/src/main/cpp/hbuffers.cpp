@@ -3,12 +3,15 @@
 #include <android/log.h>
 #include <android/hardware_buffer.h>
 #include <android/hardware_buffer_jni.h>
-
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
+#include <sys/socket.h>
 
 
 thread_local EGLDisplay d = EGL_NO_DISPLAY;

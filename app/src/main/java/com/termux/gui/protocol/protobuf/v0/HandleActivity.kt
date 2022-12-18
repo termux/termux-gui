@@ -57,7 +57,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                 ret.aid = v.generateOverlay()
                 ret.tid = -1
             } else {
-                val a = v.newActivity(m.tid, pip, dialog, lockscreen, canceloutside, m.interceptBackButton)
+                val a = v.newActivity(if (m.tid == -1) null else m.tid, pip, dialog, lockscreen, canceloutside, m.interceptBackButton)
                 val aid = a?.aid
                 if (a != null && aid != null) {
                     ret.aid = aid

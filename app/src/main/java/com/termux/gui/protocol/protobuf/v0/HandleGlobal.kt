@@ -54,7 +54,9 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
     fun toast(m: ToastRequest) {
         val ret = ToastResponse.newBuilder()
         try {
-            Toast.makeText(App.APP!!.applicationContext, m.text, if (m.long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+            Util.runOnUIThreadBlocking {
+                Toast.makeText(App.APP!!.applicationContext, m.text, if (m.long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+            }
             ret.success = true
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)

@@ -146,6 +146,9 @@ message ViewSize {
 // Activity, Task and global methods
 
 message NewActivityRequest {
+  /*
+  Use -1 to start in a new Task stack.
+   */
   int32 tid = 1;
   /*
   The Activity type isn't determined by a set of booleans like for JSON, but using an enum.
@@ -1784,9 +1787,10 @@ message KeyEvent {
     MOD_ALT_GR = 128;
     MOD_NUM_LOCK = 256;
   }
-  uint32 code = 1; // may eventually return xkb keycodes here, but unused for now
-  uint32 modifiers = 2; // Bits are according to the Modifier enum
-  uint32 codePoint = 3; // The unicode code point of the character
+  View v = 1;
+  uint32 code = 2; // may eventually return xkb keycodes here, but unused for now
+  uint32 modifiers = 3; // Bits are according to the Modifier enum
+  uint32 codePoint = 4; // The unicode code point of the character
 }
 
 

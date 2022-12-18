@@ -15,6 +15,7 @@ import android.view.ScaleGestureDetector
 import android.view.WindowManager
 import android.widget.Toast
 import com.termux.gui.GUIActivity
+import com.termux.gui.Logger
 import com.termux.gui.R
 import com.termux.gui.Util
 import com.termux.gui.protocol.shared.v0.DataClasses
@@ -42,6 +43,10 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
             val handleNotification = HandleNotification(out, remoteviews, rand, app, notifications, activities)
             while (! Thread.currentThread().isInterrupted) {
                 val m = Method.parseDelimitedFrom(input)
+                if (m == null) {
+                    Logger.log(0, "proto", "Connection terminated")
+                    break
+                }
                 when (m.methodCase) {
                     Method.MethodCase.NEWACTIVITY -> handleActivity.newActivity(m.newActivity)
                     Method.MethodCase.FINISHACTIVITY -> handleActivity.finishActivity(m.finishActivity)

@@ -315,15 +315,16 @@ class ProtoUtils {
             val rand: Random
         ) {
             inline fun <reified T : View> createView(m: Any, crossinline init: (T) -> Unit) {
-                val retClass = Class.forName(m.javaClass.canonicalName!!.replace("Request", "Response"))
                 val create = m.javaClass.getMethod("getData").invoke(m) as Create
-                val ret = retClass.getMethod("newBuilder").invoke(null)
+                val retClassName = m.javaClass.name.replace("Request", "Response")
+                val setId = Class.forName("$retClassName\$Builder").getMethod("setId", Int::class.java)
+                val ret: Any? = Class.forName(retClassName).getMethod("newBuilder").invoke(null)
                 try {
                     val o = overlays[create.aid]
                     if (o != null) {
                         val v = createViewOverlay(o.usedIds, rand, create, init)
-                        V0Shared.setViewOverlay(o, v, create.parent)
-                        retClass.getMethod("setId", Int::class.java).invoke(ret, v.id)
+                        V0Shared.setViewOverlay(o, v, if (create.parent < 0) null else create.parent)
+                        setId.invoke(ret, v.id)
                     } else {
                         if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[create.aid]) {
                                 val v = createViewActivity<T>(it, rand, create) { view ->
@@ -334,14 +335,14 @@ class ProtoUtils {
                                         }
                                     }
                                     init(view)
-                                    Util.setViewActivity(it, view, create.parent)
+                                    Util.setViewActivity(it, view, if (create.parent < 0) null else create.parent)
                                 }
-                                retClass.getMethod("setId", Int::class.java).invoke(ret, v.id)
-                            }) retClass.getMethod("setId", Int::class.java).invoke(ret, -1)
+                                setId.invoke(ret, v.id)
+                            }) setId.invoke(ret, -1)
                     }
                 } catch (e: Exception) {
                     Log.d(this.javaClass.name, "Exception: ", e)
-                    retClass.getMethod("setId", Int::class.java).invoke(ret, -1)
+                    setId.invoke(ret, -1)
                 }
                 write(ret as MessageLite.Builder, main)
             }
