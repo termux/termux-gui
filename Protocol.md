@@ -654,7 +654,7 @@ Events are a JSON object with the field "type" denoting the event type and the f
 
 ## Binary Protocol
 
-The binary protocol is/will be implemented with protocol buffers.  
+The binary protocol is be implemented with protocol buffers.  
 See app/src/proto for the definitions and documentation.  
 The general flow after establishing a connection is this:
 - The client sends a Method message with the *Request in the oneof set for the method it would like to call.
