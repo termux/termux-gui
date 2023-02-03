@@ -112,6 +112,7 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
                     if (event.isCapsLockOn) mod = mod or KeyEvent.Modifier.MOD_CAPS_LOCK_VALUE
                     if (event.isNumLockOn) mod = mod or KeyEvent.Modifier.MOD_NUM_LOCK_VALUE
                     b.modifiers = mod
+                    b.code = event.keyCode
                     eventQueue.offer(Event.newBuilder().setKeyEvent(b).build())
                     true
                 }

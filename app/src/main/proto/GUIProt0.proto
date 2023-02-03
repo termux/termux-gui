@@ -1788,7 +1788,7 @@ message KeyEvent {
     MOD_NUM_LOCK = 256;
   }
   View v = 1;
-  uint32 code = 2; // may eventually return xkb keycodes here, but unused for now
+  uint32 code = 2; // The Android keycode, refer to https://developer.android.com/reference/android/view/KeyEvent for the values.
   uint32 modifiers = 3; // Bits are according to the Modifier enum
   uint32 codePoint = 4; // The unicode code point of the character
 }
