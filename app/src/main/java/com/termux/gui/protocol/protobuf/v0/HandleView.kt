@@ -97,8 +97,8 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
 
     fun location(m: SetViewLocationRequest) {
         handler.handleView(m.v, SetViewLocationResponse.newBuilder(), { ret, v: android.view.View, c ->
-            v.x = ProtoUtils.unitToPX(m.unit, m.x.toFloat(), c.resources.displayMetrics)
-            v.y = ProtoUtils.unitToPX(m.unit, m.y.toFloat(), c.resources.displayMetrics)
+            v.x = ProtoUtils.unitToPX(m.unit, m.x, c.resources.displayMetrics)
+            v.y = ProtoUtils.unitToPX(m.unit, m.y, c.resources.displayMetrics)
             if (m.top) {
                 v.bringToFront()
             }

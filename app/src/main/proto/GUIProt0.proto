@@ -685,8 +685,8 @@ message SetViewLocationRequest {
   View v = 1;
   // The unit for x and y
   Size.Unit unit = 2;
-  int32 x = 3;
-  int32 y = 4;
+  float x = 3;
+  float y = 4;
   bool top = 5;
 }
 
