@@ -29,6 +29,7 @@ class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val m
             val h = m.height
             if (w <= 0 || h <= 0) {
                 out.writeInt(-1)
+                out.flush()
                 return
             }
             when (f) {
