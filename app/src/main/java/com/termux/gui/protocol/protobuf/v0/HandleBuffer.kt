@@ -49,12 +49,13 @@ class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val m
                                 SharedMemory.unmap(b.buff)
                                 b.btm.recycle()
                                 out.writeInt(-1)
+                                out.flush()
                                 return
                             }
                             val fdesc = FileDescriptor()
                             val setInt = FileDescriptor::class.java.getDeclaredMethod("setInt$", Int::class.java)
                             setInt(fdesc, fdint)
-                            out.writeInt(1)
+                            out.writeInt(bid)
                             ProtoUtils.sendBufferFD(out, sock, fdesc)
                             buffers[bid] = b
                         } catch (e: Exception) {
@@ -67,6 +68,7 @@ class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val m
                                 println("reflection exception")
                                 e.printStackTrace()
                                 out.writeInt(-1)
+                                out.flush()
                                 return
                             } else {
                                 throw e
@@ -78,6 +80,7 @@ class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val m
                         if (fdint == -1) {
                             println("could not create ashmem with NDK")
                             out.writeInt(-1)
+                            out.flush()
                             return
                         }
                         val buff: ByteBuffer? = ConnectionHandler.map_ashmem(fdint, w * h * 4)
@@ -85,13 +88,14 @@ class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val m
                             println("could not map ashmem with NDK")
                             ConnectionHandler.destroy_ashmem(fdint)
                             out.writeInt(-1)
+                            out.flush()
                             return
                         }
                         try {
                             val fdesc = FileDescriptor()
                             val setInt = FileDescriptor::class.java.getDeclaredMethod("setInt$", Int::class.java)
                             setInt(fdesc, fdint)
-                            out.writeInt(1)
+                            out.writeInt(bid)
                             ProtoUtils.sendBufferFD(out, sock, fdesc)
                             buffers[bid] = DataClasses.SharedBuffer(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888), null, buff, fdint)
                         } catch (e: Exception) {
@@ -102,6 +106,7 @@ class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val m
                                 println("reflection exception")
                                 e.printStackTrace()
                                 out.writeInt(-1)
+                                out.flush()
                                 return
                             } else {
                                 throw e
@@ -111,12 +116,14 @@ class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val m
                 }
                 AddBufferRequest.Format.UNRECOGNIZED -> {
                     out.writeInt(-1)
+                    out.flush()
                     return
                 }
             }
         } catch (e: java.lang.Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             out.writeInt(-1)
+            out.flush()
         }
     }
     

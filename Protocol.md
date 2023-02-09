@@ -662,7 +662,8 @@ The general flow after establishing a connection is this:
 
 The only exception to this is the addBuffer method:  
 Instead of a response message the plugin sends a 32 bit big-endian signed integer and after that one byte with a file descriptor as ancillary data.
-If the integer is negative, a buffer could not be created and there will be no byte with a file descriptor.
+If the integer is negative, a buffer could not be created and there will be no byte with a file descriptor.  
+The integer is the id for the buffer.
 
 
 The events are a stream of Event messages with the actual Event inside the event oneof.

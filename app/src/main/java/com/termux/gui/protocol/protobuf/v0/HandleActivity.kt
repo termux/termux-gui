@@ -49,7 +49,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                 NewActivityRequest.ActivityType.lockscreen -> lockscreen = true
                 NewActivityRequest.ActivityType.overlay -> overlay = true
                 NewActivityRequest.ActivityType.UNRECOGNIZED -> {
-                    ret.setAid(-1).setTid(-1).build().writeDelimitedTo(main)
+                    ProtoUtils.write(ret.setAid(-1).setTid(-1).build(), main)
                     return
                 }
             }

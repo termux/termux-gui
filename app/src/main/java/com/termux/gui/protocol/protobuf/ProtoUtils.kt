@@ -35,7 +35,7 @@ class ProtoUtils {
                                                overlays: Map<String, DataClasses.Overlay>, aid: String, ifActivity: (a: GUIActivity) -> T,
                                                ifOverlay: (o: DataClasses.Overlay) -> T, ifFail: () -> T) {
             val s = activities[aid]
-            if (s != null) {
+            write(if (s != null) {
                 val a = s.a
                 if (a != null) {
                     ifActivity(a)
@@ -49,7 +49,7 @@ class ProtoUtils {
                 } else {
                     ifFail()
                 }
-            }.writeDelimitedTo(main)
+            }, main)
         }
         
         fun <T : MessageLite.Builder> write(builder: T, out: OutputStream) {
@@ -58,6 +58,7 @@ class ProtoUtils {
 
         fun <T : MessageLite> write(m: T, out: OutputStream) {
             m.writeDelimitedTo(out)
+            out.flush()
         }
 
         fun sendBufferFD(w: DataOutputStream, s: LocalSocket, fd: FileDescriptor) {
