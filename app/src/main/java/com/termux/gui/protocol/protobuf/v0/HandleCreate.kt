@@ -263,8 +263,10 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
             it.webChromeClient = GUIWebChromeClient(l)
         }
     }
-    
-    
+
+    fun grid(m: CreateGridLayoutRequest) {
+        create.createView<GridLayout>(m) {}
+    }
     
     
 }

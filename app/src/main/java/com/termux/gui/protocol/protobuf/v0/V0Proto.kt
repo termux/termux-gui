@@ -90,6 +90,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.CREATEPROGRESSBAR -> handleCreate.progressBar(m.createProgressBar)
                     Method.MethodCase.CREATETABLAYOUT -> handleCreate.tab(m.createTabLayout)
                     Method.MethodCase.CREATEWEBVIEW -> handleCreate.webView(m.createWebView)
+                    Method.MethodCase.CREATEGRIDLAYOUT -> handleCreate.grid(m.createGridLayout)
                     
                     Method.MethodCase.SHOWCURSOR -> handleView.showCursor(m.showCursor)
                     Method.MethodCase.SETLINEARLAYOUT -> handleView.linearParams(m.setLinearLayout)
