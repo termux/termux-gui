@@ -19,6 +19,27 @@
         <path
             android:pathData="M13,18H22V20H13V18Z"
             android:fillColor="#ffffff"/>
-
+        <group>
+            <path
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2"
+                android:pathData="M13,5
+                          h8
+                          v8
+                          h-8
+                          v-9
+                          "
+                />
+            <path
+                android:fillColor="#FF0000"
+                android:pathData="M20,4
+                          h2
+                          v2
+                          h-2
+                          v-2
+                          "
+                />
+        </group>
     </group>
+    
 </vector>

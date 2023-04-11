@@ -22,4 +22,25 @@
                           h-18
                           "
         />
+    <group>
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4"
+            android:pathData="M56,40
+                          h18
+                          v18
+                          h-18
+                          v-20
+                          "
+            />
+        <path
+            android:fillColor="#FF0000"
+            android:pathData="M72,38
+                          h4
+                          v4
+                          h-4
+                          v-6
+                          "
+            />
+    </group>
 </vector>
