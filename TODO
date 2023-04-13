@@ -23,9 +23,6 @@ Roadmap:
     [x] set secure flag for Activity
         [x] json tested
         [x] protobuf tested
-    [/] add more logging
-        [x] implement methods
-        [ ] let methods log stuff
     [ ] make the C/C++ library
         [ ] test it
         [ ] write a tutorial
@@ -42,21 +39,22 @@ Roadmap:
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] use dlopen("libandroid.so") for that in C/C++
+            [ ] secure flag
         [ ] add error codes to protobuf
             [ ] error code for when the Activity is stopped
+        [/] add more logging
+            [x] implement methods
+            [ ] let methods log stuff
         [ ] RelativeLayout
         [ ] ConstraintLayout
         [ ] scroll events
         [ ] Dialogs in DialogFragments, so they stay in the Activity they're started in and don't close on leaving
         [ ] add the ability to intercept touch events in layouts
         [ ] fullscreen mode for Activities (hiding the 3 buttons and the notification bar)
-        [ ] Option to add the secure window flag to prevent screenshots
         [ ] add option to intercept volume keys like Termux
         [ ] events for PiP action buttons
-        [ ] the rest of the views in the protocol
         [ ] make the readme nicer
         [ ] add Javadocs
-        [ ] .proto docs
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots

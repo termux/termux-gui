@@ -93,7 +93,24 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
                     }
                     b.setStyle(style)
                 }
-                CreateNotificationRequest.TypeCase.CUSTOM -> TODO()
+                CreateNotificationRequest.TypeCase.CUSTOM -> {
+                    b.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                    val layout = remoteviews[m.custom.layout]
+                    val layoutExpanded = remoteviews[m.custom.layoutExpanded]
+                    val layoutHUD = remoteviews[m.custom.layoutHUD]
+                    if (layout == null) {
+                        ret.id = -1
+                        ProtoUtils.write(ret, main)
+                        return
+                    }
+                    b.setCustomContentView(layout.root)
+                    if (layoutExpanded != null) {
+                        b.setCustomBigContentView(layoutExpanded.root)
+                    }
+                    if (layoutHUD != null) {
+                        b.setCustomHeadsUpContentView(layoutHUD.root)
+                    }
+                }
                 CreateNotificationRequest.TypeCase.TYPE_NOT_SET -> {
                     ret.id = -1
                     ProtoUtils.write(ret, main)
