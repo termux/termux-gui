@@ -272,6 +272,15 @@ class HandleActivityAndTask {
                     }
                     return true
                 }
+                "setSecure" -> {
+                    val aid = m.params?.get("aid")?.asInt
+                    val secure = m.params?.get("secure")?.asBoolean
+                    val a = activities[aid]
+                    if (a != null && secure != null) {
+                        a.a?.setSecure(secure)
+                    }
+                    return true
+                }
             }
             return false
         }

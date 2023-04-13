@@ -20,26 +20,30 @@ Roadmap:
         [x] request notification permission
     [x] ImageView that captures key events
     [x] Bash library
-    [ ] add error codes to protobuf
-        [ ] error code for when the Activity is stopped
+    [x] set secure flag for Activity
+        [x] json tested
+        [x] protobuf tested
+    [/] add more logging
+        [x] implement methods
+        [ ] let methods log stuff
     [ ] make the C/C++ library
         [ ] test it
         [ ] write a tutorial
         [ ] make some example app with it
     [ ] Put all known applications using Termux:GUI in the readme, I made quite a few by now
-    [ ] protobuf documentation
-        main markdown file with quick explanations and links to in-depth markdown file for each message type
+    [x] protobuf documentation
     [ ] update the f-droid metadata
         [ ] write a changelog
         [ ] more screenshots
         [ ] update description and readme
     - 1.0.0: !!! start semantic versioning from here !!!
         [ ] switch to the new plugin system, deprecate shared uid
-        [ ] add more logging
         [ ] button in settings to save a logcat dump to a file
         [ ] SurfaceView with EGL buffers for accelerated graphics
             [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
             [ ] use dlopen("libandroid.so") for that in C/C++
+        [ ] add error codes to protobuf
+            [ ] error code for when the Activity is stopped
         [ ] RelativeLayout
         [ ] ConstraintLayout
         [ ] scroll events
@@ -52,12 +56,18 @@ Roadmap:
         [ ] the rest of the views in the protocol
         [ ] make the readme nicer
         [ ] add Javadocs
+        [ ] .proto docs
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots
             [ ] update description and readme
     - 1.1.0
         [ ] add methods for android 12 widget api
+            [ ] settable margins and paddings
+            [ ] better dynamic RemoteViews
+            [ ] Stateful widgets
+            [ ] prepopulated collections views
+            [ ] material you theming
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots

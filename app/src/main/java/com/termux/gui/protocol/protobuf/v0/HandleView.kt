@@ -30,7 +30,8 @@ import java.util.concurrent.LinkedBlockingQueue
 class HandleView(val v: V0Proto, val main: OutputStream, val activities: MutableMap<Int, DataClasses.ActivityState>,
                  val overlays: MutableMap<Int, DataClasses.Overlay>,
                  val eventQueue: LinkedBlockingQueue<Event>,
-                 val buffers: MutableMap<Int, DataClasses.SharedBuffer>
+                 val buffers: MutableMap<Int, DataClasses.SharedBuffer>,
+                 val logger: V0Proto.ProtoLogger
 ) {
     
     private val handler = ProtoUtils.Companion.ViewHandler(main, activities, overlays)

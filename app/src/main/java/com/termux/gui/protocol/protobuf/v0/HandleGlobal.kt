@@ -14,7 +14,7 @@ import java.io.OutputStream
 import java.util.*
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 
-class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager.AppTask>) {
+class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager.AppTask>, val logger: V0Proto.ProtoLogger) {
     
     fun finishTask(m: FinishTaskRequest) {
         val ret = FinishTaskResponse.newBuilder()
@@ -104,6 +104,23 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
     fun version() {
         val ret = GetVersionResponse.newBuilder()
         ret.versionCode = BuildConfig.VERSION_CODE
+        ProtoUtils.write(ret, main)
+    }
+    
+    fun setLogLevel(m: SetLogLevelRequest) {
+        val ret = SetLogLevelResponse.newBuilder()
+        if (m.level in 0..10) {
+            logger.level = m.level
+            ret.success = true
+        } else {
+            ret.success = false
+        }
+        ProtoUtils.write(ret, main)
+    }
+
+    fun getLog(m: GetLogRequest) {
+        val ret = GetLogResponse.newBuilder()
+        ret.log = logger.getLog(m.clear)
         ProtoUtils.write(ret, main)
     }
     

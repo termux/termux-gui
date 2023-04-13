@@ -16,7 +16,8 @@ import com.termux.gui.protocol.shared.v0.V0Shared
 import java.io.OutputStream
 import java.util.*
 
-class HandleRemote(val main: OutputStream, val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>, val rand: Random, val app: Context) {
+class HandleRemote(val main: OutputStream, val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>,
+                   val rand: Random, val app: Context, val logger: V0Proto.ProtoLogger) {
     
     private val handler = ProtoUtils.Companion.RemoteHandler(main, remoteviews)
     

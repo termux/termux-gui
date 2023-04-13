@@ -18,7 +18,8 @@ import java.nio.ByteBuffer
 import java.util.Random
 
 
-class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val main: OutputStream, val rand: Random, val sock: LocalSocket) {
+class HandleBuffer(val buffers: MutableMap<Int, DataClasses.SharedBuffer>, val main: OutputStream, val rand: Random,
+                   val sock: LocalSocket, val logger: V0Proto.ProtoLogger) {
     
     fun addBuffer(m: AddBufferRequest) {
         main.flush()

@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonElement
@@ -46,7 +47,7 @@ open class GUIActivity : AppCompatActivity() {
             }
         }
     
-    data class ActivityData(var autopip: Boolean = false, var backEvent: Boolean = false) : Serializable
+    data class ActivityData(var autopip: Boolean = false, var backEvent: Boolean = false, var secure: Boolean = false) : Serializable
     var data = ActivityData()
     
     data class GUITheme(val statusBarColor: Int, val colorPrimary: Int, var windowBackground: Int, val textColor: Int, val colorAccent: Int) : Serializable
@@ -72,8 +73,18 @@ open class GUIActivity : AppCompatActivity() {
             val d = savedInstanceState.getSerializable(DATA_KEY) as? ActivityData
             if (d != null) {
                 data = d
+                setSecure(data.secure)
             }
         }
+    }
+    
+    fun setSecure(secure: Boolean) {
+        data.secure = secure
+        var bit = 0
+        if (secure) {
+            bit = WindowManager.LayoutParams.FLAG_SECURE
+        }
+        window.setFlags(bit, WindowManager.LayoutParams.FLAG_SECURE)
     }
     
     val aid: Int? get() {return intent.dataString?.split('-')?.get(1)?.toInt()}

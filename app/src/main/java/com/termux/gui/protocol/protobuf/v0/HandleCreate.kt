@@ -22,7 +22,8 @@ import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: MutableMap<Int, DataClasses.ActivityState>,
-                   val overlays: MutableMap<Int, DataClasses.Overlay>, val rand: Random, val eventQueue: LinkedBlockingQueue<Event>) {
+                   val overlays: MutableMap<Int, DataClasses.Overlay>, val rand: Random,
+                   val eventQueue: LinkedBlockingQueue<Event>, val logger: V0Proto.ProtoLogger) {
     
     private val create: ProtoUtils.Companion.ViewCreator = ProtoUtils.Companion.ViewCreator(
         main,

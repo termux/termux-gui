@@ -25,7 +25,7 @@ import java.lang.Exception
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 
 class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: MutableMap<Int, DataClasses.ActivityState>,
-                     val wm: WindowManager, val overlays: MutableMap<Int, DataClasses.Overlay>) {
+                     val wm: WindowManager, val overlays: MutableMap<Int, DataClasses.Overlay>, val logger: V0Proto.ProtoLogger) {
     
     
     
@@ -295,6 +295,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                     p.x = m.x
                     p.y = m.y
                     wm.updateViewLayout(o.root, p)
+                    ret.success = true
                 }
             }
         } catch (e: Exception) {
@@ -387,6 +388,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
         try {
             if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
                     it.data.backEvent = m.intercept
+                    ret.success = true
                 }) ret.success = false
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
@@ -394,6 +396,20 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
         }
         ProtoUtils.write(ret, main)
     }
-    
-    
+
+    fun setSecure(m: SetSecureFlagRequest) {
+        val ret = SetSecureFlagResponse.newBuilder()
+        try {
+            if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
+                    it.setSecure(m.secure)
+                    ret.success = true
+                }) ret.success = false
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+        }
+        ProtoUtils.write(ret, main)
+    }
+
+
 }

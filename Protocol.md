@@ -134,12 +134,15 @@ These methods control Android [Activities](https://developer.android.com/referen
 - hideSoftKeyboard: Forces to soft keyboard to hide.
   - Parameters:
     - aid: The Activity id of the Activity that wants to hide the soft keyboard.
-- interceptBackButton: 
+- interceptBackButton: Sets whether the back button closes the activity or is intercepted and send as an event instead.
   - Parameters:
     - aid: The Activity id of the Activity that wants intercept back button presses.
     - intercept: A boolean, whether to intercept back button presses and send an event or to use the default action of finishing the Activity.
 - getVersion: Gets the version code of the plugin app. Can be used for feature detection or to prompt the user to update.
-
+- setSecure: Sets the [FLAG_SECURE](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#FLAG_SECURE) of the Activity.
+  - Parameters:
+    - aid: The Activity id of the Activity.
+    - secure: A boolean, whether FLAG_SECURE should be set or not.
 
 Layout and View control:  
 These methods create and Manipulate [Views](https://developer.android.com/reference/android/view/View), [Layouts](https://developer.android.com/guide/topics/ui/declaring-layout) and the Layout hierarchy.  

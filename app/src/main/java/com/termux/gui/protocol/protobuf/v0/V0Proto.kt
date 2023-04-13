@@ -26,7 +26,25 @@ import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 
 class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) : V0Shared(app) {
     
-
+    class ProtoLogger(var level: Int = 0) {
+        private val log: LinkedBlockingQueue<String> = LinkedBlockingQueue(10000)
+        fun log(level: Int, tag: String, msg: String) {
+            if (level <= this.level) {
+                log.offer("$tag: $msg")
+            }
+            Logger.log(level, tag, msg)
+        }
+        
+        fun getLog(clear: Boolean): String {
+            val text = log.fold("") { acc, curr ->
+                "$acc\n$curr"
+            }
+            if (clear) {
+                log.clear()
+            }
+            return text
+        }
+    }
 
     fun handleConnection(main: LocalSocket) {
         val am = app.getSystemService(ActivityManager::class.java)
@@ -34,17 +52,18 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
         withSystemListenersAndCleanup(am, wm) {
             val input = main.inputStream
             val out = main.outputStream
-            val handleActivity = HandleActivity(this, out, activities, wm, overlays)
-            val handleGlobal = HandleGlobal(out,  tasks)
-            val handleCreate = HandleCreate(this, out, activities, overlays, rand, eventQueue)
-            val handleView = HandleView(this, out, activities, overlays, eventQueue, buffers)
-            val handleBuffer = HandleBuffer(buffers, out, rand, main)
-            val handleRemote = HandleRemote(out, remoteviews, rand, app)
-            val handleNotification = HandleNotification(out, remoteviews, rand, app, notifications, activities)
+            val logger = ProtoLogger()
+            val handleActivity = HandleActivity(this, out, activities, wm, overlays, logger)
+            val handleGlobal = HandleGlobal(out,  tasks, logger)
+            val handleCreate = HandleCreate(this, out, activities, overlays, rand, eventQueue, logger)
+            val handleView = HandleView(this, out, activities, overlays, eventQueue, buffers, logger)
+            val handleBuffer = HandleBuffer(buffers, out, rand, main, logger)
+            val handleRemote = HandleRemote(out, remoteviews, rand, app, logger)
+            val handleNotification = HandleNotification(out, remoteviews, rand, app, notifications, activities, logger)
             while (! Thread.currentThread().isInterrupted) {
                 val m = Method.parseDelimitedFrom(input)
                 if (m == null) {
-                    Logger.log(0, "proto", "Connection terminated")
+                    Logger.log(1, "proto", "Connection terminated")
                     break
                 }
                 when (m.methodCase) {
@@ -70,6 +89,9 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.HIDESOFTKEYBOARD -> handleActivity.hideSoftKeyboard(m.hideSoftKeyboard)
                     Method.MethodCase.INTERCEPTBACKBUTTON -> handleActivity.interceptBackButton(m.interceptBackButton)
                     Method.MethodCase.VERSION -> handleGlobal.version()
+                    Method.MethodCase.SETSECURE -> handleActivity.setSecure(m.setSecure)
+                    Method.MethodCase.SETLOGLEVEL -> handleGlobal.setLogLevel(m.setLogLevel)
+                    Method.MethodCase.GETLOG -> handleGlobal.getLog(m.getLog)
                     
                     Method.MethodCase.CREATELINEARLAYOUT -> handleCreate.linear(m.createLinearLayout)
                     Method.MethodCase.CREATEFRAMELAYOUT -> handleCreate.frame(m.createFrameLayout)

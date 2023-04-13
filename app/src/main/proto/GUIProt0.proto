@@ -18,7 +18,18 @@ option java_package = "com.termux.gui.protocol.protobuf.v0";
 /*
 Protocol
 
-For establishing the connection, see https://github.com/termux/termux-gui/blob/main/Protocol.md#connection .
+For establishing the connection, see https://github.com/termux/termux-gui/blob/main/Protocol.md#connection . Here is the relevant part:
+
+The program has to open 2 AF_UNIX SO_STREAM server sockets in the abstract linux namespace and listen to new connections.
+One of these Sockets is used as the main communication socket with the plugin, the other one is used to send asynchronous event data to the program, eg. click events.
+
+The program then has to send a broadcast to com.termux.gui/.GUIReceiver with the string extra mainSocket and the string extra eventSocket, the values of which specify the socket name used for that communication type. The names have to be transferred without the leading null byte required to specify the abstract linux namespace.
+Delivering the broadcast can be easily done with the am command:
+am broadcast --user 0 -n com.termux.gui/.GUIReceiver --es mainSocket mainSocketName --es eventSocket eventSocketName
+
+For additional security, the program should check if the connected peer has the same user id as the program itself, to ensure only the plugin can accept the connection.
+
+
 
 Each message is send delimited, that is the size of the message is send as a varint first.  
 All protocol buffer implementations should allow you to read the varint or a delimited message directly.
@@ -27,17 +38,15 @@ Events are send via the Event message, with the oneof sent to the actual event.
 Methods are called with the Method message, with the oneof set to the request you want to do.
 After a request, the corresponding response is send back.
 
-The methods provided are the same as for the JSON protocol, but may include additional functionality or differ slightly in parameters.
-Only the additional functions and changes are documented here.
-
-
-
  */
 
 
 
 // Types used by multiple messages
 
+/*
+Possible Activity orientation settings. See https://developer.android.com/reference/android/R.attr#screenOrientation for the meanings.
+ */
 enum Orientation {
   unspecified = 0;
   behind = 1;
@@ -57,37 +66,107 @@ enum Orientation {
   userPortrait = 15;
 }
 
+/*
+The configuration of an Activity.
+ */
 message Configuration {
+  /*
+  Is dark mode enabled?
+   */
   bool darkMode = 2;
+  /*
+  The current country code.
+   */
   string country = 3;
+  /*
+  The current language code.
+   */
   string language = 4;
-  Orientation orientation = 5; // Only valid values are landscape, portrait and unspecified
+  /*
+  The current screen orientation.
+  Only valid values are landscape, portrait and unspecified
+   */
+  Orientation orientation = 5;
+  /*
+  Is the software keyboard showing?
+   */
   bool keyboardHidden = 6;
+  /*
+  Screen width in pixels.
+   */
   int32 screenWidth = 7;
+  /*
+  Screen height in pixels.
+   */
   int32 screenHeight = 8;
+  /*
+  The font scale, such that sp = fontscale * px
+   */
   float fontscale = 9;
+  /*
+  The density of the display.
+   */
   float density = 10;
 }
 
+/*
+Visibility states for Views.
+ */
 enum Visibility {
+    /*
+    The View is visible.
+     */
     visible = 0;
+    /*
+    The View is invisible, but takes up space in the layout.
+     */
     hidden = 1;
+    /*
+    The View is invisible and doesn't take up space in the layout.
+     */
     gone = 2;
 }
 
+/*
+Information necessary for the creation of View, encapsulated as a message type for simplicity.
+ */
 message Create {
+  /*
+  The Activity of the View.
+   */
   int32 aid = 1;
+  /*
+  The parent View id. Use -1 if you want to set the top level View.
+   */
   int32 parent = 2;
+  /*
+  The initial visibility.
+   */
   Visibility v = 3;
 }
 
 
+/*
+Information uniquely identifying a View.
+ */
 message View {
+  /*
+  The Activity of the View.
+   */
   int32 aid = 1;
+  /*
+  The id of the View in the Activity.
+   */
   int32 id = 2;
 }
 
+/*
+Directions for applying paddings and margins.
+ */
 enum Direction {
+  /*
+  Use all directions.
+   */
   ALL = 0;
   TOP = 1;
   LEFT = 2;
@@ -95,6 +174,9 @@ enum Direction {
   RIGHT = 4;
 }
 
+/*
+Importance values for notifications.
+ */
 enum Importance {
   DEFAULT = 0;
   MIN = 1;
@@ -104,9 +186,12 @@ enum Importance {
 }
 
 /*
-The protobuf implementation allows you to specify more size units.
+The protobuf implementation allows you to specify more size units, so it's encapsulated in a message type.
  */
 message Size {
+  /*
+  The value.
+   */
   float value = 1;
   // see https://developer.android.com/guide/topics/resources/more-resources.html#Dimension
   enum Unit {
@@ -117,24 +202,65 @@ message Size {
     in = 4; // inches
     pt = 5; // points
   }
+  /*
+  The unit of the value.
+   */
   Unit unit = 2;
 }
 
 
 /*
-Only used for setWidth and setHeight, to include the special constants MATCH_PARENT and WRAP_CONTENT
+A type for View sizing.
+Only used for setWidth and setHeight, to include the special constants MATCH_PARENT and WRAP_CONTENT.
  */
 message ViewSize {
+  /*
+  Special constants.
+   */
   enum Constant {
+    /*
+    Math the parent size.
+     */
     MATCH_PARENT = 0;
+    /*
+    Match the content size
+     */
     WRAP_CONTENT = 1;
   }
+  /*
+  The value is either a constant or a size value.
+   */
   oneof value {
     Size size = 1;
     Constant constant = 2;
   }
 }
 
+/*
+Error return codes as failure reasons for unsuccessful methods.
+0 means no error, negative numbers are non-fatal informational codes send along a successful method if needed, positive codes are fatal errors send with failed methods.
+ */
+enum Error {
+  /*
+  No error.
+   */
+  OK = 0;
+  /*
+  The Activity the method tried to act on has been stopped by the system.
+  Retry the method when you get a start event for the Activity.
+   */
+  ACTIVITY_STOPPED = 1;
+  /*
+  The Activity the method tried to act on has been destroyed.
+  The Activity will remain unavailable, and you have to launch a new one if you need another one.
+   */
+  ACTIVITY_DESTROYED = 2;
+  /*
+  An exception occurred while handling the method. Retrying the method or issuing other methods may or may not work, depending on the type of error.
+  If enabled, you will get the stack trace as a debug event.
+   */
+  INTERNAL_ERROR = 3;
+}
 
 
 
@@ -145,38 +271,76 @@ message ViewSize {
 
 // Activity, Task and global methods
 
+/*
+Create a new Activity.
+ */
 message NewActivityRequest {
   /*
   Use -1 to start in a new Task stack.
    */
   int32 tid = 1;
   /*
-  The Activity type isn't determined by a set of booleans like for JSON, but using an enum.
+  The type of Activity that you want to launch.
    */
   enum ActivityType {
+    /*
+    A normal Activity.
+     */
     normal = 0;
+    /*
+    Launch as a dialog. Is destroyed when the user navigates away or clicks outside.
+     */
     dialog = 1;
+    /*
+    Launch as a dialog. Is destroyed when the user navigates away.
+     */
     dialogCancelOutside = 2;
+    /*
+    Launch in PiP-mode.
+     */
     pip = 3;
+    /*
+    Display also on the lockscreen.
+    Make sure the Activity is secure, as the device doesn't need to be unlocked to interact with the Activity.
+     */
     lockscreen = 4;
+    /*
+    Display in an overlay over everything else like Termux:Float.
+     */
     overlay = 5;
   }
+  /*
+  The type you want to launch.
+   */
   ActivityType type = 2;
+  /*
+  Whether the back button is intercepted and send as an event instead of closing the Activity or not.
+   */
   bool interceptBackButton = 3;
 }
 
 /*
 A message with aid = -1 and tid = -1 indicates an error.
-Otherwise unlike for JSON, the tid is always returned.
 For overlays, the tid is invalid though.
  */
 message NewActivityResponse {
+  /*
+  The id of the new Activity.
+   */
   int32 aid = 1;
+  /*
+  The id of the Task of the Activity.
+   */
   int32 tid = 2;
 }
 
-
+/*
+Finish an Activity.
+ */
 message FinishActivityRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
 }
 
@@ -184,16 +348,27 @@ message FinishActivityResponse {
   bool success = 1;
 }
 
-
+/*
+Finish a Task, including all its Activities.
+ */
 message FinishTaskRequest {
+  /*
+  The id of the Task.
+   */
   int32 tid = 1;
 }
+
 message FinishTaskResponse {
   bool success = 1;
 }
 
-
+/*
+Bring a Task to the front, showing it to the user.
+ */
 message BringTaskToFrontRequest {
+  /*
+  The id of the Task.
+   */
   int32 tid = 1;
 }
 
@@ -201,8 +376,13 @@ message BringTaskToFrontResponse {
   bool success = 1;
 }
 
-
+/*
+Move a Task to the back, hiding it and returning the user to the homescreen.
+ */
 message MoveTaskToBackRequest {
+  /*
+  The id of an Activity in the Task.
+   */
   int32 aid = 1;
 }
 
@@ -210,13 +390,34 @@ message MoveTaskToBackResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the Activity theme.
+The text color is only applied to newly created Views, not retroactively.
+ */
 message SetThemeRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
+  /*
+  The status bar color.
+   */
   uint32 statusBarColor = 2;
+  /*
+  The primary color.
+   */
   uint32 colorPrimary = 3;
+  /*
+  The background color.
+   */
   uint32 windowBackground = 4;
+  /*
+  The text color.
+   */
   uint32 textColor = 5;
+  /*
+  The accent color.
+   */
   uint32 colorAccent = 6;
 }
 
@@ -226,12 +427,18 @@ message SetThemeResponse {
 
 
 message SetTaskDescriptionRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
   /*
   Images have to be a PNG or JPEG file in binary format (not base64 encoded like for JSON).
   If empty (length 0), resets the icon to the default.
    */
   bytes img = 2;
+  /*
+  The Activity label (seems unused in Android).
+   */
   string label = 3;
 }
 
@@ -239,10 +446,21 @@ message SetTaskDescriptionResponse {
   bool success = 1;
 }
 
-
+/*
+Configures the PiP-mode of the Activity.
+ */
 message SetPiPParamsRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
+  /*
+  The numerator of the aspect ratio.
+   */
   uint32 num = 2;
+  /*
+  The denominator of the aspect ratio.
+   */
   uint32 den = 3;
 }
 
@@ -250,13 +468,30 @@ message SetPiPParamsResponse {
   bool success = 1;
 }
 
-
+/*
+Configures how the Activity responds to the software keyboard.
+ */
 message SetInputModeRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
+  /*
+  How the Activity responds to the software keyboard.
+   */
   enum InputMode {
+    /*
+    Pan the Activity, hiding some content at the top to make room for the keyboard.
+     */
     pan = 0;
+    /*
+    Resize the Activity, shifting the Layout to make room for the keyboard.
+     */
     resize = 1;
   }
+  /*
+  The requested mode.
+   */
   InputMode mode = 2;
 }
 
@@ -264,9 +499,17 @@ message SetInputModeResponse {
   bool success = 1;
 }
 
-
+/*
+Enter or leave PiP-mode.
+ */
 message SetPiPModeRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
+  /*
+  Whether PiP-mode should be enabled.
+   */
   bool pip = 2;
 }
 
@@ -274,9 +517,17 @@ message SetPiPModeResponse {
   bool success = 1;
 }
 
-
+/*
+Set whether PiP-mode should be entered automatically when the user exits the Activity.
+ */
 message SetPiPModeAutoRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
+  /*
+  Whether PiP-mode should be entered automatically when the user exits the Activity.
+   */
   bool pip = 2;
 }
 
@@ -284,9 +535,17 @@ message SetPiPModeAutoResponse {
   bool success = 1;
 }
 
-
+/*
+Send a Toast.
+ */
 message ToastRequest {
+  /*
+  The text to display.
+   */
   string text = 1;
+  /*
+  Whether the text should be displayed for a loner or shorter time.
+   */
   bool long = 2;
 }
 
@@ -294,9 +553,17 @@ message ToastResponse {
   bool success = 1;
 }
 
-
+/*
+Requests to keep the screen on while the Activity is shown.
+ */
 message KeepScreenOnRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
+  /*
+  Whether to keep the screen on while the Activity is shown.
+   */
   bool on = 2;
 }
 
@@ -304,11 +571,16 @@ message KeepScreenOnResponse {
   bool success = 1;
 }
 
-
+/*
+Set the Orientation of the Activity.
+ */
 message SetOrientationRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
   /*
-  The orientation is determined with an enum instead of a string.
+  The orientation value.
    */
   Orientation orientation = 2;
 }
@@ -317,10 +589,21 @@ message SetOrientationResponse {
   bool success = 1;
 }
 
-
+/*
+Set the position of an overlay Activity.
+ */
 message SetPositionRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
+  /*
+  The x position in pixels from the left.
+   */
   uint32 x = 2;
+  /*
+  The y position in pixels from the top.
+   */
   uint32 y = 3;
 }
 
@@ -328,8 +611,13 @@ message SetPositionResponse {
   bool success = 1;
 }
 
-
+/*
+Get the current Activity configuration.
+ */
 message GetConfigurationRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
 }
 
@@ -338,7 +626,9 @@ message GetConfigurationResponse {
   Configuration configuration = 2;
 }
 
-
+/*
+Turn the screen on.
+ */
 message TurnScreenOnRequest {
   
 }
@@ -347,22 +637,44 @@ message TurnScreenOnResponse {
   bool success = 1;
 }
 
-
+/*
+Check whether the device is locked.
+ */
 message IsLockedRequest {
   
 }
 
 message IsLockedResponse {
+  /*
+  Possible lock states.
+   */
   enum Locked {
+    /*
+    Lock state unknown.
+     */
     UNKNOWN = 0;
+    /*
+    Device locked.
+     */
     LOCKED = 1;
+    /*
+    Device unlocked.
+     */
     UNLOCKED = 2;
   }
+  /*
+  Current lock state.
+   */
   Locked locked = 1;
 }
 
-
+/*
+Request an unlock. Will bring up the UI for the user to unlock the device.
+ */
 message RequestUnlockRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
 }
 
@@ -370,8 +682,13 @@ message RequestUnlockResponse {
   bool success = 1;
 }
 
-
+/*
+Hide the software keyboard.
+ */
 message HideSoftKeyboardRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
 }
 
@@ -379,7 +696,13 @@ message HideSoftKeyboardResponse {
   bool success = 1;
 }
 
+/*
+Sets whether the back button is intercepted. See NewActivityRequest.
+ */
 message InterceptBackButtonRequest {
+  /*
+  The id of the Activity.
+   */
   int32 aid = 1;
   bool intercept = 2;
 }
@@ -388,7 +711,9 @@ message InterceptBackButtonResponse {
   bool success = 1;
 }
 
-
+/*
+Get the plugin version code.
+ */
 message GetVersionRequest {
   
 }
@@ -397,16 +722,74 @@ message GetVersionResponse {
   int32 versionCode = 1;
 }
 
+/*
+Set the secure flag for the Activity, making screenshots impossible and showing a blank Activity in the task switcher if on.
+ */
+message SetSecureFlagRequest {
+  /*
+  The id of the Activity.
+   */
+  int32 aid = 1;
+  bool secure = 2;
+}
+
+message SetSecureFlagResponse {
+  bool success = 1;
+}
+
+/*
+Set the logging level for this connection.
+ */
+message SetLogLevelRequest {
+  /*
+  The log level.
+  Should be from 0 to 10 (inclusive).
+   */
+  uint32 level = 1;
+}
+
+message SetLogLevelResponse {
+  bool success = 1;
+}
+
+
+/*
+Gets the log for this connection.
+ */
+message GetLogRequest {
+  /*
+  Whether to clear the log after getting it.
+   */
+  bool clear = 1;
+}
+
+message GetLogResponse {
+  bool success = 1;
+  /*
+  The log for this connection.
+   */
+  string log = 2;
+}
+
+
 
 // View creation methods
 
 /*
+All these methods work the same:
+data is a Create submessage filled with information about the View to create: The visibility, the Activity and the parent View.
+All other fields are specific to each View type and explained in each message type.
+
 For all creation responses, an id of -1 indicates a failure.
+In other cases, a valid View id for further methods is returned.
  */
 
 
 message CreateLinearLayoutRequest {
   Create data = 1;
+  /*
+  Whether the LineaLayout lays out its children horizontally or vertically.
+   */
   bool horizontal = 2;
 }
 
@@ -435,8 +818,17 @@ message CreateSwipeRefreshLayoutResponse {
 
 message CreateTextViewRequest {
   Create data = 1;
+  /*
+  The initial text.
+   */
   string text = 2;
+  /*
+  Sets the text to be selectable by the user.
+   */
   bool selectableText = 3;
+  /*
+  Sets links to be clickable by the user.
+   */
   bool clickableLinks = 4;
 }
 
@@ -447,10 +839,13 @@ message CreateTextViewResponse {
 
 message CreateEditTextRequest {
   Create data = 1;
-  bool noline = 2;
-  // blockinput is removed, because it never worked correctly and custom views will be supported with ImageView and GLSurfaceView
   /*
-  The type is an enum instead of a string.
+  A small line is displayed under an EditText. This option removes it.
+   */
+  bool noline = 2;
+  /*
+  The type of input. Determines the layout of keys in the software keyboard.
+  See https://developer.android.com/reference/android/text/InputType .
    */
   enum Type {
     text = 0;
@@ -467,7 +862,13 @@ message CreateEditTextRequest {
     textEmailAddress = 12;
     textPassword = 13;
   }
+  /*
+  The content type.
+   */
   Type type = 3;
+  /*
+  The initial text.
+   */
   string txt = 4;
 }
 
@@ -478,7 +879,13 @@ message CreateEditTextResponse {
 
 message CreateButtonRequest {
   Create data = 1;
+  /*
+  Whether the text should be in small caps.
+   */
   bool allcaps = 2;
+  /*
+  The initial text.
+   */
   string text = 3;
 }
 
@@ -489,7 +896,10 @@ message CreateButtonResponse {
 
 message CreateImageViewRequest {
   Create data = 1;
-  bool keyboard = 2; // If true, makes the ImageView work with the soft & hardware keyboard and send key events
+  /*
+  If true, makes the ImageView work with the soft & hardware keyboard and send key events
+   */
+  bool keyboard = 2;
 }
 
 message CreateImageViewResponse {
@@ -508,8 +918,17 @@ message CreateSpaceResponse {
 
 message CreateNestedScrollViewRequest {
   Create data = 1;
+  /*
+  Snaps to children.
+   */
   bool snapping = 2;
+  /*
+  Visibility of the scroll bar.
+   */
   bool nobar = 3;
+  /*
+  Makes the View take up the whole with/height, event if the content doesn't require it.
+   */
   bool fillViewport = 4;
 }
 
@@ -520,8 +939,17 @@ message CreateNestedScrollViewResponse {
 
 message CreateHorizontalScrollViewRequest {
   Create data = 1;
+  /*
+  Snaps to children.
+   */
   bool snapping = 2;
+  /*
+  Visibility of the scroll bar.
+   */
   bool nobar = 3;
+  /*
+  Makes the View take up the whole with/height, event if the content doesn't require it.
+   */
   bool fillViewPort = 4;
 }
 
@@ -532,7 +960,13 @@ message CreateHorizontalScrollViewResponse {
 
 message CreateRadioButtonRequest {
   Create data = 1;
+  /*
+  The initial text.
+   */
   string text = 2;
+  /*
+  The initial checked status.
+   */
   bool checked = 3;
 }
 
@@ -552,7 +986,13 @@ message CreateRadioGroupResponse {
 
 message CreateCheckboxRequest {
   Create data = 1;
+  /*
+  The initial text.
+   */
   string text = 2;
+  /*
+  The initial checked status.
+   */
   bool checked = 3;
 }
 
@@ -563,6 +1003,9 @@ message CreateCheckboxResponse {
 
 message CreateToggleButtonRequest {
   Create data = 1;
+  /*
+  The initial checked status.
+   */
   bool checked = 2;
 }
 
@@ -573,7 +1016,13 @@ message CreateToggleButtonResponse {
 
 message CreateSwitchRequest {
   Create data = 1;
+  /*
+  The initial text.
+   */
   string text = 2;
+  /*
+  The initial checked status.
+   */
   bool checked = 3;
 }
 
@@ -610,7 +1059,13 @@ message CreateTabLayoutResponse {
 
 message CreateGridLayoutRequest {
   Create data = 1;
+  /*
+  The number of rows in the layout.
+   */
   uint32 rows = 2;
+  /*
+  The number of columns in the layout.
+   */
   uint32 cols = 3;
 }
 
@@ -631,8 +1086,14 @@ message CreateWebViewResponse {
 
 // View manipulation methods
 
+/*
+Sets whether the cursor is shown in an EditText.
+ */
 message ShowCursorRequest {
   View v = 1;
+  /*
+  Whether the cursor is shown.
+   */
   bool show = 2;
 }
 
@@ -640,12 +1101,18 @@ message ShowCursorResponse {
   bool success = 1;
 }
 
-
+/*
+Sets View parameters for Views in a LinearLayout.
+ */
 message SetLinearLayoutParamsRequest {
   View v = 1;
-  // Use a negative number to keep the current weight.
+  /*
+  Use a negative number to keep the current weight.
+   */
   float weight = 2;
-  // Use 0 to keep the current position. The position starts at 1, to make the default message smaller.
+  /*
+  Use 0 to keep the current position. The position starts at 1, to make the default message smaller.
+   */
   int32 position = 3;
 }
 
@@ -653,15 +1120,29 @@ message SetLinearLayoutParamsResponse {
   bool success = 1;
 }
 
-
+/*
+Sets View parameters for Views in a GridLayout.
+ */
 message SetGridLayoutParamsRequest {
   View v = 1;
+  /*
+  The starting row of the View.
+   */
   int32 row = 2;
+  /*
+  The starting column of the View.
+   */
   int32 col = 3;
+  /*
+  The amount of rows the View should occupy.
+   */
   int32 rowSize = 4;
+  /*
+  The amount of columns the View should occupy.
+   */
   int32 colSize = 5;
   /*
-  Alignment is an enum instead of a string.
+  Alignment of the View inside the cell.
    */
   enum Alignment {
     CENTER = 0;
@@ -672,7 +1153,13 @@ message SetGridLayoutParamsRequest {
     BASELINE = 5;
     FILL = 6;
   }
+  /*
+  Alignment of the View in the row.
+   */
   Alignment rowAlign = 6;
+  /*
+  Alignment of the View in the column.
+   */
   Alignment colAlign = 7;
 }
 
@@ -680,13 +1167,19 @@ message SetGridLayoutParamsResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the absolute position of a View. Useful in a FrameLayout.
+Can also set the View to show on top of the others in the Layout.
+ */
 message SetViewLocationRequest {
   View v = 1;
   // The unit for x and y
   Size.Unit unit = 2;
   float x = 3;
   float y = 4;
+  /*
+  Whether to show on top of the siblings.
+   */
   bool top = 5;
 }
 
@@ -694,7 +1187,9 @@ message SetViewLocationResponse {
   bool success = 1;
 }
 
-
+/*
+Sets View parameters for Views in a RelativeLayout.
+ */
 message SetRelativeLayoutParamsRequest {
   View v = 1;
 }
@@ -703,7 +1198,9 @@ message SetRelativeLayoutParamsResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the View visibility.
+ */
 message SetVisibilityRequest {
   View v = 1;
   Visibility vis = 2;
@@ -713,7 +1210,9 @@ message SetVisibilityResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the View width.
+ */
 message SetWidthRequest {
   View v = 1;
   ViewSize s = 2;
@@ -723,7 +1222,9 @@ message SetWidthResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the View height.
+ */
 message SetHeightRequest {
   View v = 1;
   ViewSize s = 2;
@@ -733,11 +1234,13 @@ message SetHeightResponse {
   bool success = 1;
 }
 
-
+/*
+Gets the View size in a specified unit.
+ */
 message GetDimensionsRequest {
   View v = 1;
   /*
-  Here you can specify the unit you want the dimensions in.
+  The unit for the returned size.
    */
   Size.Unit unit = 2;
 }
@@ -750,7 +1253,9 @@ message GetDimensionsResponse {
   float height = 2;
 }
 
-
+/*
+Removes a View.
+ */
 message DeleteViewRequest {
   View v = 1;
 }
@@ -759,7 +1264,9 @@ message DeleteViewResponse {
   bool success = 1;
 }
 
-
+/*
+Removes the children of a View.
+ */
 message DeleteChildrenRequest {
   View v = 1;
 }
@@ -768,10 +1275,18 @@ message DeleteChildrenResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the margins of a View.
+ */
 message SetMarginRequest {
   View v = 1;
+  /*
+  The margin size.
+   */
   Size s = 2;
+  /*
+  The direction for the margin to apply.
+   */
   Direction dir = 3;
 }
 
@@ -779,10 +1294,18 @@ message SetMarginResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the padding of a View.
+ */
 message SetPaddingRequest {
   View v = 1;
+  /*
+  The padding size.
+   */
   Size s = 2;
+  /*
+  The direction for the padding to apply.
+   */
   Direction dir = 3;
 }
 
@@ -790,7 +1313,9 @@ message SetPaddingResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the background color of a View.
+ */
 message SetBackgroundColorRequest {
   View v = 1;
   uint32 color = 2;
@@ -800,7 +1325,9 @@ message SetBackgroundColorResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the text color of a View.
+ */
 message SetTextColorRequest {
   View v = 1;
   uint32 color = 2;
@@ -810,9 +1337,14 @@ message SetTextColorResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the progress of a ProgressBar.
+ */
 message SetProgressRequest {
   View v = 1;
+  /*
+  THe progress from 0 to 100 (inclusive).
+   */
   uint32 progress = 2;
 }
 
@@ -820,7 +1352,10 @@ message SetProgressResponse {
   bool success = 1;
 }
 
-
+/*
+Sets whether a SwipeRefreshLayout is in the refreshing state.
+You have to set this to false when your refreshing action has completed.
+ */
 message SetRefreshingRequest {
   View v = 1;
   bool refreshing = 2;
@@ -830,7 +1365,9 @@ message SetRefreshingResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the Text of a View.
+ */
 message SetTextRequest {
   View v = 1;
   string text = 2;
@@ -840,15 +1377,35 @@ message SetTextResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the gravity of the text in a View.
+ */
 message SetGravityRequest {
   View v = 1;
+  /*
+  Gravity values.
+   */
   enum Gravity {
+    /*
+    Center the text.
+     */
     CENTER = 0;
+    /*
+    Align to the top/left.
+     */
     LEFTTOP = 1;
+    /*
+    Align to the right/bottom.
+     */
     RIGHTBOTTOM = 2;
   }
+  /*
+  The horizontal gravity.
+   */
   Gravity horizontal = 2;
+  /*
+  The vertical gravity.
+   */
   Gravity vertical = 3;
 }
 
@@ -856,7 +1413,9 @@ message SetGravityResponse {
   bool success = 1;
 }
 
-
+/*
+Sets the text size for a View.
+ */
 message SetTextSizeRequest {
   View v = 1;
   Size s = 2;
@@ -866,17 +1425,24 @@ message SetTextSizeResponse {
   bool success = 1;
 }
 
-
+/*
+Gets the text in a View.
+ */
 message GetTextRequest {
   View v = 1;
 }
 
 message GetTextResponse {
   bool success = 1;
+  /*
+  The text of the View.
+   */
   string text = 2;
 }
 
-
+/*
+Sets whether a View is checked, like a CheckBox, RadioButton, Switch or ToggleButton.
+ */
 message SetCheckedRequest {
   View v = 1;
   bool checked = 2;
@@ -886,7 +1452,9 @@ message SetCheckedResponse {
   bool success = 1;
 }
 
-
+/*
+Shift the focus to a View.
+ */
 message RequestFocusRequest {
   View v = 1;
   bool forcesoft = 2;
@@ -896,11 +1464,13 @@ message RequestFocusResponse {
   bool success = 1;
 }
 
-
+/*
+Gets the scroll position of a NestedScrollVIew or HorizontalScrollView.
+ */
 message GetScrollPositionRequest {
   View v = 1;
   /*
-  For JSON the unit was in px, here you can choose the unit.
+  The unit of the scroll amounts.
    */
   Size.Unit unit = 2;
 }
@@ -913,11 +1483,22 @@ message GetScrollPositionResponse {
   float y = 2;
 }
 
-
+/*
+Sets the scroll position of a NestedScrollVIew or HorizontalScrollView.
+ */
 message SetScrollPositionRequest {
   View v = 1;
+  /*
+  The horizontal scroll.
+   */
   Size x = 2;
+  /*
+  The vertical scroll.
+   */
   Size y = 3;
+  /*
+  Whether to scroll abruptly or smooth to the position.
+   */
   bool smooth = 4;
 }
 
@@ -925,9 +1506,14 @@ message SetScrollPositionResponse {
   bool success = 1;
 }
 
-
+/*
+Set the items of a Spinner.
+ */
 message SetListRequest {
   View v = 1;
+  /*
+  The items to be displayed in the spinner.
+   */
   repeated string list = 2;
 }
 
@@ -935,9 +1521,14 @@ message SetListResponse {
   bool success = 1;
 }
 
-
+/*
+Set the image of an ImageView.
+ */
 message SetImageRequest {
   View v = 1;
+  /*
+  The image. Has to be a PNG/JPG.
+   */
   bytes image = 2;
 }
 
@@ -945,17 +1536,44 @@ message SetImageResponse {
   bool success = 1;
 }
 
+/*
+Creates a shared memory buffer.
 
+This is the only method that doesn't generate a message as a response.
+Instead the buffer id is send as a signed 32bit integer.
+If the integer is negative, creation failed.
+If the integer is positive, creation succeeded and you will get another byte (the value can be discarded)
+with a file descriptor for the memory region as ancillary data.
+
+ */
 message AddBufferRequest {
+  /*
+  Available color formats.
+   */
   enum Format {
+    /*
+    Use the ARGB8888 format.
+     */
     ARGB8888 = 0;
   }
+  /*
+  The buffer format.
+   */
   Format f = 1;
+  /*
+  The buffer width.
+   */
   uint32 width = 2;
+  /*
+  The buffer height.
+   */
   uint32 height = 3;
 }
 
-
+/*
+Deletes a shared buffer.
+To actually free the memory, you also have to unmap it and close the file descriptor you received.
+ */
 message DeleteBufferRequest {
   int32 buffer = 1;
 }
@@ -964,7 +1582,10 @@ message DeleteBufferResponse {
   bool success = 1;
 }
 
-
+/*
+Blit the buffer to the underlying image inside the plugin.
+Refreshing ImageViews or setting the ImageView to show this buffer will now show the updated contents.
+ */
 message BlitBufferRequest {
   int32 buffer = 1;
 }
@@ -973,7 +1594,9 @@ message BlitBufferResponse {
   bool success = 1;
 }
 
-
+/*
+Set an ImageView to show the contents of a shared memory buffer.
+ */
 message SetBufferRequest {
   View v = 1;
   int32 buffer = 2;
@@ -983,7 +1606,9 @@ message SetBufferResponse {
   bool success = 1;
 }
 
-
+/*
+Refresh an ImageView after blitting the buffer it uses to show the new image.
+ */
 message RefreshImageViewRequest {
   View v = 1;
 }
@@ -992,7 +1617,9 @@ message RefreshImageViewResponse {
   bool success = 1;
 }
 
-
+/*
+Select a tab in a TabLayout.
+ */
 message SelectTabRequest {
   View v = 1;
   uint32 tab = 2;
@@ -1002,6 +1629,9 @@ message SelectTabResponse {
   bool success = 1;
 }
 
+/*
+Select an item in a Spinner.
+ */
 message SelectItemRequest {
   View v = 1;
   uint32 item = 2;
@@ -1011,7 +1641,9 @@ message SelectItemResponse {
   bool success = 1;
 }
 
-
+/*
+Set whether a View should be clickable.
+ */
 message SetClickableRequest {
   View v = 1;
   bool clickable = 2;
@@ -1032,6 +1664,14 @@ message SetClickableResponse {
 
 // RemoteViews methods
 
+/*
+RemoteViews are more limited Views used for custom notification layouts and widgets.
+Most methods work like the View methods.
+ */
+
+/*
+Create a new remote layout. You can then place remote Views in the layout.
+ */
 message CreateRemoteLayoutRequest {
   
 }
@@ -1041,7 +1681,9 @@ message CreateRemoteLayoutResponse {
   int32 rid = 1;
 }
 
-
+/*
+Delete a remote Layout.
+ */
 message DeleteRemoteLayoutRequest {
   int32 rid = 1;
 }
@@ -1130,6 +1772,9 @@ message SetRemoteProgressBarRequest {
   int32 rid = 1;
   int32 id = 2;
   uint32 progress = 3;
+  /*
+  For remote progress bars you get to choose the maximum value.
+   */
   uint32 max = 4;
 }
 
@@ -1195,7 +1840,9 @@ message SetRemotePaddingResponse {
   bool success = 1;
 }
 
-
+/*
+Beware, the Image has to be smaller than 2 MB.
+ */
 message SetRemoteImageRequest {
   int32 rid = 1;
   int32 id = 2;
@@ -1206,7 +1853,9 @@ message SetRemoteImageResponse {
   bool success = 1;
 }
 
-
+/*
+Set a Widget to show a remote layout.
+ */
 message SetWidgetLayoutRequest {
   int32 rid = 1;
   string wid = 2;
@@ -1221,6 +1870,10 @@ message SetWidgetLayoutResponse {
 
 // WebView methods
 
+/*
+Allow Javascript to run in the WebView.
+The user gets asked for this and can deny it.
+ */
 message AllowJavascriptRequest {
   View v = 1;
   bool allow = 2;
@@ -1231,7 +1884,9 @@ message AllowJavascriptResponse {
   bool allowed = 2;
 }
 
-
+/*
+Allow the WebView to open content URIs.
+ */
 message AllowContentURIRequest {
   View v = 1;
   bool allow = 2;
@@ -1241,11 +1896,17 @@ message AllowContentURIResponse {
   bool success = 1;
 }
 
-
+/*
+Set the data to be shown in the WebView.
+You should always set base64 to true and use base64 encoded data.
+ */
 message SetDataRequest {
   View v = 1;
   string data = 2;
   bool base64 = 3;
+  /*
+  The MIME type of the data.
+   */
   string mime = 4;
 }
 
@@ -1253,7 +1914,9 @@ message SetDataResponse {
   bool success = 1;
 }
 
-
+/*
+Load a URI in the WebView.
+ */
 message LoadURIRequest {
   View v = 1;
   string uri = 2;
@@ -1263,7 +1926,9 @@ message LoadURIResponse {
   bool success = 1;
 }
 
-
+/*
+Allow clicking links to navigate in the WebView.
+ */
 message AllowNavigationRequest {
   View v = 1;
   bool allow = 2;
@@ -1273,7 +1938,9 @@ message AllowNavigationResponse {
   bool success = 1;
 }
 
-
+/*
+Go back to the last page.
+ */
 message GoBackRequest {
   View v = 1;
 }
@@ -1282,7 +1949,9 @@ message GoBackResponse {
   bool success = 1;
 }
 
-
+/*
+Go forward to the next page (if there is one in the back list).
+ */
 message GoForwardRequest {
   View v = 1;
 }
@@ -1291,7 +1960,9 @@ message GoForwardResponse {
   bool success = 1;
 }
 
-
+/*
+Run Javascript in the WebView.
+ */
 message EvaluateJSRequest {
   View v = 1;
   string code = 2;
@@ -1304,9 +1975,21 @@ message EvaluateJSResponse {
 
 // Notification methods
 
+/*
+Create a channel for notifications.
+ */
 message CreateNotificationChannelRequest {
+  /*
+  The id the channel should have. This isn't shown to the user, but to identify the channel.
+   */
   string id = 1;
+  /*
+  The name of the channel shown to the user.
+   */
   string name = 2;
+  /*
+  The initial importance of the channel. Higher means the notifications fill be more intrusive.
+   */
   Importance importance = 3;
 }
 
@@ -1314,27 +1997,59 @@ message CreateNotificationChannelResponse {
   bool success = 1;
 }
 
-
+/*
+Create a notification.
+ */
 message CreateNotificationRequest {
+  /*
+  A normal notification.
+   */
   message NormalNotification {
     string title = 1;
     string content = 2;
   }
+  /*
+  A notification with longer text, allowing the user to expand the notification to see it all.
+   */
   message LongTextNotification {
     string title = 1;
     string content = 2;
   }
+  /*
+  A notification showing an image.
+   */
   message BigImageNotification {
     string title = 1;
     string content = 2;
+    /*
+    The image to show.
+     */
     bytes image = 3;
+    /*
+    Whether to show a thumbnail when the notification is folded up.
+     */
     bool asThumbnail = 4;
   }
+  /*
+  A notification with a custom layout.
+   */
   message CustomNotification {
+    /*
+    The layout id for the normal layout.
+     */
     int32 layout = 1;
+    /*
+    The layout id for an expanded layout. Optional. Set to -1 when not using.
+     */
     int32 layoutExpanded = 2;
+    /*
+    The layout id for an HUD layout. Optional. Set to -1 when not using.
+     */
     int32 layoutHUD = 3;
   }
+  /*
+  The main notification data.
+   */
   oneof type {
     NormalNotification normal = 8;
     LongTextNotification longText = 9;
@@ -1342,16 +2057,41 @@ message CreateNotificationRequest {
     CustomNotification custom = 11;
   }
   /*
-  Use -1 to create a new notification.
+  Use -1 to create a new notification. Use an existing id to update a notification.
    */
   int32 id = 1;
+  /*
+  An icon for the notification. Optional.
+   */
   bytes icon = 2;
+  /*
+  The channel the notification should be in.
+   */
   string channel = 3;
+  /*
+  The importance of the notification. Newer Android versions will use the channel importance instead.
+   */
   Importance importance = 4;
+  /*
+  Whether to alert the user only once or also on updates.
+   */
   bool alertOnce = 5;
+  /*
+  Whether to show the timestamp.
+   */
   bool showTimestamp = 6;
+  /*
+  Actions the user can use.
+   */
   repeated string actions = 7;
+  /*
+  The timestamp in millisecond time since the Unix epoch.
+   */
   int64 timestamp = 12;
+  /*
+  When a notification is ongoing, it cannot be dismissed by the user.
+  All notifications will be dismissed when the connection is closed though.
+   */
   bool ongoing = 13;
 }
 
@@ -1362,7 +2102,9 @@ message CreateNotificationResponse {
   int32 id = 1;
 }
 
-
+/*
+Dismiss a notification.
+ */
 message CancelNotificationRequest {
   int32 id = 1;
 }
@@ -1377,6 +2119,10 @@ message CancelNotificationResponse {
 
 
 // Event control methods
+
+/*
+Set whether Views should send certain event types.
+ */
 
 message SendClickEventRequest {
   View v = 1;
@@ -1427,7 +2173,9 @@ message SendTextEventResponse {
   bool success = 1;
 }
 
-
+/*
+For overlay Activities. Not reliable.
+ */
 message SendOverlayTouchEventRequest {
   int32 aid = 1;
   bool send = 2;
@@ -1466,6 +2214,9 @@ message Method {
     HideSoftKeyboardRequest hideSoftKeyboard = 35;
     InterceptBackButtonRequest interceptBackButton = 36;
     GetVersionRequest version = 37;
+    SetSecureFlagRequest setSecure = 38;
+    SetLogLevelRequest setLogLevel = 39;
+    GetLogRequest getLog = 40;
     
 
     // View creation methods
@@ -1589,7 +2340,9 @@ message Method {
 
 // Event types
 
-
+/*
+See the Android Activity lifecycle for information on these events.
+ */
 
 message CreateEvent {
   int32 aid = 1;
@@ -1618,27 +2371,51 @@ message DestroyEvent {
   bool finishing = 2;
 }
 
+
+/*
+Send when the configuration of an Activity updates, i.e. because the screen was rotated.
+ */
 message ConfigEvent {
   int32 aid = 1;
   Configuration configuration = 2;
 }
 
+/*
+Send when a View is clicked.
+Enabled automatically for Views it makes sense for (i.e. Buttons).
+ */
 message ClickEvent {
   View v = 1;
+  /*
+  The checked status for View that can be checked.
+   */
   bool set = 4;
 }
 
+/*
+Send when a View is clicked and hold for some time.
+ */
 message LongClickEvent {
   View v = 1;
 }
 
+/*
+Send when the focus changes from or to a View.
+ */
 message FocusChangeEvent {
   View v = 1;
   bool focus = 2;
 }
 
+/*
+Send when a View is touched.
+See the Android documentation for MotionEvent for info: https://developer.android.com/reference/android/view/MotionEvent
+ */
 message TouchEvent {
   View v = 1;
+  /*
+  See the Android documentation for MotionEvent for info.
+   */
   enum Action {
     down = 0;
     up = 1;
@@ -1649,132 +2426,225 @@ message TouchEvent {
   }
   Action action = 2;
   message Touch {
+    /*
+    A pointer on the display.
+     */
     message Pointer {
+      /*
+      Coordinates inside the View.
+       */
       int32 x = 1;
       int32 y = 2;
+      /*
+      The pointer id.
+       */
       int32 id = 3;
     }
+    /*
+    A list of pointer currently touching the display.
+     */
     repeated Pointer pointers = 4;
   }
+  /*
+  The touches in this event. Multiple can be returned if it's a move event.
+   */
   repeated Touch touches = 3;
+  /*
+  The pointer index the event is for, if any.
+   */
   int32 index = 4;
+  /*
+  A timestamp for when the event happened, use for gestures and the like.
+   */
   uint64 time = 5;
 }
 
+/*
+Send when a SwipeRefreshLayout is refreshed. Automatically enabled.
+ */
 message RefreshEvent {
   View v = 1;
 }
 
+/*
+Send when a RadioButton is selected in a RadioGroup. Automatically enabled.
+ */
 message SelectedEvent {
   View v = 1;
+  /*
+  The id of the currently selected RadioButton in the group-
+   */
   int32 selected = 2;
 }
 
-
+/*
+Send when an item or tab is selected in a Spinner or TabLayout. Automatically enabled.
+ */
 message ItemSelectedEvent {
   View v = 1;
-  // For Spinners, this is the index in the list you provided, and not the string of the option like for JSON.
-  // -1 if nothing was selected.
+  /*
+  The index of the tab/item.
+  -1 if nothing was selected.
+   */
   int32 selected = 2;
 }
 
-
+/*
+Send when a back button press is intercepted.
+ */
 message BackButtonEvent {
   int32 aid = 1;
 }
 
+/*
+Send when text changes in a TextView. Unreliable.
+ */
 message TextEvent {
   View v = 1;
   string text = 2;
 }
 
-
+/*
+Send when a navigation was attempted in a WebView.
+ */
 message WebViewNavigationEvent {
   View v = 1;
   string url = 2;
 }
 
+/*
+Send when an HTTP error happened in a WebView.
+ */
 message WebViewHTTPErrorEvent {
   View v = 1;
   string url = 2;
   int32 code = 3;
 }
 
+/*
+Send when an error happened in a WebView.
+ */
 message WebViewErrorEvent {
   View v = 1;
   string url = 2;
 }
 
+/*
+Send when a WebView was destroyed by the system. You have to delete and recreate it.
+ */
 message WebViewDestroyedEvent {
   View v = 1;
 }
 
+/*
+Send when the progress bar changes in a WebView.
+ */
 message WebViewProgressEvent {
   View v = 1;
   uint32 progress = 2;
 }
 
+/*
+Send when JS writes a console message in a WebView.
+ */
 message WebViewConsoleMessageEvent {
   View v = 1;
   string message = 2;
 }
 
-
+/*
+Send when Airplane mode changes.
+ */
 message AirplaneEvent {
   bool active = 1;
 }
 
+/*
+Send when the locale changes.
+ */
 message LocaleEvent {
   string locale = 1;
 }
 
+
+/*
+Send when the timezone changes.
+ */
 message TimezoneEvent {
   string tz = 1;
 }
 
+/*
+Send when the screen is turned off.
+ */
 message ScreenOffEvent {
   
 }
 
+/*
+Send when the screen is turned on.
+ */
 message ScreenOnEvent {
   
 }
 
+/*
+Send when the user leaves an Activity.
+This is the right moment to enter PiP-mode if you need to.
+ */
 message UserLeaveHintEvent {
   int32 aid = 1;
 }
 
+/*
+Send when PiP-mode changes.
+ */
 message PiPChangedEvent {
   int32 aid = 1;
   bool pip = 2;
 }
 
-
+/*
+Send for a click in a remote layout.
+ */
 message RemoteClickEvent {
   uint32 rid = 1;
   uint32 id = 2;
 }
 
+/*
+Send when the user taps a notification.
+ */
 message NotificationEvent {
   uint32 id = 1;
 }
 
+/*
+Send when the user dismisses a notification.
+ */
 message NotificationDismissedEvent {
   uint32 id = 1;
 }
 
+/*
+Send when the user presses a notification action.
+ */
 message NotificationActionEvent {
   uint32 id = 1;
   uint32 action = 2;
 }
 
-
+/*
+Send when a pinch gesture is used on an overlay Activity. Unreliable.
+ */
 message OverlayScaleEvent {
   int32 aid = 1;
   float span = 2;
 }
 
-
+/*
+Send when an ImageView or SurfaceView is set to use the keyboard.
+ */
 message KeyEvent {
   enum Modifier {
     MOD_NONE = 0;
@@ -1790,13 +2660,15 @@ message KeyEvent {
   }
   View v = 1;
   uint32 code = 2; // The Android keycode, refer to https://developer.android.com/reference/android/view/KeyEvent for the values.
-  uint32 modifiers = 3; // Bits are according to the Modifier enum
-  uint32 codePoint = 4; // The unicode code point of the character
+  uint32 modifiers = 3; // Bits are according to the Modifier enum.
+  uint32 codePoint = 4; // The unicode code point of the character.
 }
 
 
 // Debug events
-
+/*
+An Exception happened in the plugin. Currently unused.
+ */
 message ExceptionDebugEvent {
   string stacktrace = 1;
 }

@@ -22,7 +22,8 @@ import java.io.OutputStream
 import java.util.*
 
 class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>,
-                         val rand: Random, val app: Context, val notifications: MutableSet<Int>, val activities: MutableMap<Int, DataClasses.ActivityState>) {
+                         val rand: Random, val app: Context, val notifications: MutableSet<Int>,
+                         val activities: MutableMap<Int, DataClasses.ActivityState>, val logger: V0Proto.ProtoLogger) {
     
     
     fun createChannel(m: CreateNotificationChannelRequest) {
