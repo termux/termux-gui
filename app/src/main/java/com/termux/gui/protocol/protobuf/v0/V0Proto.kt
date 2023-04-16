@@ -148,6 +148,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.SELECTTAB -> handleView.selectTab(m.selectTab)
                     Method.MethodCase.SELECTITEM -> handleView.selectItem(m.selectItem)
                     Method.MethodCase.SETCLICKABLE -> handleView.setClickable(m.setClickable)
+                    Method.MethodCase.SETCHECKED -> handleView.setChecked(m.setChecked)
                     
                     Method.MethodCase.CREATEREMOTELAYOUT -> handleRemote.createLayout(m.createRemoteLayout)
                     Method.MethodCase.DELETEREMOTELAYOUT -> handleRemote.deleteLayout(m.deleteRemoteLayout)

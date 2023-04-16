@@ -2278,6 +2278,7 @@ message Method {
     SelectTabRequest selectTab = 232;
     SelectItemRequest selectItem = 233;
     SetClickableRequest setClickable = 234;
+    SetCheckedRequest setChecked = 235;
     
     
     // RemoteViews methods

@@ -511,6 +511,15 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
         })
     }
 
+    fun setChecked(m: SetCheckedRequest) {
+        handler.handleView(m.v, SetCheckedResponse.newBuilder(), { ret, v: CompoundButton, _, _ ->
+            v.isChecked = m.checked
+            ret.success = true
+        }, {
+            it.success = false
+        })
+    }
+
 
     @SuppressLint("SetJavaScriptEnabled")
     fun allowJS(m: AllowJavascriptRequest) {
