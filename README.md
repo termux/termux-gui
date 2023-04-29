@@ -6,7 +6,7 @@
 
 This is a plugin for [Termux](https://github.com/termux/termux-app) that enables command line programs to use the native android GUI.  
   
-In the examples directory you can find demo videos and sample code.
+In the examples directory you can find demo videos, sample code is provided in the tutorials of the official language bindings.
 
 [There are also prepackaged programs you can use](https://github.com/tareksander/termux-gui-package).
 
@@ -15,8 +15,24 @@ There is currently no release on f-droid, so the only method to install this plu
 Releases on f-droid will be provided as soon as possible. ~~When there is a release, the f-droid badge at the top will show a version number.~~ The f-droid builds currently don't work, Github builds are the only option for now.  
 [See this comment for links to install Termux and its plugins from Github](https://github.com/tareksander/termux-gui-python-bindings/issues/1#issuecomment-983797979).  
 
-Protocol.md describes the Protocol used and the available functions you can use.  
+[Protocol.md](Protocol.md) describes the Protocol used and the available functions you can use.  
+[GUIProt0.proto](app/src/main/proto/GUIProt0.proto) contains teh documentation of the newer Protobuf-based protocol with more features.  
 If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  
+
+### Features
+
+- buttons, switches, toggles, checkboxes, text fields, scrolling, LinearLayout
+- custom notifications
+- custom widgets
+- shared image buffers
+- GLES2 acceleration
+- WebView
+- Dialogs
+- Lockscreen Activities
+- Wake-lock
+- ...and more
+
+
 
 ### Comparison with native apps
 
@@ -33,13 +49,13 @@ If you want to use overlay windows or be able to open windows from the backgroun
 
 ## Language Bindings
 
-## Official
+### Official
 
 - [Python](https://github.com/tareksander/termux-gui-python-bindings)
 - [C/C++](https://github.com/tareksander/termux-gui-c-bindings)
 - [Bash](https://github.com/tareksander/termux-gui-bash)
 
-## Community
+### Community
 
 Not maintained by the plugin maintainer:
 

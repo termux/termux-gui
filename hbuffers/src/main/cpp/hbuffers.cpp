@@ -5,69 +5,65 @@
 #include <android/hardware_buffer_jni.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include <android/api-level.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 
-#include <sys/socket.h>
+#include <csignal>
 
-
-thread_local EGLDisplay d = EGL_NO_DISPLAY;
-thread_local EGLContext c = EGL_NO_CONTEXT;
+#include <atomic>
 
 
+static std::atomic<PFNEGLCREATEIMAGEKHRPROC> createImage{nullptr};
+static std::atomic<PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC> getClientBuffer{nullptr};
 
 extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_termux_gui_hbuffers_HBuffers_00024Companion_nativeRenderBuffer(JNIEnv *env, jobject thiz,
-                                                            jobject surface, jobject buffer) {
-    if (d == EGL_NO_DISPLAY) {
-        d = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        if (d == EGL_NO_DISPLAY)
-            return false;
-        if (! eglInitialize(d, nullptr, nullptr))
-            return false;
-        const EGLint attrib[] = {
-                
-                EGL_BLUE_SIZE, 8,
-                EGL_GREEN_SIZE, 8,
-                EGL_RED_SIZE, 8,
-                EGL_NONE
-        };
-        EGLConfig conf;
-        EGLint configs = 0;
-        eglChooseConfig(d, attrib, &conf, 1, &configs);
-        if (configs == 0) {
-            eglTerminate(d);
-            return false;
+JNIEXPORT jlong JNICALL
+Java_com_termux_gui_hbuffers_HBuffers_00024Companion_nativeHardwareBufferToEGLImageKHR(JNIEnv *env,
+                                                                                       jobject thiz,
+                                                                                       jlong dispJ,
+                                                                                       jobject bJ) {
+    auto disp = (EGLDisplay) dispJ;
+    AHardwareBuffer* b = AHardwareBuffer_fromHardwareBuffer(env, bJ);
+    if (createImage.load() == nullptr) {
+        createImage = (PFNEGLCREATEIMAGEKHRPROC) eglGetProcAddress("eglCreateImageKHR");
+        if (createImage.load() == nullptr) {
+            jclass nullPointerException = env->FindClass("java/lang/NullPointerException");
+            if (nullPointerException == nullptr) {
+                __android_log_print( ANDROID_LOG_ERROR,"nativeHardwareBufferToEGLImageKHR", "Could not find class NullPointerException\n");
+            } else {
+                env->ThrowNew(nullPointerException, "Could not get eglCreateImageKHR address");
+            }
+            return reinterpret_cast<jlong>(EGL_NO_IMAGE_KHR);
         }
-        
-        //c = eglCreateContext(d, )
     }
-    
-    
-    
-    
-    
-    return true;
+    if (getClientBuffer.load() == nullptr) {
+        getClientBuffer = (PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC) eglGetProcAddress("eglGetNativeClientBufferANDROID");
+        if (getClientBuffer.load() == nullptr) {
+            jclass nullPointerException = env->FindClass("java/lang/NullPointerException");
+            if (nullPointerException == nullptr) {
+                __android_log_print( ANDROID_LOG_ERROR,"nativeHardwareBufferToEGLImageKHR", "Could not find class NullPointerException\n");
+            } else {
+                env->ThrowNew(nullPointerException, "Could not get eglGetNativeClientBufferANDROID address");
+            }
+            return reinterpret_cast<jlong>(EGL_NO_IMAGE_KHR);
+        }
+    }
+    EGLClientBuffer cb = getClientBuffer.load()(b);
+    if (cb == nullptr) {
+        return reinterpret_cast<jlong>(EGL_NO_IMAGE_KHR);
+    }
+    EGLint attribs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
+    EGLImageKHR img = createImage.load()(disp, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, cb, attribs);
+    return reinterpret_cast<jlong>(img);
 }
-
-
-
 extern "C"
-JNIEXPORT void JNICALL
-Java_com_termux_gui_hbuffers_HBuffers_00024Companion_nativeCleanup(JNIEnv *env, jobject thiz) {
-    
-    
-    
-    if (d != EGL_NO_DISPLAY) {
-        eglTerminate(d);
-        d = EGL_NO_DISPLAY;
-    }
-    
-    
-    
-    
+JNIEXPORT jint JNICALL
+Java_com_termux_gui_hbuffers_HBuffers_00024Companion_sendHardwareBuffer(JNIEnv *env, jobject thiz,
+                                                                        jint fd, jobject bJ) {
+    AHardwareBuffer* b = AHardwareBuffer_fromHardwareBuffer(env, bJ);
+    // Ignore sigpipe as a precaution, AHardwareBuffer_sendHandleToUnixSocket doesn't use the NO_SIGNAL flag for sendmsg
+    signal(SIGPIPE, SIG_IGN);
+    return AHardwareBuffer_sendHandleToUnixSocket(b, fd);
 }

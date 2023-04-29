@@ -31,27 +31,6 @@ import kotlin.math.roundToInt
 
 class ProtoUtils {
     companion object {
-        fun <T : MessageLite> viewActionOrFail(main: OutputStream, activities: Map<String, DataClasses.ActivityState>,
-                                               overlays: Map<String, DataClasses.Overlay>, aid: String, ifActivity: (a: GUIActivity) -> T,
-                                               ifOverlay: (o: DataClasses.Overlay) -> T, ifFail: () -> T) {
-            val s = activities[aid]
-            write(if (s != null) {
-                val a = s.a
-                if (a != null) {
-                    ifActivity(a)
-                } else {
-                    ifFail()
-                }
-            } else {
-                val o = overlays[aid]
-                if (o != null) {
-                    ifOverlay(o)
-                } else {
-                    ifFail()
-                }
-            }, main)
-        }
-        
         fun <T : MessageLite.Builder> write(builder: T, out: OutputStream) {
             write(builder.build(), out)
         }
@@ -319,6 +298,7 @@ class ProtoUtils {
                 val create = m.javaClass.getMethod("getData").invoke(m) as Create
                 val retClassName = m.javaClass.name.replace("Request", "Response")
                 val setId = Class.forName("$retClassName\$Builder").getMethod("setId", Int::class.java)
+                val setCode = Class.forName("$retClassName\$Builder").getMethod("setCode", GUIProt0.Error::class.java)
                 val ret: Any? = Class.forName(retClassName).getMethod("newBuilder").invoke(null)
                 try {
                     val o = overlays[create.aid]
@@ -339,11 +319,15 @@ class ProtoUtils {
                                     Util.setViewActivity(it, view, if (create.parent < 0) null else create.parent)
                                 }
                                 setId.invoke(ret, v.id)
-                            }) setId.invoke(ret, -1)
+                            }) {
+                            setId.invoke(ret, -1)
+                            setCode.invoke(ret, GUIProt0.Error.INVALID_ACTIVITY)
+                        }
                     }
                 } catch (e: Exception) {
                     Log.d(this.javaClass.name, "Exception: ", e)
                     setId.invoke(ret, -1)
+                    setCode.invoke(ret, GUIProt0.Error.INTERNAL_ERROR)
                 }
                 write(ret as MessageLite.Builder, main)
             }
@@ -354,15 +338,18 @@ class ProtoUtils {
             val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation>
         ) {
             inline fun <R : MessageLite.Builder> handleRemote(rid: Int, ret: R, crossinline action: (R, DataClasses.RemoteLayoutRepresentation) -> Unit, crossinline fail: (R) -> Unit) {
+                val setCode = Class.forName(ret::class.java.name).getMethod("setCode", GUIProt0.Error::class.java)
                 try {
                     val r = remoteviews[rid]
                     if (r != null) {
                         action(ret, r)
                     } else {
+                        setCode(GUIProt0.Error.INVALID_REMOTE_LAYOUT)
                         fail(ret)
                     }
                 } catch (e: Exception) {
                     Log.d(this.javaClass.name, "Exception: ", e)
+                    setCode(GUIProt0.Error.INTERNAL_ERROR)
                     fail(ret)
                 }
                 write(ret as MessageLite.Builder, main)
@@ -387,6 +374,7 @@ class ProtoUtils {
             }
 
             inline fun <T : View, R : MessageLite.Builder> handleView(m: GUIProt0.View, ret: R, crossinline action: (R, T, Context, MutableSet<Int>) -> Unit, crossinline fail: (R) -> Unit) {
+                val setCode = Class.forName(ret::class.java.name).getMethod("setCode", GUIProt0.Error::class.java)
                 try {
                     val o = overlays[m.aid]
                     if (o != null) {
@@ -402,57 +390,57 @@ class ProtoUtils {
                                 if (v != null) {
                                     action(ret, v, it, it.usedIds)
                                 } else {
+                                    setCode(ret, GUIProt0.Error.INVALID_VIEW)
                                     fail(ret)
                                 }
-                            }) fail(ret)
+                            }) {
+                            setCode(ret, GUIProt0.Error.INVALID_ACTIVITY)
+                            fail(ret)
+                        }
                     }
                 } catch (e: Exception) {
                     Log.d(this.javaClass.name, "Exception: ", e)
+                    setCode(ret, GUIProt0.Error.INTERNAL_ERROR)
+                    fail(ret)
+                }
+                write(ret as MessageLite.Builder, main)
+            }
+            inline fun <T : View, R : MessageLite.Builder> handleViewConnectionThread(m: GUIProt0.View, ret: R, crossinline action: (R, T, Context, MutableSet<Int>) -> Unit, crossinline fail: (R) -> Unit) {
+                val setCode = Class.forName(ret::class.java.name).getMethod("setCode", GUIProt0.Error::class.java)
+                try {
+                    val o = overlays[m.aid]
+                    if (o != null) {
+                        val v = o.root.findViewReimplemented<T>(m.id)
+                        if (v != null) {
+                            action(ret, v, o.context, o.usedIds)
+                        } else {
+                            setCode(ret, GUIProt0.Error.INVALID_VIEW)
+                            fail(ret)
+                        }
+                    } else {
+                        val a = activities[m.aid]?.a
+                        if (a != null) {
+                            val v = a.findViewReimplemented<T>(m.id)
+                            if (v != null) {
+                                action(ret, v, a, a.usedIds)
+                            } else {
+                                setCode(ret, GUIProt0.Error.INVALID_VIEW)
+                                fail(ret)
+                            }
+                        } else {
+                            setCode(ret, GUIProt0.Error.INVALID_ACTIVITY)
+                            fail(ret)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.d(this.javaClass.name, "Exception: ", e)
+                    setCode(ret, GUIProt0.Error.INTERNAL_ERROR)
                     fail(ret)
                 }
                 write(ret as MessageLite.Builder, main)
             }
         }
         
-        /*
-        class ViewCreator(
-            val v: V0Proto,
-            val main: OutputStream,
-            val activities: MutableMap<Int, DataClasses.ActivityState>,
-            val overlays: MutableMap<Int, DataClasses.Overlay>,
-            val rand: Random
-        ) {
-            inline fun <reified T : View, reified R : MessageLite> createView(create: Create, crossinline init: (T) -> Unit) {
-                val ret = R::class.java.getMethod("newBuilder").invoke(null)
-                try {
-                    val o = overlays[create.aid]
-                    if (o != null) {
-                        val v = createViewOverlay(o.usedIds, rand, create, init)
-                        V0Shared.setViewOverlay(o, v, create.parent)
-                        R::class.java.getMethod("setSuccess", Boolean::class.java).invoke(ret, true)
-                    } else {
-                        if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[create.aid]) {
-                                createViewActivity<T>(it, rand, create) { view ->
-                                    val t = it.theme
-                                    if (t != null) {
-                                        if (view is TextView) {
-                                            view.setTextColor(t.textColor)
-                                        }
-                                    }
-                                    init(view)
-                                    Util.setViewActivity(it, view, create.parent)
-                                }
-                                R::class.java.getMethod("setSuccess", Boolean::class.java).invoke(ret, true)
-                            }) R::class.java.getMethod("setSuccess", Boolean::class.java).invoke(ret, false)
-                    }
-                } catch (e: Exception) {
-                    Log.d(this.javaClass.name, "Exception: ", e)
-                    R::class.java.getMethod("setSuccess", Boolean::class.java).invoke(ret, false)
-                }
-                write(ret as MessageLite.Builder, main)
-            }
-        }
-         */
         inline fun <reified T : View> createViewActivity(a: GUIActivity, rand: Random, create: Create, init: (T) -> Unit): T {
             return createViewRaw(a, Util.generateViewID(rand, a), create, init)
         }

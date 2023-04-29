@@ -9,7 +9,7 @@ import com.termux.gui.Util
 import java.util.*
 
 class LifecycleListener(private val v0: V0Shared, private val activities: MutableMap<Int, DataClasses.ActivityState>,
-                        private val tasks: LinkedList<ActivityManager.AppTask>, private val am: ActivityManager, private val connectionID: Long) : Application.ActivityLifecycleCallbacks {
+                        private val tasks: MutableList<ActivityManager.AppTask>, private val am: ActivityManager, private val connectionID: Long) : Application.ActivityLifecycleCallbacks {
     override fun onActivityCreated(a: Activity, savedInstanceState: Bundle?) {
         //println("create")
         if (a is GUIActivity && a.connection == connectionID) {

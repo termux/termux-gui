@@ -14,6 +14,7 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.view.WindowInsetsCompat
 import com.termux.gui.GUIActivity
 import com.termux.gui.Logger
 import com.termux.gui.R
@@ -56,8 +57,8 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
             val handleActivity = HandleActivity(this, out, activities, wm, overlays, logger)
             val handleGlobal = HandleGlobal(out,  tasks, logger)
             val handleCreate = HandleCreate(this, out, activities, overlays, rand, eventQueue, logger)
-            val handleView = HandleView(this, out, activities, overlays, eventQueue, buffers, logger)
-            val handleBuffer = HandleBuffer(buffers, out, rand, main, logger)
+            val handleView = HandleView(this, out, activities, overlays, eventQueue, buffers, hardwareBuffers, logger)
+            val handleBuffer = HandleBuffer(buffers, hardwareBuffers, out, rand, main, logger)
             val handleRemote = HandleRemote(out, remoteviews, rand, app, logger)
             val handleNotification = HandleNotification(out, remoteviews, rand, app, notifications, activities, logger)
             while (! Thread.currentThread().isInterrupted) {
@@ -65,6 +66,8 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                 if (m == null) {
                     Logger.log(1, "proto", "Connection terminated")
                     break
+                } else {
+                    //println(m.methodCase.name)
                 }
                 when (m.methodCase) {
                     Method.MethodCase.NEWACTIVITY -> handleActivity.newActivity(m.newActivity)
@@ -92,6 +95,8 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.SETSECURE -> handleActivity.setSecure(m.setSecure)
                     Method.MethodCase.SETLOGLEVEL -> handleGlobal.setLogLevel(m.setLogLevel)
                     Method.MethodCase.GETLOG -> handleGlobal.getLog(m.getLog)
+                    Method.MethodCase.INTERCEPTVOLUME -> handleActivity.interceptVolume(m.interceptVolume)
+                    Method.MethodCase.CONFIGINSETS -> handleActivity.configInsets(m.configInsets)
                     
                     Method.MethodCase.CREATELINEARLAYOUT -> handleCreate.linear(m.createLinearLayout)
                     Method.MethodCase.CREATEFRAMELAYOUT -> handleCreate.frame(m.createFrameLayout)
@@ -113,6 +118,7 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.CREATETABLAYOUT -> handleCreate.tab(m.createTabLayout)
                     Method.MethodCase.CREATEWEBVIEW -> handleCreate.webView(m.createWebView)
                     Method.MethodCase.CREATEGRIDLAYOUT -> handleCreate.grid(m.createGridLayout)
+                    Method.MethodCase.CREATESURFACEVIEW -> handleCreate.surfaceView(m.createSurfaceView)
                     
                     Method.MethodCase.SHOWCURSOR -> handleView.showCursor(m.showCursor)
                     Method.MethodCase.SETLINEARLAYOUT -> handleView.linearParams(m.setLinearLayout)
@@ -149,6 +155,11 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
                     Method.MethodCase.SELECTITEM -> handleView.selectItem(m.selectItem)
                     Method.MethodCase.SETCLICKABLE -> handleView.setClickable(m.setClickable)
                     Method.MethodCase.SETCHECKED -> handleView.setChecked(m.setChecked)
+
+                    Method.MethodCase.CREATEHARDWAREBUFFER -> handleBuffer.createHardwareBuffer(m.createHardwareBuffer)
+                    Method.MethodCase.DESTROYHARDWAREBUFFER -> handleBuffer.destroyHardwareBuffer(m.destroyHardwareBuffer)
+                    Method.MethodCase.SETSURFACEBUFFER -> handleView.setSurfaceBuffer(m.setSurfaceBuffer)
+                    Method.MethodCase.SURFACECONFIG -> handleView.surfaceConfig(m.surfaceConfig)
                     
                     Method.MethodCase.CREATEREMOTELAYOUT -> handleRemote.createLayout(m.createRemoteLayout)
                     Method.MethodCase.DELETEREMOTELAYOUT -> handleRemote.deleteLayout(m.deleteRemoteLayout)
@@ -243,6 +254,32 @@ class V0Proto(app: Context, private val eventQueue: LinkedBlockingQueue<Event>) 
     override fun onBackButton(a: GUIActivity) {
         a.aid?.let {
             eventQueue.offer(Event.newBuilder().setBack(BackButtonEvent.newBuilder().setAid(it)).build())
+        }
+    }
+
+    override fun onVolume(a: GUIActivity, keyCode: Int, down: Boolean) {
+        val k = if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) {
+            VolumeKeyEvent.VolumeKey.VOLUME_UP
+        } else {
+            VolumeKeyEvent.VolumeKey.VOLUME_DOWN
+        }
+        a.aid?.let {
+            eventQueue.offer(Event.newBuilder().setVolume(VolumeKeyEvent.newBuilder().setAid(it).setKey(k).setReleased(!down)).build())
+        }
+    }
+
+    override fun onInsetChange(a: GUIActivity, insets: WindowInsetsCompat) {
+        a.aid?.let {
+            val bars = if (insets.isVisible(WindowInsetsCompat.Type.navigationBars()) && insets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                ConfigureInsetsRequest.Bars.BOTH_BARS
+            } else if (insets.isVisible(WindowInsetsCompat.Type.navigationBars())) {
+                ConfigureInsetsRequest.Bars.NAVIGATION_BAR
+            } else if (insets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                ConfigureInsetsRequest.Bars.STATUS_BAR
+            } else {
+                ConfigureInsetsRequest.Bars.NO_BAR
+            }
+            eventQueue.offer(Event.newBuilder().setInset(InsetEvent.newBuilder().setAid(it).setVisible(bars)).build())
         }
     }
 

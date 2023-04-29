@@ -7,6 +7,11 @@
 #include <sys/mman.h>
 #include <linux/ashmem.h>
 #include <android/log.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <atomic>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -60,4 +65,48 @@ Java_com_termux_gui_ConnectionHandler_00024Companion_unmap_1ashmem(JNIEnv *env, 
     } else {
         __android_log_print( ANDROID_LOG_DEBUG,"unmap_ashmem", "could not unmap ashmem, could not get direct buffer address or capacity\n");
     }
+}
+
+
+static std::atomic<PFNEGLDESTROYIMAGEKHRPROC> destroyImage{nullptr};
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_termux_gui_views_HardwareBufferSurfaceView_00024EGLImageKHR_00024Companion_nativeEglDestroyImageKHR(
+        JNIEnv *env, jobject thiz, jlong disp, jlong img) {
+    if (destroyImage.load() == nullptr) {
+        destroyImage = (PFNEGLDESTROYIMAGEKHRPROC) eglGetProcAddress("eglDestroyImageKHR");
+        if (destroyImage.load() == nullptr) {
+            jclass nullPointerException = env->FindClass("java/lang/NullPointerException");
+            if (nullPointerException == nullptr) {
+                __android_log_print( ANDROID_LOG_ERROR,"nativeEglDestroyImageKHR", "Could not find class NullPointerException\n");
+            } else {
+                env->ThrowNew(nullPointerException, "Could not get eglDestroyImageKHR address");
+            }
+            return JNI_FALSE;
+        }
+    }
+    return destroyImage.load()((EGLDisplay) disp, (EGLImageKHR) img);
+}
+
+
+static std::atomic<PFNGLEGLIMAGETARGETTEXTURE2DOESPROC> eglImageTargetTexture2D{nullptr};
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_termux_gui_views_HardwareBufferSurfaceView_00024EGLImageKHR_00024Companion_nativeEGLImageTargetTexture2DOES(
+        JNIEnv *env, jobject thiz, jlong img) {
+    if (eglImageTargetTexture2D.load() == nullptr) {
+        eglImageTargetTexture2D = (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC) eglGetProcAddress("glEGLImageTargetTexture2DOES");
+        if (eglImageTargetTexture2D.load() == nullptr) {
+            jclass nullPointerException = env->FindClass("java/lang/NullPointerException");
+            if (nullPointerException == nullptr) {
+                __android_log_print( ANDROID_LOG_ERROR,"nativeEglDestroyImageKHR", "Could not find class NullPointerException\n");
+            } else {
+                env->ThrowNew(nullPointerException, "Could not get glEGLImageTargetTexture2DOES address");
+            }
+            return;
+        }
+    }
+    eglImageTargetTexture2D.load()(GL_TEXTURE_EXTERNAL_OES, (GLeglImageOES) img);
 }

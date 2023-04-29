@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
+import android.hardware.HardwareBuffer
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -24,6 +25,7 @@ import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 import com.termux.gui.protocol.shared.v0.DataClasses
 import com.termux.gui.protocol.shared.v0.GUIWebViewClient
 import com.termux.gui.protocol.shared.v0.V0Shared
+import com.termux.gui.views.HardwareBufferSurfaceView
 import java.io.OutputStream
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -31,6 +33,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                  val overlays: MutableMap<Int, DataClasses.Overlay>,
                  val eventQueue: LinkedBlockingQueue<Event>,
                  val buffers: MutableMap<Int, DataClasses.SharedBuffer>,
+                 val hardwareBuffers: MutableMap<Int, HardwareBuffer>,
                  val logger: V0Proto.ProtoLogger
 ) {
     
@@ -90,6 +93,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 ret.success = true
             } else {
                 ret.success = false
+                ret.code = Error.INTERNAL_ERROR
             }
         }, {
             it.success = false
@@ -132,6 +136,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
             val p = v.layoutParams
             if (p == null) {
                 ret.success = false
+                ret.code = Error.INTERNAL_ERROR
                 return@handleView
             }
             when (m.s.valueCase!!) {
@@ -144,12 +149,14 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                         ViewSize.Constant.WRAP_CONTENT -> p.width = LayoutParams.WRAP_CONTENT
                         ViewSize.Constant.UNRECOGNIZED -> {
                             ret.success = false
+                            ret.code = Error.INVALID_ENUM
                             return@handleView
                         }
                     }
                 }
                 ViewSize.ValueCase.VALUE_NOT_SET -> {
                     ret.success = false
+                    ret.code = Error.INVALID_ENUM
                     return@handleView
                 }
             }
@@ -164,6 +171,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
             val p = v.layoutParams
             if (p == null) {
                 ret.success = false
+                ret.code = Error.INTERNAL_ERROR
                 return@handleView
             }
             when (m.s.valueCase!!) {
@@ -176,12 +184,14 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                         ViewSize.Constant.WRAP_CONTENT -> p.height = LayoutParams.WRAP_CONTENT
                         ViewSize.Constant.UNRECOGNIZED -> {
                             ret.success = false
+                            ret.code = Error.INVALID_ENUM
                             return@handleView
                         }
                     }
                 }
                 ViewSize.ValueCase.VALUE_NOT_SET -> {
                     ret.success = false
+                    ret.code = Error.INVALID_ENUM
                     return@handleView
                 }
             }
@@ -226,6 +236,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
             val p = v.layoutParams as? ViewGroup.MarginLayoutParams
             if (p == null) {
                 ret.success = false
+                ret.code = Error.INTERNAL_ERROR
                 return@handleView
             }
             val px = ProtoUtils.unitToPX(m.s.unit, m.s.value, c.resources.displayMetrics).toInt()
@@ -237,6 +248,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 Direction.RIGHT -> p.rightMargin = px
                 Direction.UNRECOGNIZED -> {
                     ret.success = false
+                    ret.code = Error.INVALID_ENUM
                     return@handleView
                 }
             }
@@ -258,6 +270,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 Direction.RIGHT -> v.setPadding(v.paddingLeft, v.paddingTop, px, v.paddingBottom)
                 Direction.UNRECOGNIZED -> {
                     ret.success = false
+                    ret.code = Error.INVALID_ENUM
                     return@handleView
                 }
             }
@@ -289,6 +302,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
         handler.handleView(m.v, SetProgressResponse.newBuilder(), { ret, v: ProgressBar, _, _ ->
             if (m.progress < 0 || m.progress > 100) {
                 ret.success = false
+                ret.code = Error.INTERNAL_ERROR
                 return@handleView
             }
             v.progress = m.progress
@@ -325,6 +339,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 SetGravityRequest.Gravity.RIGHTBOTTOM -> Gravity.END
                 SetGravityRequest.Gravity.UNRECOGNIZED -> {
                     ret.success = false
+                    ret.code = Error.INVALID_ENUM
                     return@handleView
                 }
             } or when (m.vertical!!) {
@@ -333,6 +348,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 SetGravityRequest.Gravity.RIGHTBOTTOM -> Gravity.BOTTOM
                 SetGravityRequest.Gravity.UNRECOGNIZED -> {
                     ret.success = false
+                    ret.code = Error.INVALID_ENUM
                     return@handleView
                 }
             }
@@ -404,6 +420,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                         }
                         else -> {
                             ret.success = false
+                            ret.code = Error.INVALID_VIEW_TYPE
                             return@handleView
                         }
                     }
@@ -413,6 +430,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 ret.success = true
             } else {
                 ret.success = false
+                ret.code = Error.INVALID_VIEW_TYPE
             }
         }, {
             it.success = false
@@ -435,6 +453,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 }
                 else -> {
                     ret.success = false
+                    ret.code = Error.INVALID_VIEW_TYPE
                     return@handleView
                 }
             }
@@ -463,6 +482,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 ret.success = true
             } else {
                 ret.success = false
+                ret.code = Error.BUFFER_NOT_FOUND
             }
         }, {
             it.success = false
@@ -487,6 +507,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 ret.success = true
             } else {
                 ret.success = false
+                ret.code = Error.INTERNAL_ERROR
             }
         }, {
             it.success = false
@@ -596,6 +617,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 ret.success = true
             } else {
                 ret.success = false
+                ret.code = Error.ANDROID_VERSION_TOO_LOW
             }
         }, {
             it.success = false
@@ -627,6 +649,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
                 ret.success = true
             } else {
                 ret.success = false
+                ret.code = Error.INTERNAL_ERROR
             }
         }, {
             it.success = false
@@ -698,6 +721,50 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
     }
     
     
+    fun setSurfaceBuffer(m: SurfaceViewSetBufferRequest) {
+        //println("setbuffer")
+        // setBuffer is synchronized with the rendering and so can be called from the connection thread
+        handler.handleViewConnectionThread(m.v, SurfaceViewSetBufferResponse.newBuilder(), { ret, v: HardwareBufferSurfaceView, _, _ ->
+            val b = hardwareBuffers[m.buffer]
+            if (b != null) {
+                v.setBuffer(b)
+                ret.success = true
+            } else {
+                ret.success = false
+                ret.code = Error.BUFFER_NOT_FOUND
+            }
+        }, {
+            it.success = false
+        })
+    }
+    
+    fun surfaceConfig(m: SurfaceViewConfigRequest) {
+        handler.handleView(m.v, SurfaceViewSetBufferResponse.newBuilder(), { ret, v: HardwareBufferSurfaceView, _, _ ->
+            synchronized(HardwareBufferSurfaceView.RENDER_LOCK) {
+                v.config.backgroundColor = m.backgroundColor
+                when (m.xMismatch) {
+                    SurfaceViewConfigRequest.OnDimensionMismatch.STICK_TOPLEFT -> v.config.x = HardwareBufferSurfaceView.Config.OnDimensionMismatch.STICK_TOPLEFT
+                    SurfaceViewConfigRequest.OnDimensionMismatch.CENTER_AXIS -> v.config.x = HardwareBufferSurfaceView.Config.OnDimensionMismatch.CENTER_AXIS
+                    else -> {
+                        ret.success = false
+                        ret.code = Error.INVALID_ENUM
+                    }
+                }
+                when (m.yMismatch) {
+                    SurfaceViewConfigRequest.OnDimensionMismatch.STICK_TOPLEFT -> v.config.y = HardwareBufferSurfaceView.Config.OnDimensionMismatch.STICK_TOPLEFT
+                    SurfaceViewConfigRequest.OnDimensionMismatch.CENTER_AXIS -> v.config.y = HardwareBufferSurfaceView.Config.OnDimensionMismatch.CENTER_AXIS
+                    else -> {
+                        ret.success = false
+                        ret.code = Error.INVALID_ENUM
+                    }
+                }
+                v.setFrameRate(m.framerate)
+                ret.success = true
+            }
+        }, {
+            it.success = false
+        })
+    }
     
     
 }

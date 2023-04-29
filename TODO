@@ -23,35 +23,43 @@ Roadmap:
     [x] set secure flag for Activity
         [x] json tested
         [x] protobuf tested
-    [ ] make the C/C++ library
-        [ ] test it
-        [ ] write a tutorial
-        [ ] make some example app with it
+    [x] fullscreen mode for Activities (hiding the 3 buttons and the notification bar)
+    [x] add option to intercept volume keys like Termux
+    [x] SurfaceView with EGL buffers for accelerated graphics
+        [x] secure flag
+        [x] setting the frame rate
+        [x] The frame callbacks should happen through Choreographer
+        [x] set behaviour on non-fitting buffer relative to SurfaceView size
+            [x] Center the axis
+            [x] start at the top/left corner of the image at the top/left corner of the SurfaceView
+            [x] set a background color (the glClearColor) for smaller images
+        [x] test it
+    [x] add error codes to protobuf
+        [x] add to plugin
+    [x] add more logging
+        [x] implement methods
+    [x] make the C/C++ library
+        [/] write a tutorial
+        [x] make some example app with it
+            [x] port of es2gears
     [ ] Put all known applications using Termux:GUI in the readme, I made quite a few by now
     [x] protobuf documentation
     [ ] update the f-droid metadata
         [ ] write a changelog
-        [ ] more screenshots
         [ ] update description and readme
     - 1.0.0: !!! start semantic versioning from here !!!
         [ ] switch to the new plugin system, deprecate shared uid
+        [ ] add more logging
+        [ ] C library 1.0
+            [ ] add error codes from protobuf to C library
+            [/] finish tutorial
         [ ] button in settings to save a logcat dump to a file
-        [ ] SurfaceView with EGL buffers for accelerated graphics
-            [ ] with ctypes.LoadLibrary("libandroid.so") you can load the android library in python and access the hardware buffer functions
-            [ ] use dlopen("libandroid.so") for that in C/C++
-            [ ] secure flag
-        [ ] add error codes to protobuf
-            [ ] error code for when the Activity is stopped
-        [/] add more logging
-            [x] implement methods
-            [ ] let methods log stuff
-        [ ] RelativeLayout
+        [?] RelativeLayout
+            [ ] good ConstraintLayout support accomplishes the same
         [ ] ConstraintLayout
         [ ] scroll events
         [ ] Dialogs in DialogFragments, so they stay in the Activity they're started in and don't close on leaving
-        [ ] add the ability to intercept touch events in layouts
-        [ ] fullscreen mode for Activities (hiding the 3 buttons and the notification bar)
-        [ ] add option to intercept volume keys like Termux
+        [?] add the ability to intercept touch events in layouts
         [ ] events for PiP action buttons
         [ ] make the readme nicer
         [ ] add Javadocs

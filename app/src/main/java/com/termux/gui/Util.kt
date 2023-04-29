@@ -34,7 +34,7 @@ import kotlin.math.roundToInt
 class Util {
     companion object {
         
-        fun getTaskInfo(tasks: LinkedList<ActivityManager.AppTask>, task: ActivityManager.AppTask): ActivityManager.RecentTaskInfo? {
+        fun getTaskInfo(tasks: MutableList<ActivityManager.AppTask>, task: ActivityManager.AppTask): ActivityManager.RecentTaskInfo? {
             try {
                 return task.taskInfo
             } catch (e: IllegalArgumentException) {

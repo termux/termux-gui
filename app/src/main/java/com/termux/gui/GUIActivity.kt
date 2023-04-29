@@ -4,11 +4,14 @@ import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowInsetsCompat
 import com.google.gson.JsonElement
 import java.io.Serializable
 import java.util.*
@@ -24,6 +27,8 @@ open class GUIActivity : AppCompatActivity() {
         fun onPictureInPictureModeChanged(a: GUIActivity, isInPictureInPictureMode: Boolean)
         fun onUserLeaveHint(a: GUIActivity)
         fun onBackButton(a: GUIActivity)
+        fun onVolume(a: GUIActivity, keyCode: Int, down: Boolean)
+        fun onInsetChange(a: GUIActivity, insets: WindowInsetsCompat)
     }
     
     
@@ -47,13 +52,13 @@ open class GUIActivity : AppCompatActivity() {
             }
         }
     
-    data class ActivityData(var autopip: Boolean = false, var backEvent: Boolean = false, var secure: Boolean = false) : Serializable
+    data class ActivityData(var autopip: Boolean = false, var backEvent: Boolean = false, var secure: Boolean = false, var volumeUp: Boolean = false, var volumeDown: Boolean = false) : Serializable
     var data = ActivityData()
     
     data class GUITheme(val statusBarColor: Int, val colorPrimary: Int, var windowBackground: Int, val textColor: Int, val colorAccent: Int) : Serializable
     var listener: Listener? = null
-    
-    @Suppress("UNCHECKED_CAST")
+
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Logger.log(2, TAG, "oncreate activity")
@@ -76,6 +81,10 @@ open class GUIActivity : AppCompatActivity() {
                 setSecure(data.secure)
             }
         }
+        window.decorView.setOnApplyWindowInsetsListener { v, insets ->
+            listener?.onInsetChange(this, WindowInsetsCompat.toWindowInsetsCompat(insets, v))
+            v.onApplyWindowInsets(insets)
+        }
     }
     
     fun setSecure(secure: Boolean) {
@@ -90,12 +99,29 @@ open class GUIActivity : AppCompatActivity() {
     val aid: Int? get() {return intent.dataString?.split('-')?.get(1)?.toInt()}
     val connection: Long? get() {return intent.dataString?.split('-')?.get(0)?.toLong()}
 
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         if (data.backEvent) {
             listener?.onBackButton(this)
         } else {
             super.onBackPressed()
         }
+    }
+    
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (data.volumeDown && keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || data.volumeUp && keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            listener?.onVolume(this, keyCode, true)
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+    
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (data.volumeDown && keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || data.volumeUp && keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            listener?.onVolume(this, keyCode, false)
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
     }
     
     fun configToJson(conf: Configuration?): JsonElement? {
@@ -129,7 +155,7 @@ open class GUIActivity : AppCompatActivity() {
         listener?.onConfigurationChanged(this, newConfig)
     }
 
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
         listener?.onPictureInPictureModeChanged(this, isInPictureInPictureMode)
@@ -151,7 +177,6 @@ open class GUIActivity : AppCompatActivity() {
     }
     
     
-    @Suppress("UNCHECKED_CAST")
     fun <T> findViewReimplemented(id: Int) : T? {
         return findViewById(id)
     }

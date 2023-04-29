@@ -41,6 +41,7 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
         } catch (e: java.lang.Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -65,6 +66,7 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
                         a.requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 0)
                     }
                     ret.id = -1
+                    ret.code = Error.INTERNAL_ERROR
                     ProtoUtils.write(ret, main)
                     return
                 }
@@ -100,6 +102,7 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
                     val layoutHUD = remoteviews[m.custom.layoutHUD]
                     if (layout == null) {
                         ret.id = -1
+                        ret.code = Error.INVALID_REMOTE_LAYOUT
                         ProtoUtils.write(ret, main)
                         return
                     }
@@ -113,6 +116,7 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
                 }
                 CreateNotificationRequest.TypeCase.TYPE_NOT_SET -> {
                     ret.id = -1
+                    ret.code = Error.INVALID_ENUM
                     ProtoUtils.write(ret, main)
                     return
                 }
@@ -177,6 +181,7 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
         } catch (e: java.lang.Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.id = -1
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -194,6 +199,7 @@ class HandleNotification(val main: OutputStream, val remoteviews: MutableMap<Int
         } catch (e: java.lang.Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }

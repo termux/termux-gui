@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.hardware.HardwareBuffer
 import android.net.Uri
 import android.os.Build
 import android.os.SharedMemory
@@ -30,7 +31,8 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     private var activityID = 0
     protected val rand = Random()
 
-    protected val tasks = LinkedList<ActivityManager.AppTask>()
+    protected val tasks: MutableList<ActivityManager.AppTask> = Collections.synchronizedList(LinkedList())
+    protected val hardwareBuffers: MutableMap<Int, HardwareBuffer> = Collections.synchronizedMap(HashMap())
     protected val activities: MutableMap<Int, DataClasses.ActivityState> = Collections.synchronizedMap(HashMap())
     protected val buffers: MutableMap<Int, DataClasses.SharedBuffer> = HashMap()
     protected val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation> = HashMap()
@@ -102,6 +104,11 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
                     }
                 }
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                for (b in hardwareBuffers.values) {
+                    b.close()
+                }
+            } 
             val not = NotificationManagerCompat.from(app)
             for (id in notifications) {
                 not.cancel(Thread.currentThread().id.toString(), id)

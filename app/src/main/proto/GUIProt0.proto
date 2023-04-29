@@ -251,15 +251,57 @@ enum Error {
    */
   ACTIVITY_STOPPED = 1;
   /*
-  The Activity the method tried to act on has been destroyed.
-  The Activity will remain unavailable, and you have to launch a new one if you need another one.
+  The Activity the method tried to act on has been destroyed, or was never created (in case an invalid id was used).
    */
-  ACTIVITY_DESTROYED = 2;
+  INVALID_ACTIVITY = 2;
   /*
   An exception occurred while handling the method. Retrying the method or issuing other methods may or may not work, depending on the type of error.
-  If enabled, you will get the stack trace as a debug event.
    */
   INTERNAL_ERROR = 3;
+  /*
+  The View id wasn't found in the Activity.
+   */
+  INVALID_VIEW = 4;
+  /*
+  The View id was found, but doesn't correspond to a valid View type for the method.
+   */
+  INVALID_VIEW_TYPE = 5;
+  /*
+  The remote layout with the specified ID wasn't found.
+   */
+  INVALID_REMOTE_LAYOUT = 6;
+  /*
+  An image was too big to be used by Android. Images for remote ImageViews and Task icons have to be smaller than 2 MB.
+   */
+  IMAGE_TOO_BIG = 7;
+  /*
+  The specified notification channel wasn't found.
+   */
+  CHANNEL_NOT_FOUND = 8;
+  /*
+  The specified notification widget wasn't found.
+   */
+  WIDGET_NOT_FOUND = 9;
+  /*
+  An enumeration value wasn't recognized.
+   */
+  INVALID_ENUM = 10;
+  /*
+  The specified Task id wasn't found.
+   */
+  TASK_NOT_FOUND = 11;
+  /*
+  The ratio in SetPiPParamsRequest was out of range for Android PiP window ratios.
+   */
+  INVALID_RATIO = 12;
+  /*
+  The method can't work, because the feature was introduced in a later Android version.
+   */
+  ANDROID_VERSION_TOO_LOW = 13;
+  /*
+  The specified buffer wasn't found.
+   */
+  BUFFER_NOT_FOUND = 14;
 }
 
 
@@ -346,6 +388,7 @@ message FinishActivityRequest {
 
 message FinishActivityResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -360,6 +403,7 @@ message FinishTaskRequest {
 
 message FinishTaskResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -374,6 +418,7 @@ message BringTaskToFrontRequest {
 
 message BringTaskToFrontResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -388,6 +433,7 @@ message MoveTaskToBackRequest {
 
 message MoveTaskToBackResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -423,6 +469,7 @@ message SetThemeRequest {
 
 message SetThemeResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -444,6 +491,7 @@ message SetTaskDescriptionRequest {
 
 message SetTaskDescriptionResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -466,6 +514,7 @@ message SetPiPParamsRequest {
 
 message SetPiPParamsResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -497,6 +546,7 @@ message SetInputModeRequest {
 
 message SetInputModeResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -515,6 +565,7 @@ message SetPiPModeRequest {
 
 message SetPiPModeResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -533,6 +584,7 @@ message SetPiPModeAutoRequest {
 
 message SetPiPModeAutoResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -551,6 +603,7 @@ message ToastRequest {
 
 message ToastResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -569,6 +622,7 @@ message KeepScreenOnRequest {
 
 message KeepScreenOnResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -587,6 +641,7 @@ message SetOrientationRequest {
 
 message SetOrientationResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -609,6 +664,7 @@ message SetPositionRequest {
 
 message SetPositionResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -624,6 +680,7 @@ message GetConfigurationRequest {
 message GetConfigurationResponse {
   bool success = 1;
   Configuration configuration = 2;
+  Error code = 3;
 }
 
 /*
@@ -635,6 +692,7 @@ message TurnScreenOnRequest {
 
 message TurnScreenOnResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -680,6 +738,7 @@ message RequestUnlockRequest {
 
 message RequestUnlockResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -694,6 +753,7 @@ message HideSoftKeyboardRequest {
 
 message HideSoftKeyboardResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -709,7 +769,92 @@ message InterceptBackButtonRequest {
 
 message InterceptBackButtonResponse {
   bool success = 1;
+  Error code = 2;
 }
+
+
+/*
+Sets whether the volume button(s) is intercepted. Instead of changing the volume, you will get an event.
+ */
+message InterceptVolumeButtonRequest {
+  /*
+  The id of the Activity.
+   */
+  int32 aid = 1;
+  /*
+  Whether to intercept volume up.
+   */
+  bool interceptUp = 2;
+  /*
+  Whether to intercept volume down.
+   */
+  bool interceptDown = 3;
+}
+
+message InterceptVolumeButtonResponse {
+  bool success = 1;
+  Error code = 2;
+}
+
+
+/*
+Sets the behaviour of the status and navigation bar.
+ */
+message ConfigureInsetsRequest {
+  /*
+  The id of the Activity.
+   */
+  int32 aid = 1;
+  /*
+  Which bars should be hidden/shown.
+   */
+  enum Bars {
+    /*
+    Both the navigation and the status bar.
+     */
+    BOTH_BARS = 0;
+    /*
+    Navigation bar only.
+     */
+    NAVIGATION_BAR = 1;
+    /*
+    Status bar only.
+     */
+    STATUS_BAR = 2;
+    /*
+    No bar.
+     */
+    NO_BAR = 3;
+  }
+  /*
+  How the hidden bars should behave.
+   */
+  enum BarBehaviour {
+    /*
+    Show the bars on system gestures like swipe from the top or the bottom of the screen.
+     */
+    BAR_BEHAVIOUR_DEFAULT = 0;
+    /*
+    Like BAR_BEHAVIOUR_DEFAULT, but the bars will be shown transparent, temporarily and overlay over the window.
+     */
+    BAR_BEHAVIOUR_TRANSIENT = 1;
+  }
+  /*
+  The bars that should be shown.
+   */
+  Bars shown = 2;
+  /*
+  How the bars should behave to user input.
+   */
+  BarBehaviour behaviour = 3;
+  
+}
+
+message ConfigureInsetsResponse {
+  bool success = 1;
+  Error code = 2;
+}
+
 
 /*
 Get the plugin version code.
@@ -735,6 +880,7 @@ message SetSecureFlagRequest {
 
 message SetSecureFlagResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -795,6 +941,7 @@ message CreateLinearLayoutRequest {
 
 message CreateLinearLayoutResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -804,6 +951,7 @@ message CreateFrameLayoutRequest {
 
 message CreateFrameLayoutResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -813,6 +961,7 @@ message CreateSwipeRefreshLayoutRequest {
 
 message CreateSwipeRefreshLayoutResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -834,6 +983,7 @@ message CreateTextViewRequest {
 
 message CreateTextViewResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -874,6 +1024,7 @@ message CreateEditTextRequest {
 
 message CreateEditTextResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -891,6 +1042,7 @@ message CreateButtonRequest {
 
 message CreateButtonResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -904,6 +1056,7 @@ message CreateImageViewRequest {
 
 message CreateImageViewResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -913,6 +1066,7 @@ message CreateSpaceRequest {
 
 message CreateSpaceResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -934,6 +1088,7 @@ message CreateNestedScrollViewRequest {
 
 message CreateNestedScrollViewResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -955,6 +1110,7 @@ message CreateHorizontalScrollViewRequest {
 
 message CreateHorizontalScrollViewResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -972,6 +1128,7 @@ message CreateRadioButtonRequest {
 
 message CreateRadioButtonResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -981,6 +1138,7 @@ message CreateRadioGroupRequest {
 
 message CreateRadioGroupResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -998,6 +1156,7 @@ message CreateCheckboxRequest {
 
 message CreateCheckboxResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1011,6 +1170,7 @@ message CreateToggleButtonRequest {
 
 message CreateToggleButtonResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1028,6 +1188,7 @@ message CreateSwitchRequest {
 
 message CreateSwitchResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1037,6 +1198,7 @@ message CreateSpinnerRequest {
 
 message CreateSpinnerResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1046,6 +1208,7 @@ message CreateProgressBarRequest {
 
 message CreateProgressBarResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1055,6 +1218,7 @@ message CreateTabLayoutRequest {
 
 message CreateTabLayoutResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 message CreateGridLayoutRequest {
@@ -1071,6 +1235,7 @@ message CreateGridLayoutRequest {
 
 message CreateGridLayoutResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 message CreateWebViewRequest {
@@ -1079,8 +1244,26 @@ message CreateWebViewRequest {
 
 message CreateWebViewResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
+
+message CreateSurfaceViewRequest {
+  Create data = 1;
+  /*
+  If true, makes the SurfaceView work with the soft & hardware keyboard and send key events
+   */
+  bool keyboard = 2;
+  /*
+  Secure flag, like for Activities.
+   */
+  bool secure = 6;
+}
+
+message CreateSurfaceViewResponse {
+  int32 id = 1;
+  Error code = 2;
+}
 
 
 
@@ -1099,6 +1282,7 @@ message ShowCursorRequest {
 
 message ShowCursorResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1118,6 +1302,7 @@ message SetLinearLayoutParamsRequest {
 
 message SetLinearLayoutParamsResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1165,6 +1350,7 @@ message SetGridLayoutParamsRequest {
 
 message SetGridLayoutParamsResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1185,6 +1371,7 @@ message SetViewLocationRequest {
 
 message SetViewLocationResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1196,6 +1383,7 @@ message SetRelativeLayoutParamsRequest {
 
 message SetRelativeLayoutParamsResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1208,6 +1396,7 @@ message SetVisibilityRequest {
 
 message SetVisibilityResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1220,6 +1409,7 @@ message SetWidthRequest {
 
 message SetWidthResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1232,6 +1422,7 @@ message SetHeightRequest {
 
 message SetHeightResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1251,6 +1442,7 @@ message GetDimensionsResponse {
    */
   float width = 1;
   float height = 2;
+  Error code = 3;
 }
 
 /*
@@ -1262,6 +1454,7 @@ message DeleteViewRequest {
 
 message DeleteViewResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1273,6 +1466,7 @@ message DeleteChildrenRequest {
 
 message DeleteChildrenResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1292,6 +1486,7 @@ message SetMarginRequest {
 
 message SetMarginResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1311,6 +1506,7 @@ message SetPaddingRequest {
 
 message SetPaddingResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1323,6 +1519,7 @@ message SetBackgroundColorRequest {
 
 message SetBackgroundColorResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1335,6 +1532,7 @@ message SetTextColorRequest {
 
 message SetTextColorResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1350,6 +1548,7 @@ message SetProgressRequest {
 
 message SetProgressResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1363,6 +1562,7 @@ message SetRefreshingRequest {
 
 message SetRefreshingResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1375,6 +1575,7 @@ message SetTextRequest {
 
 message SetTextResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1411,6 +1612,7 @@ message SetGravityRequest {
 
 message SetGravityResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1423,6 +1625,7 @@ message SetTextSizeRequest {
 
 message SetTextSizeResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1438,6 +1641,7 @@ message GetTextResponse {
   The text of the View.
    */
   string text = 2;
+  Error code = 3;
 }
 
 /*
@@ -1450,6 +1654,7 @@ message SetCheckedRequest {
 
 message SetCheckedResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1462,6 +1667,7 @@ message RequestFocusRequest {
 
 message RequestFocusResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1481,6 +1687,7 @@ message GetScrollPositionResponse {
    */
   float x = 1;
   float y = 2;
+  Error code = 3;
 }
 
 /*
@@ -1504,6 +1711,7 @@ message SetScrollPositionRequest {
 
 message SetScrollPositionResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1519,6 +1727,7 @@ message SetListRequest {
 
 message SetListResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1534,12 +1743,13 @@ message SetImageRequest {
 
 message SetImageResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
 Creates a shared memory buffer.
 
-This is the only method that doesn't generate a message as a response.
+This is a method that doesn't generate a message as a response.
 Instead the buffer id is send as a signed 32bit integer.
 If the integer is negative, creation failed.
 If the integer is positive, creation succeeded and you will get another byte (the value can be discarded)
@@ -1580,6 +1790,7 @@ message DeleteBufferRequest {
 
 message DeleteBufferResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1592,6 +1803,7 @@ message BlitBufferRequest {
 
 message BlitBufferResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1604,6 +1816,7 @@ message SetBufferRequest {
 
 message SetBufferResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1615,6 +1828,7 @@ message RefreshImageViewRequest {
 
 message RefreshImageViewResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1627,6 +1841,7 @@ message SelectTabRequest {
 
 message SelectTabResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1639,6 +1854,7 @@ message SelectItemRequest {
 
 message SelectItemResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1651,6 +1867,7 @@ message SetClickableRequest {
 
 message SetClickableResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1679,6 +1896,7 @@ message CreateRemoteLayoutRequest {
 message CreateRemoteLayoutResponse {
   // an rid of -1 indicates a failure.
   int32 rid = 1;
+  Error code = 2;
 }
 
 /*
@@ -1690,6 +1908,7 @@ message DeleteRemoteLayoutRequest {
 
 message DeleteRemoteLayoutResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1703,6 +1922,7 @@ message AddRemoteFrameLayoutRequest {
 
 message AddRemoteFrameLayoutResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1714,6 +1934,7 @@ message AddRemoteLinearLayoutRequest {
 
 message AddRemoteLinearLayoutResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1724,6 +1945,7 @@ message AddRemoteTextViewRequest {
 
 message AddRemoteTextViewResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1734,6 +1956,7 @@ message AddRemoteButtonRequest {
 
 message AddRemoteButtonResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1744,6 +1967,7 @@ message AddRemoteImageViewRequest {
 
 message AddRemoteImageViewResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1754,6 +1978,7 @@ message AddRemoteProgressBarRequest {
 
 message AddRemoteProgressBarResponse {
   int32 id = 1;
+  Error code = 2;
 }
 
 
@@ -1765,6 +1990,7 @@ message SetRemoteBackgroundColorRequest {
 
 message SetRemoteBackgroundColorResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1780,6 +2006,7 @@ message SetRemoteProgressBarRequest {
 
 message SetRemoteProgressBarResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1791,6 +2018,7 @@ message SetRemoteTextRequest {
 
 message SetRemoteTextResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1802,6 +2030,7 @@ message SetRemoteTextSizeRequest {
 
 message SetRemoteTextSizeResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1813,6 +2042,7 @@ message SetRemoteTextColorRequest {
 
 message SetRemoteTextColorResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1824,6 +2054,7 @@ message SetRemoteVisibilityRequest {
 
 message SetRemoteVisibilityResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1838,6 +2069,7 @@ message SetRemotePaddingRequest {
 
 message SetRemotePaddingResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1851,6 +2083,7 @@ message SetRemoteImageRequest {
 
 message SetRemoteImageResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1863,6 +2096,7 @@ message SetWidgetLayoutRequest {
 
 message SetWidgetLayoutResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1882,6 +2116,7 @@ message AllowJavascriptRequest {
 message AllowJavascriptResponse {
   bool success = 1;
   bool allowed = 2;
+  Error code = 3;
 }
 
 /*
@@ -1894,6 +2129,7 @@ message AllowContentURIRequest {
 
 message AllowContentURIResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1912,6 +2148,7 @@ message SetDataRequest {
 
 message SetDataResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1924,6 +2161,7 @@ message LoadURIRequest {
 
 message LoadURIResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1936,6 +2174,7 @@ message AllowNavigationRequest {
 
 message AllowNavigationResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1947,6 +2186,7 @@ message GoBackRequest {
 
 message GoBackResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1958,6 +2198,7 @@ message GoForwardRequest {
 
 message GoForwardResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -1970,6 +2211,7 @@ message EvaluateJSRequest {
 
 message EvaluateJSResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -1995,6 +2237,7 @@ message CreateNotificationChannelRequest {
 
 message CreateNotificationChannelResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -2100,6 +2343,7 @@ message CreateNotificationResponse {
   -1 indicates an error.
    */
   int32 id = 1;
+  Error code = 2;
 }
 
 /*
@@ -2111,6 +2355,7 @@ message CancelNotificationRequest {
 
 message CancelNotificationResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -2131,6 +2376,7 @@ message SendClickEventRequest {
 
 message SendClickEventResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -2141,6 +2387,7 @@ message SendLongClickEventRequest {
 
 message SendLongClickEventResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -2151,6 +2398,7 @@ message SendFocusChangeEventRequest {
 
 message SendFocusChangeEventResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -2161,6 +2409,7 @@ message SendTouchEventRequest {
 
 message SendTouchEventResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
@@ -2171,6 +2420,7 @@ message SendTextEventRequest {
 
 message SendTextEventResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 /*
@@ -2183,9 +2433,163 @@ message SendOverlayTouchEventRequest {
 
 message SendOverlayTouchEventResponse {
   bool success = 1;
+  Error code = 2;
 }
 
 
+// SurfaceView and HardwareBuffer methods
+
+
+/*
+Creates a shared HardwareBuffer for rendering with GLES or Vulkan.
+
+The flags AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER and AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE are always set, as
+the plugin reads the buffer as a texture and the client needs to write to it as a framebuffer.
+
+This is a method that doesn't generate a message as a response.
+Instead the buffer id is send as a signed 32bit integer.
+If the integer is negative, creation failed.
+If the integer is positive, creation succeeded and you will get the HardwareBuffer over the socket.
+Receiving the HardwareBuffer has to be done with AHardwareBuffer_recvHandleFromUnixSocket from hardware_buffer.h in the NDK.
+
+ */
+message CreateHardwareBufferRequest {
+  /*
+  Width in pixels.
+   */
+  int32 width = 1;
+  /*
+  Height in pixels.
+   */
+  int32 height = 2;
+  /*
+  Possible buffer formats. See https://developer.android.com/ndk/reference/group/a-hardware-buffer#ahardwarebuffer_format.
+   */
+  enum Format {
+    /*
+    Corresponding to AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM.
+     */
+    RGBA8888 = 0;
+    /*
+    Corresponding to AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM.
+     */
+    RGBX8888 = 1;
+    /*
+    Corresponding to AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM.
+     */
+    RGB888 = 2;
+    /*
+    Corresponding to AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM.
+     */
+    RGB565 = 3;
+  }
+  /*
+  The buffer format.
+   */
+  Format format = 3;
+  enum CPUUsage {
+    never = 0;
+    rarely = 1;
+    often = 2;
+  }
+  /*
+  How often the CPU will read the buffer.
+   */
+  CPUUsage cpuRead = 4;
+  /*
+  How often the CPU will write to the buffer.
+   */
+  CPUUsage cpuWrite = 5;
+}
+
+/*
+Destroys a HardwareBuffer in the plugin.
+To free the resources, you also have to destroy the HardwareBuffer in the client and unmap all texture and other mappings.
+ */
+message DestroyHardwareBufferRequest {
+  int32 buffer = 1;
+}
+
+message DestroyHardwareBufferResponse {
+  bool success = 1;
+  Error code = 2;
+}
+
+
+/*
+Sets a SurfaceView to present the contents of a HardwareBuffer.
+After this method completes, the client can use the old buffer again.
+If you want to unset the buffer, use -1.
+-1 is returned for the old buffer if there was none.
+
+If a buffer fits the SurfaceView size, it is displayed fully as the contents of the SurfaceView.
+If the buffer is too small, it is centered in the SurfaceView.
+If the buffer is too large, it is drawn such that the upper left corner starts at the upper left corner of the SurfaceView.
+This is done for both dimensions independently, i.e. a SurfaceView with a size of 100 x 200 and a buffer of 50x300
+gets centered horizontally in the SurfaceView, while the upper edge of the buffer aligns with the upper edge of the SurfaceView.
+ */
+message SurfaceViewSetBufferRequest {
+  View v = 1;
+  int32 buffer = 2;
+}
+
+message SurfaceViewSetBufferResponse {
+  bool success = 1;
+  /*
+  The new buffer that is being used.
+   */
+  int32 newBuffer = 2;
+  /*
+  The old buffer that is available again.
+   */
+  int32 oldBuffer = 3;
+  Error code = 4;
+}
+
+/*
+Sets configurations for a SurfaceView.
+ */
+message SurfaceViewConfigRequest {
+  View v = 1;
+  /*
+  What should happen in case the buffer dimensions for an axis don't match the Surface dimensions.
+   */
+  enum OnDimensionMismatch {
+    /*
+    The top/left side of the buffer will be displayed starting at the top/left side of the Surface.
+    If the buffer is too large, the content at the bottom/right of the buffer won't be displayed.
+     */
+    STICK_TOPLEFT = 0;
+    /*
+    The content of the buffer is centered on the axis of the Surface, meaning the outer parts won't be displayed if the buffer is too large.
+     */
+    CENTER_AXIS = 1;
+  }
+  /*
+  In case the buffer is too small, this is the color the rest of the surface gets filled up with
+   */
+  uint32 backgroundColor = 2;
+  /*
+  What happens on an x dimension mismatch.
+   */
+  OnDimensionMismatch xMismatch = 3;
+  /*
+  What happens on an y dimension mismatch.
+   */
+  OnDimensionMismatch yMismatch = 4;
+  /*
+  The targeted framerate for the Surface. The system doesn't need to respect this value.
+  If it does, the frequency of SurfaceViewSurfaceChangedEvents changes accordingly.
+  It is ignored on Android versions lower than 11.
+   */
+  float framerate = 5;
+  
+}
+
+message SurfaceViewConfigResponse {
+  bool success = 1;
+  Error code = 2;
+}
 
 
 
@@ -2217,6 +2621,8 @@ message Method {
     SetSecureFlagRequest setSecure = 38;
     SetLogLevelRequest setLogLevel = 39;
     GetLogRequest getLog = 40;
+    InterceptVolumeButtonRequest interceptVolume = 41;
+    ConfigureInsetsRequest configInsets = 42;
     
 
     // View creation methods
@@ -2240,6 +2646,7 @@ message Method {
     CreateTabLayoutRequest createTabLayout = 117;
     CreateWebViewRequest createWebView = 128;
     CreateGridLayoutRequest createGridLayout = 129;
+    CreateSurfaceViewRequest createSurfaceView = 130;
     
     
     // View manipulation methods
@@ -2331,6 +2738,13 @@ message Method {
     SendTouchEventRequest sendTouchEvent = 603;
     SendTextEventRequest sendTextEvent = 604;
     SendOverlayTouchEventRequest sendOverlayTouch = 605;
+    
+    
+    CreateHardwareBufferRequest createHardwareBuffer = 700;
+    DestroyHardwareBufferRequest destroyHardwareBuffer = 701;
+    SurfaceViewSetBufferRequest setSurfaceBuffer = 702;
+    SurfaceViewConfigRequest surfaceConfig = 703;
+    
     
   }
 }
@@ -2666,13 +3080,84 @@ message KeyEvent {
 }
 
 
-// Debug events
 /*
-An Exception happened in the plugin. Currently unused.
+Send for each frame for a SurfaceView. You should try to submit a frame as fast as possible after this,
+and not submit another one until the next event, to prevent rendering images that don't get shown to the user.
  */
-message ExceptionDebugEvent {
-  string stacktrace = 1;
+message SurfaceViewFrameCompleteEvent {
+  /*
+  The id of the SurfaceView.
+   */
+  View v = 1;
+  /*
+  The timestamp for the frame rendering completion in milliseconds since system boot.
+   */
+  uint64 timestamp = 2;
 }
+
+
+/*
+Send when the Surface of a SurfaceView changes. If the size is different, your next buffer should have the updated size.
+ */
+message SurfaceViewSurfaceChangedEvent {
+  /*
+  The id of the SurfaceView.
+   */
+  View v = 1;
+  /*
+  The new width of the Surface.
+   */
+  uint32 width = 2;
+  /*
+  The new height of the Surface.
+   */
+  uint32 height = 3;
+}
+
+
+/*
+Send when a volume key is pressed and it was configured to be intercepted.
+Down presses are repeated as long as the key is down.
+ */
+message VolumeKeyEvent {
+  int32 aid = 1;
+  /*
+  The Volume keys.
+   */
+  enum VolumeKey {
+    /*
+    Volume up.
+     */
+    VOLUME_UP = 0;
+    /*
+    Volume down.
+     */
+    VOLUME_DOWN = 1;
+  }
+  /*
+  Which volume key was pressed.
+   */
+  VolumeKey key = 2;
+  /*
+  Whether the key was pressed or released.
+   */
+  bool released = 3;
+}
+
+
+/*
+Send when the system bar status changes.
+ */
+message InsetEvent {
+  int32 aid = 1;
+  /*
+  The bars that are now visible.
+   */
+  ConfigureInsetsRequest.Bars visible = 2;
+}
+
+
+// Debug events
 
 
 message Event {
@@ -2714,11 +3199,13 @@ message Event {
     NotificationActionEvent notificationAction = 46;
     OverlayScaleEvent overlayScale = 47;
     KeyEvent keyEvent = 48;
-    
+    SurfaceViewFrameCompleteEvent frameComplete = 49;
+    VolumeKeyEvent volume = 50;
+    InsetEvent inset = 51;
+    SurfaceViewSurfaceChangedEvent surfaceChanged = 52;
     
     // Debug events
     
-    ExceptionDebugEvent exception = 1000;
     
     
     

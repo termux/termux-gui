@@ -14,7 +14,7 @@ import java.io.OutputStream
 import java.util.*
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 
-class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager.AppTask>, val logger: V0Proto.ProtoLogger) {
+class HandleGlobal(val main: OutputStream, val tasks: MutableList<ActivityManager.AppTask>, val logger: V0Proto.ProtoLogger) {
     
     fun finishTask(m: FinishTaskRequest) {
         val ret = FinishTaskResponse.newBuilder()
@@ -24,11 +24,13 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
                 t.finishAndRemoveTask()
                 true
             } else {
+                ret.code = Error.TASK_NOT_FOUND
                 false
             }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -41,11 +43,13 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
                 t.moveToFront()
                 true
             } else {
+                ret.code = Error.TASK_NOT_FOUND
                 false
             }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -61,6 +65,7 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -74,11 +79,15 @@ class HandleGlobal(val main: OutputStream, val tasks: LinkedList<ActivityManager
                 val lock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, "com.termux.gui:wake")
                 lock.acquire(0)
                 lock.release()
+                ret.success = true
+            } else {
+                ret.success = false
+                ret.code = Error.INTERNAL_ERROR
             }
-            ret.success = true
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }

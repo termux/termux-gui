@@ -26,6 +26,8 @@ For additional security, the program may check if the connected peer has the sam
 - JSON: For better compatibility with high-level languages, messages can be transferred in JSON.
 - Binary: For Increased throughput and compatibility with low-level languages, a protobuf-based protocol can be used. 
 
+Future features will likely only be implemented in the binary protocol, but the JSON protocol should still suffice for many applications.  
+
 For the JSON Protocol, each message must be preceded by the length of the message (without this length value) as a 4 byte unsigned integer, the same with the return messages from the plugin.
 This integer is send big-endian.
 

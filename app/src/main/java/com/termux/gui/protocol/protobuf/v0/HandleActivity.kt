@@ -11,8 +11,11 @@ import android.os.Build
 import android.util.Log
 import android.util.Rational
 import android.view.View
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.termux.gui.App
 import com.termux.gui.GUIActivity
 import com.termux.gui.R
@@ -86,7 +89,10 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                 if(V0Shared.runOnUIThreadActivityStartedBlocking(a) {
                         it.finish()
                         ret.success = true
-                }) ret.success = false
+                }) {
+                    ret.success = false
+                    ret.code = Error.INVALID_ACTIVITY
+                }
             } else {
                 if (o != null) {
                     wm.removeView(o.root)
@@ -94,11 +100,13 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                     ret.success = true
                 } else {
                     ret.success = false
+                    ret.code = Error.INVALID_ACTIVITY
                 }
             }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         
         ProtoUtils.write(ret, main)
@@ -113,11 +121,13 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                     ret.success = a.moveTaskToBack(true)
                 } else {
                     ret.success = false
+                    ret.code = Error.INVALID_ACTIVITY
                 }
             }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -128,10 +138,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
             if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
                     it.theme = GUIActivity.GUITheme(m.statusBarColor, m.colorPrimary, m.windowBackground, m.textColor, m.colorAccent)
                     ret.success = true
-            }) ret.success = false
+            }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -150,10 +164,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         it.setTaskDescription(ActivityManager.TaskDescription(m.label, BitmapFactory.decodeByteArray(bin, 0, bin.size), prim))
                     }
                     ret.success = true
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -167,10 +185,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         .coerceAtLeast(Rational(100, 239))
                     it.setPictureInPictureParams(PictureInPictureParams.Builder().setAspectRatio(rat).build())
                     ret.success = true
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -191,10 +213,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         }
                         SetInputModeRequest.InputMode.UNRECOGNIZED -> ret.success = false
                     }
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -210,10 +236,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         it.moveTaskToBack(true)
                     }
                     ret.success = true
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -224,10 +254,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
             if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
                     it.data.autopip = m.pip
                     ret.success = true
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -242,10 +276,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         it.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
                     ret.success = true
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -274,10 +312,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         Orientation.userPortrait -> ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
                         else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     }
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -289,6 +331,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
             val o = overlays[m.aid]
             if (o == null) {
                 ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
             } else {
                 Util.runOnUIThreadBlocking {
                     val p = o.root.layoutParams as WindowManager.LayoutParams
@@ -301,6 +344,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -312,14 +356,19 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                     val c: Configuration? = it.resources?.configuration
                     if (c == null) {
                         ret.success = false
+                        ret.code = Error.INTERNAL_ERROR
                     } else {
                         ret.setConfiguration(V0Proto.configMessage(it, c))
                         ret.success = true
                     }
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -329,6 +378,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
         val ret = RequestUnlockResponse.newBuilder()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             ret.success = false
+            ret.code = Error.ANDROID_VERSION_TOO_LOW
             ProtoUtils.write(ret, main)
             return
         }
@@ -340,11 +390,16 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         ret.success = true
                     } else {
                         ret.success = false
+                        ret.code = Error.INTERNAL_ERROR
                     }
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -362,6 +417,7 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         ret.success = true
                     } else {
                         ret.success = false
+                        ret.code = Error.INTERNAL_ERROR
                     }
                 }
             }
@@ -373,12 +429,18 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         ret.success = true
                     } else {
                         ret.success = false
+                        ret.code = Error.INTERNAL_ERROR
                     }
                 }
+            }
+            if (a == null && o == null) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
             }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -389,10 +451,14 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
             if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
                     it.data.backEvent = m.intercept
                     ret.success = true
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -403,13 +469,74 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
             if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
                     it.setSecure(m.secure)
                     ret.success = true
-                }) ret.success = false
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
         } catch (e: Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
-
+    
+    fun interceptVolume(m: InterceptVolumeButtonRequest) {
+        val ret = InterceptVolumeButtonResponse.newBuilder()
+        try {
+            if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
+                    it.data.volumeDown = m.interceptDown
+                    it.data.volumeUp = m.interceptUp
+                    ret.success = true
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+            ret.code = Error.INTERNAL_ERROR
+        }
+        ProtoUtils.write(ret, main)
+    }
+    
+    fun configInsets(m: ConfigureInsetsRequest) {
+        val ret = ConfigureInsetsResponse.newBuilder()
+        try {
+            if (V0Shared.runOnUIThreadActivityStartedBlocking(activities[m.aid]) {
+                    val c = WindowInsetsControllerCompat(it.window, it.window.decorView)
+                    c.systemBarsBehavior = when (m.behaviour) {
+                        ConfigureInsetsRequest.BarBehaviour.BAR_BEHAVIOUR_DEFAULT -> WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+                        ConfigureInsetsRequest.BarBehaviour.BAR_BEHAVIOUR_TRANSIENT -> WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                        else -> WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+                    }
+                    when (m.shown) {
+                        ConfigureInsetsRequest.Bars.BOTH_BARS -> c.show(WindowInsetsCompat.Type.systemBars())
+                        ConfigureInsetsRequest.Bars.NAVIGATION_BAR -> {
+                            c.show(WindowInsetsCompat.Type.navigationBars())
+                            c.hide(WindowInsetsCompat.Type.statusBars())
+                        }
+                        ConfigureInsetsRequest.Bars.STATUS_BAR -> {
+                            c.show(WindowInsetsCompat.Type.statusBars())
+                            c.hide(WindowInsetsCompat.Type.navigationBars())
+                        }
+                        ConfigureInsetsRequest.Bars.NO_BAR -> c.hide(WindowInsetsCompat.Type.systemBars())
+                        else -> {}
+                    }
+                    ret.success = true
+                }) {
+                ret.success = false
+                ret.code = Error.INVALID_ACTIVITY
+            }
+        } catch (e: Exception) {
+            Log.d(this.javaClass.name, "Exception: ", e)
+            ret.success = false
+            ret.code = Error.INTERNAL_ERROR
+        }
+        ProtoUtils.write(ret, main)
+    }
+    
+    
+    
 
 }

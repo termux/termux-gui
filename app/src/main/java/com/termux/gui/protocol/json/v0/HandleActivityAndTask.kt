@@ -23,7 +23,7 @@ import java.util.*
 class HandleActivityAndTask {
     companion object {
         @Suppress("DEPRECATION")
-        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<Int, DataClasses.ActivityState>, tasks: LinkedList<ActivityManager.AppTask>, overlays: MutableMap<Int, DataClasses.Overlay>, app: Context, wm: WindowManager, out: DataOutputStream) : Boolean {
+        fun handleActivityTaskMessage(m: ConnectionHandler.Message, activities: MutableMap<Int, DataClasses.ActivityState>, tasks: MutableList<ActivityManager.AppTask>, overlays: MutableMap<Int, DataClasses.Overlay>, app: Context, wm: WindowManager, out: DataOutputStream) : Boolean {
             when (m.method) {
                 "finishTask" -> {
                     tasks.find { t -> Util.getTaskInfo(tasks, t)?.let { it1 -> Util.getTaskId(it1) } == m.params?.get("tid")?.asInt }?.finishAndRemoveTask()

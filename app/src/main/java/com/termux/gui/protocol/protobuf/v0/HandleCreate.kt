@@ -14,6 +14,7 @@ import com.termux.gui.protocol.protobuf.ProtoUtils
 import com.termux.gui.protocol.protobuf.v0.GUIProt0.*
 import com.termux.gui.protocol.shared.v0.*
 import com.termux.gui.views.HorizontalProgressBar
+import com.termux.gui.views.HardwareBufferSurfaceView
 import com.termux.gui.views.KeyboardImageView
 import com.termux.gui.views.SnappingHorizontalScrollView
 import com.termux.gui.views.SnappingNestedScrollView
@@ -251,6 +252,7 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
                     setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
                 }
 
+                @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
                 override fun onConsoleMessage(msg: ConsoleMessage) {
                     eventQueue.offer(Event.newBuilder().setWebConsoleMessage(WebViewConsoleMessageEvent.newBuilder().setMessage(msg.message()).
                     setV(View.newBuilder().setAid(m.data.aid).setId(it.id))).build())
@@ -267,6 +269,27 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
 
     fun grid(m: CreateGridLayoutRequest) {
         create.createView<GridLayout>(m) {}
+    }
+    
+    fun surfaceView(m: CreateSurfaceViewRequest) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            ProtoUtils.write(CreateSurfaceViewResponse.newBuilder().setId(-1).setCode(Error.ANDROID_VERSION_TOO_LOW), main)
+            return
+        }
+        create.createView<HardwareBufferSurfaceView>(m) {
+            it.surfaceChangedListener = object: HardwareBufferSurfaceView.SurfaceChangedListener {
+                override fun onSurfaceChanged(width: Int, height: Int) {
+                    eventQueue.offer(Event.newBuilder().setSurfaceChanged(SurfaceViewSurfaceChangedEvent.newBuilder().setV(View.newBuilder().setAid(m.data.aid).setId(it.id)).setWidth(width).setHeight(height)).build())
+                }
+            }
+            it.frameCallback = object: HardwareBufferSurfaceView.FrameCallbackListener {
+                override fun onSurfaceFrame(timestamp: Long) {
+                    eventQueue.offer(Event.newBuilder().setFrameComplete(SurfaceViewFrameCompleteEvent.newBuilder().setV(View.newBuilder().setAid(m.data.aid).setId(it.id)).setTimestamp(timestamp)).build())
+                }
+            }
+            it.keyboard = m.keyboard
+            it.setSecure(m.secure)
+        }
     }
     
     

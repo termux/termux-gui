@@ -13,6 +13,7 @@ import android.provider.Settings
 import android.view.*
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.WindowInsetsCompat
 import com.termux.gui.*
 import com.termux.gui.Util.Companion.runOnUIThreadBlocking
 import com.termux.gui.protocol.json.v0.HandleActivityAndTask.Companion.handleActivityTaskMessage
@@ -164,7 +165,7 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
     }
     
     @Suppress("DEPRECATION")
-    private fun handleActivity(m: ConnectionHandler.Message, tasks: LinkedList<ActivityManager.AppTask>, wm: WindowManager,
+    private fun handleActivity(m: ConnectionHandler.Message, tasks: MutableList<ActivityManager.AppTask>, wm: WindowManager,
                                overlays: MutableMap<Int, DataClasses.Overlay>, out: DataOutputStream, app: Context, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
         for (t in tasks) {
             try {
@@ -325,7 +326,15 @@ class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<Connectio
         map["aid"] = a.aid
         eventQueue.offer(ConnectionHandler.Event("back", ConnectionHandler.gson.toJsonTree(map)))
     }
-    
+
+    override fun onVolume(a: GUIActivity, keyCode: Int, down: Boolean) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun onInsetChange(a: GUIActivity, insets: WindowInsetsCompat) {
+        //TODO("Not yet implemented")
+    }
+
     override fun onAirplaneModeChanged(c: Context, i: Intent) {
         eventQueue.offer(ConnectionHandler.Event("airplane", ConnectionHandler.gson.toJsonTree(i.getBooleanExtra("state", false))))
     }

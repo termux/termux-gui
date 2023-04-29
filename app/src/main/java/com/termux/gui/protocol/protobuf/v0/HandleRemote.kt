@@ -30,6 +30,7 @@ class HandleRemote(val main: OutputStream, val remoteviews: MutableMap<Int, Data
         } catch (e: java.lang.Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.rid = -1
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -41,6 +42,7 @@ class HandleRemote(val main: OutputStream, val remoteviews: MutableMap<Int, Data
         } catch (e: java.lang.Exception) {
             Log.d(this.javaClass.name, "Exception: ", e)
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
         }
         ProtoUtils.write(ret, main)
     }
@@ -149,6 +151,7 @@ class HandleRemote(val main: OutputStream, val remoteviews: MutableMap<Int, Data
                 Visibility.gone -> android.view.View.GONE
                 Visibility.UNRECOGNIZED -> {
                     ret.success = false
+                    ret.code = Error.INVALID_ENUM
                     return@handleRemote
                 }
             })
@@ -186,6 +189,7 @@ class HandleRemote(val main: OutputStream, val remoteviews: MutableMap<Int, Data
     fun setWidget(m: SetWidgetLayoutRequest) {
         handler.handleRemote(m.rid, SetWidgetLayoutResponse.newBuilder(), { ret, r ->
             ret.success = false
+            ret.code = Error.INTERNAL_ERROR
             val w = GUIWidget.getIDMappingPrefs(app)?.getInt(m.wid, AppWidgetManager.INVALID_APPWIDGET_ID) ?: AppWidgetManager.INVALID_APPWIDGET_ID
             val p = GUIWidget.getIDMappingPrefs(app)
             if (p != null && w != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -208,6 +212,7 @@ class HandleRemote(val main: OutputStream, val remoteviews: MutableMap<Int, Data
                         AppWidgetManager.getInstance(app).updateAppWidget(w, rvReal)
                     }
                     ret.success = true
+                    ret.code = Error.OK
                 }
             }
         }) {
