@@ -25,8 +25,8 @@ android {
         applicationId "com.termux.gui"
         minSdk 24
         targetSdk 33
-        versionCode 7
-        versionName "0.1.6"
+        versionCode 8
+        versionName "1.0.0"
         externalNativeBuild {
             cmake {
                 arguments ''
