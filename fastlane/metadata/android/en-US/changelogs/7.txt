@@ -1,0 +1,11 @@
+Implemented all Protobuf methods
+Added features for the Protobuf protocol:
+- setting an Activity to fullscreen
+- intercepting volume buttons
+- hardware-accelerated rendering with SurfaceViews
+- setting the secure flag for an Activity, disabling screenshots and blanking it out in the app switcher
+WebView fixes
+Changed the app icon a bit
+Added more demo videos
+Implemented a Bash library
+Implemented a C library (tutorial not yet fully finished)

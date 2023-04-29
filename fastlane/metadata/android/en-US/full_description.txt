@@ -18,11 +18,10 @@ Using the plugin:
 
 <a href="https://github.com/tareksander/termux-gui-package">There are also prepackaged programs you can use.</a>
 
-There are currently only <a href="https://github.com/tareksander/termux-gui-python-bindings">Python bindings</a>, but the <a href="https://github.com/termux/termux-gui/blob/main/Protocol.md">protocol</a> used is fully documented.
+There are currently <a href="https://github.com/tareksander/termux-gui-python-bindings">Python bindings</a>, <a href="https://github.com/tareksander/termux-gui-c-bindings">C bindings</a> and a <a href="https://github.com/tareksander/termux-gui-bash">Bash library</a>, and the <a href="https://github.com/termux/termux-gui/blob/main/Protocol.md">protocol</a> used is fully documented.
 Implementing the protocol only requires the ability to use unix sockets, JSON handling and reading and writing 4 byte big endian integers.
 The python bindings should provide further clarification in case the protocol didn't specify something.
 The python bindings also have a tutorial.
 
-Example code is provided in <a href="https://github.com/termux/termux-gui/tree/main/examples">examples/code</a>, but it's not commented and more used for testing features.
 
 

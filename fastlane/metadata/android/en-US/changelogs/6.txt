@@ -1,0 +1,17 @@
+Fixed: add aid to onUserLeaveHint event
+Added: method to set selected tab for TabLayout
+Added: method to set clickability of views
+Added: option to specify View visibility at creation
+Added: notifications with custom layout
+Added: normal notifications in addition to custom ones
+Added: method to get plugin version code
+Added: method the set text gravity
+Added: WebView
+  - navigating history
+  - set document
+  - load from URI
+  - run Javascript code in the WebView
+Added: GridLayout
+Added: method to set the coordinates of views directly. Useful to use FrameLayout to overlay views
+Added: ability to catch the back button as an event.
+Added: method to move views in the layout hierarchy, e.g. to make it go on top of everything else in FrameLayout or reposition it in GridLayout or LinearLayout. This is added to the layout parameters methods.
