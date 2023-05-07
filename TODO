@@ -36,7 +36,7 @@ Roadmap:
         [?] add the ability to intercept touch events in layouts
         [ ] events for PiP action buttons
         [ ] make the readme nicer
-        [ ] add Javadocs
+        [/] add Javadocs
         [ ] Put all known applications using Termux:GUI in the readme, I made quite a few by now
         [ ] update the f-droid metadata
             [ ] write a changelog
@@ -49,6 +49,10 @@ Roadmap:
             [ ] Stateful widgets
             [ ] prepopulated collections views
             [ ] material you theming
+        [ ] material design components
+            [ ] md2
+            [ ] md3
+            [ ] the material design theme should be the Activity theme
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots
