@@ -10,6 +10,9 @@ import androidx.core.view.GestureDetectorCompat
 import kotlin.math.abs
 
 
+/**
+ * HorizontalScrollView supporting snapping to children.
+ */
 @SuppressLint("ClickableViewAccessibility")
 class SnappingHorizontalScrollView(c: Context) : HorizontalScrollView(c) {
     private val SWIPE_MIN_DISTANCE = 5

@@ -6,7 +6,8 @@ import android.content.ComponentName
 
 /**
  * Makes the Application object globally available enable the handler Threads to register Activity Lifecycle listeners.
- * Also cleans up any leftover Tasks stacks from e.g. a crash and sets the default Exception handler to just print.
+ * Also cleans up any leftover Tasks stacks from e.g. a crash and sets the default Exception handler to just print
+ * (so exceptions in handler threads don't bring down the whole app).
  */
 class App : Application() {
     companion object {

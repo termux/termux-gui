@@ -24,13 +24,18 @@ import java.util.*
 import kotlin.collections.HashSet
 import kotlin.reflect.KClass
 
-
+/**
+ * Code that can be shared for all Protocol implementations.
+ */
 abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     
     
     private var activityID = 0
     protected val rand = Random()
-
+    
+    /*
+    State of the connection, list of active objects.
+     */
     protected val tasks: MutableList<ActivityManager.AppTask> = Collections.synchronizedList(LinkedList())
     protected val hardwareBuffers: MutableMap<Int, HardwareBuffer> = Collections.synchronizedMap(HashMap())
     protected val activities: MutableMap<Int, DataClasses.ActivityState> = Collections.synchronizedMap(HashMap())
@@ -38,7 +43,10 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     protected val remoteviews: MutableMap<Int, DataClasses.RemoteLayoutRepresentation> = HashMap()
     protected val overlays: MutableMap<Int, DataClasses.Overlay> = Collections.synchronizedMap(HashMap())
     protected val notifications: MutableSet<Int> = Collections.synchronizedSet(HashSet())
-    
+
+    /**
+     * Runs a closure with dynamic Intent listeners and cleanup of all Intent listeners and State if the closure returns.
+     */
     protected fun withSystemListenersAndCleanup(am: ActivityManager, wm: WindowManager, clos: () -> Unit) {
         val lifecycleCallbacks = LifecycleListener(this, activities, tasks, am, Util.connectionID())
         App.APP?.registerActivityLifecycleCallbacks(lifecycleCallbacks)
@@ -117,6 +125,10 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         }
     }
     
+    /*
+    Listeners for events the protocol implementations have to provide.
+     */
+    
     abstract fun onActivityCreated(state: DataClasses.ActivityState)
     abstract fun onActivityStarted(state: DataClasses.ActivityState)
     abstract fun onActivityResumed(state: DataClasses.ActivityState)
@@ -134,7 +146,11 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
     abstract fun onNotification(nid: Int)
     abstract fun onNotificationDismissed(nid: Int)
     abstract fun onNotificationAction(nid: Int, action: Int)
-    
+
+    /**
+     * Generate a new Activity id in the connection.
+     * Since each connection has its own id sequence, predictable ids aren't an issue.
+     */
     protected fun generateActivityID(): Int {
         // to make the aid unique even on integer overflow
         while (activities.containsKey(activityID)) {
@@ -147,7 +163,9 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         return aid
     }
 
-
+    /**
+     * Creates a new Activity with the specified configuration.
+     */
     @Suppress("DEPRECATION")
     fun newActivity(ptid: Int?, pip: Boolean, dialog: Boolean, lockscreen: Boolean, canceloutside: Boolean, interceptBackButton: Boolean): GUIActivity? {
         //println("ptid: $ptid")
@@ -240,6 +258,9 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
             }
         }
 
+        /**
+         * Run a closure when the Activity is started, queueing it if it is stopped.
+         */
         fun runOnUIThreadActivityStarted(a: DataClasses.ActivityState, r: (activity: GUIActivity) -> Unit) {
             var e: Exception? = null
             var stopped = false
@@ -268,7 +289,7 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
         }
 
         /**
-         * Returns true if the activity is stopped or not found and the runnable wasn't run
+         * Returns true if the activity is stopped or not found and the runnable wasn't run.
          */
         fun runOnUIThreadActivityStartedBlocking(a: DataClasses.ActivityState?, r: (activity: GUIActivity) -> Unit) : Boolean {
             if (a == null) return true
@@ -302,7 +323,10 @@ abstract class V0Shared(protected val app: Context) : GUIActivity.Listener {
             return Util.generateViewIDRaw(rand, w.usedIds)
         }
          */
-
+        
+        /*
+        Get layouts through reflection, because a good RemoteViews API was only introduced in API 31.
+         */
 
         fun getReflectedLayout(name: String): Pair<Int?,Int?> {
             val layout = R.layout::class.java

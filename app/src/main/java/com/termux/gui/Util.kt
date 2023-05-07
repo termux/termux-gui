@@ -31,9 +31,14 @@ import java.util.concurrent.LinkedBlockingQueue
 import kotlin.collections.HashMap
 import kotlin.math.roundToInt
 
+/**
+ * Static functions that don't fit into one specific existing class.
+ */
 class Util {
     companion object {
-        
+        /**
+         * Gets the task info re removes the Task if it's already closed.
+         */
         fun getTaskInfo(tasks: MutableList<ActivityManager.AppTask>, task: ActivityManager.AppTask): ActivityManager.RecentTaskInfo? {
             try {
                 return task.taskInfo
@@ -42,7 +47,10 @@ class Util {
             }
             return null
         }
-        
+
+        /**
+         * Get the Task ID for all Android versions.
+         */
         @Suppress("DEPRECATION")
         fun getTaskId(info: ActivityManager.RecentTaskInfo): Int {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -51,11 +59,17 @@ class Util {
                 info.id
             }
         }
-        
+
+        /**
+         * Convert DIP to PX.
+         */
         fun toPX(a: Context, dip: Int): Int {
             return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip.toFloat(), a.resources.displayMetrics).roundToInt()
         }
-        
+
+        /**
+         * Send a JSON message with a file descriptor attached.
+         */
         fun sendMessageFd(w: DataOutputStream, ret: String, s: LocalSocket, fd: FileDescriptor) {
             s.setFileDescriptorsForSend(arrayOf(fd))
             val bytes = ret.toByteArray(StandardCharsets.UTF_8)
@@ -64,13 +78,20 @@ class Util {
             w.flush()
         }
 
+
+        /**
+         * Send a JSON message,
+         */
         fun sendMessage(w: DataOutputStream, ret: String) {
             val bytes = ret.toByteArray(StandardCharsets.UTF_8)
             w.writeInt(bytes.size)
             w.write(bytes)
             w.flush()
         }
-        
+
+        /**
+         * Handle the optional View creation parameters for JSON.
+         */
         fun createViewOptionalsJSON(v: View, params: HashMap<String, JsonElement>?) {
             if (params != null) {
                 val visibility = params["visibility"]
@@ -85,16 +106,25 @@ class Util {
             }
         }
 
+        /**
+         * Generate a View ID for an Activity.
+         */
         fun generateViewID(rand: Random, a: GUIActivity): Int {
             return generateViewIDRaw(rand, a.usedIds)
         }
 
+        /**
+         * Generate a new id and add it to the set.
+         */
         fun generateViewIDRaw(rand: Random, usedIds: MutableSet<Int>): Int {
             val id = generateIndex(rand, usedIds)
             usedIds.add(id)
             return id
         }
 
+        /**
+         * Generate an tndex that's not in the set.
+         */
         fun generateIndex(rand: Random, used: Set<Int>): Int {
             var id = rand.nextInt(Integer.MAX_VALUE)
             while (used.contains(id)) {
@@ -103,6 +133,9 @@ class Util {
             return id
         }
 
+        /**
+         * Run a Runnable on the UI thread and block for it, re-throwing any Exceptions if needed.
+         */
         fun runOnUIThreadBlocking(r: Runnable) {
             var e: Exception? = null
             runBlocking(Dispatchers.Main) {
@@ -119,7 +152,10 @@ class Util {
                 throw ex
             }
         }
-        
+
+        /**
+         * Adds a View to an Activity, handling theming and default layouting.
+         */
         fun setViewActivity(a: GUIActivity, v: View, parent: Int?) {
             val t = a.theme
             if (t != null) {
@@ -148,7 +184,10 @@ class Util {
                 g?.addView(v)
             }
         }
-        
+
+        /**
+         * Set the click listener for a View.
+         */
         fun setClickListener(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 if (v is CompoundButton) {
@@ -171,6 +210,9 @@ class Util {
             }
         }
 
+        /**
+         * Set the long click listener for a View.
+         */
         fun setLongClickListener(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 val map = HashMap<String, Any>()
@@ -183,6 +225,9 @@ class Util {
             }
         }
 
+        /**
+         * Set the focus change listener for a View.
+         */
         fun setFocusChangeListener(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
                 val map = HashMap<String, Any>()
@@ -196,7 +241,10 @@ class Util {
                 v.onFocusChangeListener = null
             }
         }
-        
+
+        /**
+         * Set the checked listener for a View.
+         */
         fun setCheckedListener(v: RadioGroup, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             val args = HashMap<String, Any>()
             args["aid"] = aid
@@ -207,6 +255,9 @@ class Util {
             }
         }
 
+        /**
+         * Set the item listener for a Spinner.
+         */
         fun setSpinnerListener(v: Spinner, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             v.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
                 val args = HashMap<String, Any?>()
@@ -225,6 +276,9 @@ class Util {
             }
         }
 
+        /**
+         * Set the refresh listener for a SwipeRefreshLayout.
+         */
         fun setRefreshListener(v: SwipeRefreshLayout, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             val args = HashMap<String, Any>()
             args["aid"] = aid
@@ -236,7 +290,10 @@ class Util {
                 }
             }
         }
-        
+
+        /**
+         * Set the tab listener for a TabLayout.
+         */
         fun setTabSelectedListener(v: TabLayout, aid: Int, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             val args = HashMap<String, Any>()
             args["aid"] = aid
@@ -252,7 +309,11 @@ class Util {
                 override fun onTabReselected(tab: TabLayout.Tab?) {}
             })
         }
-        
+
+
+        /**
+         * Maps MotionEvent actions to JSON names.
+         */
         private val TOUCH_EVENT_MAP: Map<Int, String>
         init {
             val map = HashMap<Int,String>()
@@ -264,7 +325,10 @@ class Util {
             map[MotionEvent.ACTION_MOVE] = "move"
             TOUCH_EVENT_MAP = Collections.unmodifiableMap(map)
         }
-        
+
+        /**
+         * Set the text watcher for a View.
+         */
         @SuppressLint("DiscouragedPrivateApi")
         fun setTextWatcher(v: TextView, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
@@ -283,9 +347,11 @@ class Util {
                 })
             } else (TextView::class.java.getDeclaredField("mListeners").get(v) as ArrayList<*>).clear()
         }
-        
-        
-        
+
+
+        /**
+         * Set the touch listener for a View.
+         */
         @SuppressLint("ClickableViewAccessibility")
         fun setTouchListenerJSON(v: View, aid: Int, enabled: Boolean, eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) {
             if (enabled) {
@@ -343,7 +409,10 @@ class Util {
                 v.setOnTouchListener(null)
             }
         }
-        
+
+        /**
+         * Destroy a WebView, making sure everything is freed.
+         */
         fun destroyWebView(v: WebView) {
             v.clearCache(false)
             v.clearHistory()
@@ -351,7 +420,10 @@ class Util {
             v.removeAllViews()
             v.destroy()
         }
-        
+
+        /**
+         * Remove a View subtree and remove all IDs.
+         */
         fun removeViewRecursive(v: View?, usedIds: MutableSet<Int>) {
             if (v != null) {
                 if (v is ViewGroup && v !is WebView) {
@@ -369,11 +441,17 @@ class Util {
                 usedIds.remove(v.id)
             }
         }
-        
+
+        /**
+         * Get the connection id (the current thread id).
+         */
         fun connectionID(): Long {
             return Thread.currentThread().id
         }
-        
+
+        /**
+         * Get the old Activity id format from the connection id and the activity id.
+         */
         fun activityIDData(aid: Int): String {
             return connectionID().toString()+"-"+aid.toString()
         }

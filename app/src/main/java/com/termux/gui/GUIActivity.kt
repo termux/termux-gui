@@ -21,7 +21,9 @@ import java.util.*
  */
 open class GUIActivity : AppCompatActivity() {
 
-
+    /**
+     * Listeners that the protocol implementations can listen to.
+     */
     interface Listener {
         fun onConfigurationChanged(a: GUIActivity, newConfig: Configuration)
         fun onPictureInPictureModeChanged(a: GUIActivity, isInPictureInPictureMode: Boolean)
@@ -39,10 +41,18 @@ open class GUIActivity : AppCompatActivity() {
         public const val INTERCEPT_KEY = "intercept"
         public const val PIP_KEY = "pip"
     }
+
+    /**
+     * The IDs used in the Activity.
+     */
     val usedIds: TreeSet<Int> = TreeSet()
     init {
         usedIds.add(R.id.root)
     }
+
+    /**
+     * The theme.
+     */
     var theme: GUITheme? = null
         set(t) {
             field = t
@@ -51,11 +61,18 @@ open class GUIActivity : AppCompatActivity() {
                 window.statusBarColor = t.statusBarColor
             }
         }
-    
+
+    /**
+     * Further Activity data that can be saved and restored
+     */
     data class ActivityData(var autopip: Boolean = false, var backEvent: Boolean = false, var secure: Boolean = false, var volumeUp: Boolean = false, var volumeDown: Boolean = false) : Serializable
     var data = ActivityData()
     
     data class GUITheme(val statusBarColor: Int, val colorPrimary: Int, var windowBackground: Int, val textColor: Int, val colorAccent: Int) : Serializable
+
+    /**
+     * The listener for Activity events.
+     */
     var listener: Listener? = null
 
     @Suppress("DEPRECATION")
@@ -86,7 +103,10 @@ open class GUIActivity : AppCompatActivity() {
             v.onApplyWindowInsets(insets)
         }
     }
-    
+
+    /**
+     * Set the secure bit, in the Data object and set teh window flag for it.
+     */
     fun setSecure(secure: Boolean) {
         data.secure = secure
         var bit = 0
@@ -95,8 +115,15 @@ open class GUIActivity : AppCompatActivity() {
         }
         window.setFlags(bit, WindowManager.LayoutParams.FLAG_SECURE)
     }
-    
+
+    /**
+     * Return the Activity id.
+     */
     val aid: Int? get() {return intent.dataString?.split('-')?.get(1)?.toInt()}
+
+    /**
+     * Return the connection id.
+     */
     val connection: Long? get() {return intent.dataString?.split('-')?.get(0)?.toLong()}
 
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
@@ -123,7 +150,10 @@ open class GUIActivity : AppCompatActivity() {
         }
         return super.onKeyUp(keyCode, event)
     }
-    
+
+    /**
+     * Converts a configuration object to JSON.
+     */
     fun configToJson(conf: Configuration?): JsonElement? {
         val c: Configuration = conf ?: resources.configuration ?: return ConnectionHandler.gson.toJsonTree(emptyArray<Any>())
         val m = HashMap<String, Any>()
@@ -180,7 +210,10 @@ open class GUIActivity : AppCompatActivity() {
     fun <T> findViewReimplemented(id: Int) : T? {
         return findViewById(id)
     }
-    
+
+    /**
+     * Destroy all WebViews in the Activity
+     */
     private fun destroyWebViews(v: View?) {
         if (v == null) return
         if (v is WebView) {

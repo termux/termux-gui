@@ -7,7 +7,9 @@ import androidx.security.crypto.MasterKey
 import java.io.IOException
 import java.security.GeneralSecurityException
 
-
+/**
+ * Settings for the app.
+ */
 class Settings private constructor() {
     
     companion object {
@@ -21,14 +23,32 @@ class Settings private constructor() {
         private const val JAVASCRIPT_DEFAULT = false
         val instance = Settings()
     }
-    
-    
-    
+
+
+    /**
+     * Timeout for the service in seconds if no clients are connected.
+     */
     var timeout: Int = TIMEOUT_DEFAULT
+
+    /**
+     * Whether the service should be immediately stopped in the background if no clients are connected.
+     */
     var background: Boolean = BACKGROUND_DEFAULT
+
+    /**
+     * The log level for the logger.
+     */
     var loglevel: Int = LOGLEVEL_DEFAULT
+
+    /**
+     * Whether JavaScript should be enabled in WebViews by default.
+     */
     var javascript: Boolean = JAVASCRIPT_DEFAULT
-    
+
+
+    /**
+     * Get the encrypted shared preferences for the settings.
+     */
     @Suppress("DEPRECATION")
     private fun settingsPreferences(c: Context): EncryptedSharedPreferences? {
         return try {
@@ -45,8 +65,10 @@ class Settings private constructor() {
             null
         }
     }
-    
-    
+
+    /**
+     * Load the settings from the shared preferences.
+     */
     fun load(c: Context) {
         val prefs = settingsPreferences(c)
         if (prefs != null) {
@@ -56,8 +78,10 @@ class Settings private constructor() {
             javascript = prefs.getBoolean(JAVASCRIPT_KEY, JAVASCRIPT_DEFAULT)
         }
     }
-    
-    
+
+    /**
+     * Save the settings to the shared preferences.
+     */
     @SuppressLint("ApplySharedPref")
     fun save(c: Context) {
         val prefs = settingsPreferences(c)

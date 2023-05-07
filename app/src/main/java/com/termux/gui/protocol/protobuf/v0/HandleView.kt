@@ -740,7 +740,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
     
     fun surfaceConfig(m: SurfaceViewConfigRequest) {
         handler.handleView(m.v, SurfaceViewSetBufferResponse.newBuilder(), { ret, v: HardwareBufferSurfaceView, _, _ ->
-            synchronized(HardwareBufferSurfaceView.RENDER_LOCK) {
+            synchronized(v.RENDER_LOCK) {
                 v.config.backgroundColor = m.backgroundColor
                 when (m.xMismatch) {
                     SurfaceViewConfigRequest.OnDimensionMismatch.STICK_TOPLEFT -> v.config.x = HardwareBufferSurfaceView.Config.OnDimensionMismatch.STICK_TOPLEFT

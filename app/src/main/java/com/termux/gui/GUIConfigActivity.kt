@@ -23,18 +23,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+/**
+ * Activity for editing the settings.
+ */
 class GUIConfigActivity : AppCompatActivity() {
     
     private var b: ActivityGuiConfigBinding? = null
     
     companion object {
-        private const val OPEN_FILE = 1
     }
     
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+        // fill layout with current settings
         b = ActivityGuiConfigBinding.inflate(layoutInflater)
         b!!.serviceTimeout.setText(Settings.instance.timeout.toString(), TextView.BufferType.EDITABLE)
         b!!.serviceBackground.isChecked = Settings.instance.background
@@ -47,11 +49,13 @@ class GUIConfigActivity : AppCompatActivity() {
                 }
             }
         }
+        // only show the channel UI if channels are supported by the Android version.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             b!!.channelDelete.visibility = View.GONE
             b!!.channelDeleteDesc.visibility = View.GONE
         }
         
+        // Can open a document to store the logcat in.
         val open = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri: Uri? ->
             if (uri != null) {
                 val app = applicationContext
@@ -82,6 +86,7 @@ class GUIConfigActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        // try saving the settings on pause
         try {
             Settings.instance.timeout = Integer.parseInt(b!!.serviceTimeout.text.toString())
         } catch(_: NumberFormatException) {}

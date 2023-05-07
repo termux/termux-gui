@@ -25,6 +25,11 @@ import java.io.DataOutputStream
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
+/**
+ * Implementation of the JSON protocol.
+ * Sorry for this mess.
+ * New features will likely only be in the protobuf protocol.
+ */
 class V0Json(app: Context, private val eventQueue: LinkedBlockingQueue<ConnectionHandler.Event>) : V0Shared(app) {
     
 

@@ -5,28 +5,39 @@
 
 
 Roadmap:
-    - 0.1.6:
-    [ ] Put all known applications using Termux:GUI in the readme, I made quite a few by now
-    [x] protobuf documentation
-    [ ] update the f-droid metadata
-        [ ] write a changelog
-        [ ] update description and readme
     - 1.0.0: !!! start semantic versioning from here !!!
         [ ] switch to the new plugin system, deprecate shared uid
         [ ] add more logging
+        [ ] HardwareBuffer features
+            [ ] frame sync: signal when the Buffer is finished being written and can be used by the plugin,
+                and signal when the plugin finished using a buffer and the client can use it again
+                [ ] eventfd
+                [ ] EGL_ANDROID_native_fence_sync
+            [ ] EGL_ANDROID_presentation_time
+            [ ] EGL_ANDROID_get_frame_timestamps
+            [ ] EGL_ANDROID_front_buffer_auto_refresh
+            [ ] rendering into the front buffer of the surface
+            [ ] set a buffer with damage, implement with EGL_KHR_swap_buffers_with_damage and EGL_KHR_partial_update
+            [ ] better framerate handling: https://developer.android.com/guide/topics/media/frame-rate
         [ ] C library 1.0
             [ ] add error codes from protobuf to C library
+            [ ] add finishActivity
             [/] finish tutorial
         [ ] button in settings to save a logcat dump to a file
         [?] RelativeLayout
-            [ ] good ConstraintLayout support accomplishes the same
+            good ConstraintLayout support accomplishes the same
         [ ] ConstraintLayout
         [ ] scroll events
+        [ ] make overlay Activities better
+            [ ] Option to specify a margin on the sides where grabbing & moving is handled by the plugin
+            [ ] Option to handle pinch scaling in the plugin
+                [ ] including a multiplier of how the pinching is translated to scaling
         [ ] Dialogs in DialogFragments, so they stay in the Activity they're started in and don't close on leaving
         [?] add the ability to intercept touch events in layouts
         [ ] events for PiP action buttons
         [ ] make the readme nicer
         [ ] add Javadocs
+        [ ] Put all known applications using Termux:GUI in the readme, I made quite a few by now
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots

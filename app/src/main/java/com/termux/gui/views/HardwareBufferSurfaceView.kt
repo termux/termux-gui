@@ -25,14 +25,35 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.Charset
 
+/**
+ * A SurfaceView that can draw a shared HardwareBuffer to the Surface.
+ */
 class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.FrameCallback {
-    
+
+    /**
+     * Configuration of the View.
+     */
     class Config {
+        /**
+         * Behaviour on buffer dimension mismatch with the Surface.
+         */
         enum class OnDimensionMismatch {
-            CENTER_AXIS, STICK_TOPLEFT
+            /**
+             * Center the buffer on the axis.
+             */
+            CENTER_AXIS,
+
+            /**
+             * Attach the buffer at the top/left side of the Surface.
+             */
+            STICK_TOPLEFT
         }
         var x: OnDimensionMismatch = OnDimensionMismatch.CENTER_AXIS
         var y: OnDimensionMismatch = OnDimensionMismatch.CENTER_AXIS
+
+        /**
+         * Color usedin case the buffer is too small.
+         */
         var backgroundColor: Int = 0xff000000.toInt()
     }
     
@@ -44,7 +65,10 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
     interface FrameCallbackListener {
         fun onSurfaceFrame(timestamp: Long)
     }
-    
+
+    /**
+     * EGLImageKHR wrapper.
+     */
     @Suppress("EqualsOrHashCode")
     class EGLImageKHR(handle: Long) : EGLObjectHandle(handle) {
         companion object {
@@ -94,9 +118,12 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
             }
         }
         
-        val RENDER_LOCK = Object()
     }
-    
+
+    /**
+     * Lock for modifying the View, so the main Thread and the connection Thread can draw.
+     */
+    val RENDER_LOCK = Object()
     
     var keyboard: Boolean = false
     var surfaceChangedListener: SurfaceChangedListener? = null
@@ -209,7 +236,6 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
                         Config.OnDimensionMismatch.CENTER_AXIS -> {
                             val marginPX = (bWidth.toFloat() - surfaceWidth.toFloat())/2f
                             val marginNDC = marginPX * (2f / surfaceWidth.toFloat())
-                            //println("bwidth: $bWidth, surfaceWidth: $surfaceWidth, marginPX: $marginPX, marginNDC: $marginNDC")
                             vertexArray[0] -= marginNDC
                             vertexArray[2] -= marginNDC
                             vertexArray[4] += marginNDC
@@ -223,12 +249,6 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
                                 vertexArray[6] *= ratio
                             }
                             if (ratio > 1f) {
-                                /*
-                                buffer = 400
-                                surface = 300
-                                400/300 = 1.333
-                                1 / 1.333 = 0.75
-                                 */
                                 // scale the texture coordinates down to show a  slice of the buffer
                                 textureArray[4] = 1f / ratio
                                 textureArray[6] = 1f / ratio

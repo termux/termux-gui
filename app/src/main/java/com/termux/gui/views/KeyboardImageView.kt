@@ -5,6 +5,9 @@ import android.view.inputmethod.*
 import androidx.appcompat.widget.AppCompatImageView
 import com.termux.gui.protocol.shared.v0.RawInputConnection
 
+/**
+ * ImageView with InputConnection to get KeyEvents.
+ */
 class KeyboardImageView(c: Context) : AppCompatImageView(c) {
     
     

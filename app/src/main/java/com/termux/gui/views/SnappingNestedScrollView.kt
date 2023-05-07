@@ -9,7 +9,9 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.widget.NestedScrollView
 import kotlin.math.abs
 
-
+/**
+ * NestedScrollView supporting snapping to children.
+ */
 @SuppressLint("ClickableViewAccessibility")
 class SnappingNestedScrollView(c: Context) : NestedScrollView(c) {
     private val SWIPE_MIN_DISTANCE = 5

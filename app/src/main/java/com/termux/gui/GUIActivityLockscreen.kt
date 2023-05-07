@@ -4,6 +4,9 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 
+/**
+ * Activity that can be shown on the lockscreen.
+ */
 class GUIActivityLockscreen : GUIActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT < 27) {

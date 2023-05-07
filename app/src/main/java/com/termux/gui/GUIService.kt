@@ -25,14 +25,26 @@ class GUIService : Service() {
         const val NOTIFICATION_ID = 100
         val requests = ConcurrentLinkedQueue<ConnectionRequest>()
     }
-    
-    
-    
-    
+
+
+    /**
+     * A list of Runnables that are run on service destroy, because the handler threads waiting for IO can't be easily killed otherwise.
+     */
     val destroywatch: MutableSet<Runnable> = Collections.synchronizedSet(HashSet())
-    private val pool = ThreadPoolExecutor(30, 30, 1, TimeUnit.SECONDS, ArrayBlockingQueue(10))
+
+    /**
+     * The pool of connection threads
+     */
+    private val pool = ThreadPoolExecutor(10, 30, 1, TimeUnit.SECONDS, ArrayBlockingQueue(10))
+
+    /**
+     * Listens for requests and passes them to the thread pool.
+     */
     private val requestWatcher: Thread
-    
+
+    /**
+     * Constructs the foreground service notification
+     */
     private val notification: Notification
         get() {
             NotificationManagerCompat.from(this).createNotificationChannel(
@@ -91,7 +103,9 @@ class GUIService : Service() {
 
     init {
         requestWatcher = Thread (fun() {
+            // the number of consecutive milliseconds with no active requests
             var noRequests = 0
+            // the number of active connection on the last loop run
             var lastConnections = 0
             while (!Thread.currentThread().isInterrupted) {
                 val r = requests.poll()
@@ -99,13 +113,16 @@ class GUIService : Service() {
                 if (count != 0) {
                     noRequests = 0
                 }
+                // update the connection count in the notification
                 if (lastConnections != pool.activeCount) {
                     lastConnections = count
                     startForeground(NOTIFICATION_ID, notification)
                 }
+                // automatically close the service if no clients are connected and the setting is active
                 if (Settings.instance.background && count == 0) {
                     stopForeground(true)
                 }
+                // submit a new connection to the worker pool
                 if (r != null) {
                     Logger.log(1, TAG, "new connection")
                     noRequests = 0
@@ -115,6 +132,7 @@ class GUIService : Service() {
                 } else {
                     try {
                         Thread.sleep(1)
+                        // stop if timeout without active connections or new requests is exceeded
                         if (Settings.instance.timeout >= 0) {
                             noRequests++
                             if (noRequests > Settings.instance.timeout * 1000 && count == 0) {

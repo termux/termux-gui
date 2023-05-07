@@ -6,6 +6,9 @@ import android.content.Intent
 import com.google.gson.JsonObject
 import java.util.*
 
+/**
+ * Receives PendingIntents from notifications and widgets and dispatches them to the correct thread.
+ */
 class PendingIntentReceiver : BroadcastReceiver() {
     companion object {
         const val THREAD = "thread"

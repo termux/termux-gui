@@ -58,6 +58,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, priva
         val main = LocalSocket(LocalSocket.SOCKET_STREAM)
         val event = LocalSocket(LocalSocket.SOCKET_STREAM)
         
+        // Runnable to stop the connection if the service is closed
         val watch = Runnable {
             main.shutdownInput()
             main.shutdownOutput()
@@ -72,10 +73,13 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, priva
                 event.use {
                     main.connect(LocalSocketAddress(request.mainSocket))
                     event.connect(LocalSocketAddress(request.eventSocket))
-                    // check if it is a termux program that wants to connect to the plugin
+                    // check if it is a Termux program that wants to connect to the plugin
                     if (main.peerCredentials.uid != app.applicationInfo.uid || event.peerCredentials.uid != app.applicationInfo.uid) {
                         return
                     }
+                    
+                    
+                    // protocol handshake
                     
                     var protocol = -1
                     while (protocol == -1) {
@@ -86,24 +90,29 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, priva
                     val ptype = protocol and 0x0f
                     Logger.log(1, TAG, "requested type: $ptype")
                     Logger.log(1, TAG, "requested version: $pversion")
+                    // unknown protocol, return an error
                     if (ptype != 1 && ptype != 0) {
                         main.outputStream.write(1)
                         return
                     }
+                    // unknown JSON protocol version
                     if (ptype == 1 && pversion != 0) {
                         main.outputStream.write(1)
                         return
                     }
+                    // unknown Protobuf protocol version
                     if (ptype == 0 && pversion != 0) {
                         main.outputStream.write(1)
                         return
                     }
+                    // everything OK, requested type and version is valid
                     main.outputStream.write(0)
                     main.outputStream.flush()
 
                     Logger.log(1, TAG, "connection accepted")
 
                     eventWorker = Thread {
+                        // Take events from the queue corresponding to the protocol and send them to the client
                         when (ptype) {
                             0 -> {
                                 while (! Thread.currentThread().isInterrupted) {
@@ -124,6 +133,7 @@ class ConnectionHandler(private val request: GUIService.ConnectionRequest, priva
                     }
                     eventWorker!!.start()
                     Logger.log(1, TAG, "listening")
+                    // dispatch the connection to the correct protocol implementation.
                     when (ptype) {
                         0 -> {
                             when (pversion) {

@@ -3,14 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="com.termux">
     
-    <!-- According to google surveys EGL2.0 should be available on all devices anyways -->
+    <!-- According to google surveys EGL2.0 should be available on all devices anyways, but you should declare it in the manifest. -->
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="false" />
 
+    <!-- Used to keep the app from getting killed even when no clients how Activities in the foreground. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Used for overlay Activities. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Used to turn on the display. -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Used on Android 13 for the foreground service notification. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
     <application
