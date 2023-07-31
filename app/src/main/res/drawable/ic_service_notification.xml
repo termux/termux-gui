@@ -1,45 +1,26 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <!--
-        Updated notification icon compliant with system icons guidelines
-        https://material.io/design/iconography/system-icons.html
-    -->
-
-    <group>
-        <clip-path
-            android:pathData="M0,0h24v24h-24z"/>
-
-        <path
-            android:pathData="M5,4H2L8,12L2,20H5L11,12L5,4Z"
-            android:fillColor="#ffffff"/>
-
-        <path
-            android:pathData="M13,18H22V20H13V18Z"
-            android:fillColor="#ffffff"/>
-        <group>
-            <path
-                android:strokeColor="#FFFFFF"
-                android:strokeWidth="2"
-                android:pathData="M13,5
-                          h8
-                          v8
-                          h-8
-                          v-9
-                          "
-                />
-            <path
-                android:fillColor="#FF0000"
-                android:pathData="M20,4
-                          h2
-                          v2
-                          h-2
-                          v-2
-                          "
-                />
-        </group>
-    </group>
-    
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+  <group android:scaleX="1.5"
+      android:scaleY="1.5"
+      android:translateX="-128"
+      android:translateY="-128">
+    <path
+        android:pathData="M156.5,142.5H113.5L198.5,255.5V256.5L113.5,369.5H156.5L241.5,256.5V255.5L156.5,142.5Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M398.5,341.5H270.5V369.5H398.5V341.5Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="m342.5,142.5h-72v157h128v-101h-28v73h-72v-101h44z"
+        android:fillColor="#999999"/>
+    <path
+        android:pathData="M377.5,163.5m-21,0a21,21 0,1 1,42 0a21,21 0,1 1,-42 0"
+        android:strokeLineJoin="round"
+        android:strokeWidth="1.44"
+        android:fillColor="#ff2a2a"
+        android:strokeColor="#00000000"/>
+  </group>
 </vector>
