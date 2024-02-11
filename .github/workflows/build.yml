@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Build
       run: ./gradlew assembleDebugMinify
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: termux-gui-debug.apk
         path: ./app/build/outputs/apk/debugMinify/app-debugMinify.apk
