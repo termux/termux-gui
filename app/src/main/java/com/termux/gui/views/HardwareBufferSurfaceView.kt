@@ -125,7 +125,7 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
      */
     val RENDER_LOCK = Object()
     
-    var keyboard: Boolean = false
+    private var keyListener: OnKeyListener? = null
     var surfaceChangedListener: SurfaceChangedListener? = null
     var frameCallback: FrameCallbackListener? = null
     var config: Config = Config()
@@ -610,15 +610,17 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
     
     
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection {
-        return if (keyboard) {
+        val l = keyListener
+        return if (l != null) {
             outAttrs.inputType = EditorInfo.TYPE_NULL
-            RawInputConnection()
+            RawInputConnection(l)
         } else {
             super.onCreateInputConnection(outAttrs)
         }
     }
     
     override fun setOnKeyListener(l: OnKeyListener?) {
+        keyListener = l
         super.setOnKeyListener(l)
     }
 

@@ -8,7 +8,10 @@ Roadmap:
     - 1.0.0: !!! start semantic versioning from here !!!
         [ ] switch to the new plugin system, deprecate shared uid
         [ ] add more logging
+        [ ] Option for notifications to stay after the connection is closed
+            [ ] but ongoing notifications will be set to not ongoing, to allow dismissal
         [ ] HardwareBuffer features
+            [ ] render thread
             [ ] frame sync: signal when the Buffer is finished being written and can be used by the plugin,
                 and signal when the plugin finished using a buffer and the client can use it again
                 [ ] eventfd
@@ -21,7 +24,7 @@ Roadmap:
             [ ] better framerate handling: https://developer.android.com/guide/topics/media/frame-rate
         [ ] C library 1.0
             [ ] add error codes from protobuf to C library
-            [ ] add finishActivity
+            [x] add finishActivity
             [/] finish tutorial
         [ ] button in settings to save a logcat dump to a file
         [?] RelativeLayout
@@ -43,21 +46,30 @@ Roadmap:
             [ ] more screenshots
             [ ] update description and readme
     - 1.1.0
+        [ ] JSON protocol version 2 based on Protocol Buffers JSON encoding
         [ ] add methods for android 12 widget api
             [ ] settable margins and paddings
             [ ] better dynamic RemoteViews
             [ ] Stateful widgets
             [ ] prepopulated collections views
             [ ] material you theming
+        [ ] Quick settings tiles?
+            [ ] Have to be defined as services in the manifest, icon can probably be changed by a content provider or otherwise dynamically
+            [ ] Programs could set quick settings tiles and then listen for events on them
         [ ] material design components
             [ ] md2
             [ ] md3
             [ ] the material design theme should be the Activity theme
+                [ ] set md colors to activity colors
+                [ ] material you support
+            [ ] add a style enum to the create info message, error if a particular style isn't supported for a component.
+                Also allows more future versions of MD or custom styles, and can re-use the existing methods.
+                    [ ] not for RemoteViews, these only support the plain Views
         [ ] update the f-droid metadata
             [ ] write a changelog
             [ ] more screenshots
             [ ] update description and readme
-    - 1.2.0:
+    - 2.0.0:
         [ ] remove shared uid
         [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .
             The id gets looked up once and cached in a Hashmap (delete when view is removed).

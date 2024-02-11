@@ -100,24 +100,17 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
         }
     }
 
+    
+    
     fun image(m: CreateImageViewRequest) {
         if (m.keyboard) {
             create.createView<KeyboardImageView>(m) {
-                it.setOnKeyListener { _, _, event ->
-                    val b = KeyEvent.newBuilder()
-                    b.codePoint = event.unicodeChar
-                    var mod = 0
-                    if (event.isShiftPressed) mod = KeyEvent.Modifier.MOD_LSHIFT_VALUE or KeyEvent.Modifier.MOD_RSHIFT_VALUE
-                    if (event.isCtrlPressed) mod = mod or KeyEvent.Modifier.MOD_LCTRL_VALUE or KeyEvent.Modifier.MOD_RCTRL_VALUE
-                    if (event.isAltPressed) mod = mod or KeyEvent.Modifier.MOD_ALT_VALUE
-                    if (event.isFunctionPressed) mod = mod or KeyEvent.Modifier.MOD_FN_VALUE
-                    if (event.isCapsLockOn) mod = mod or KeyEvent.Modifier.MOD_CAPS_LOCK_VALUE
-                    if (event.isNumLockOn) mod = mod or KeyEvent.Modifier.MOD_NUM_LOCK_VALUE
-                    b.modifiers = mod
-                    b.code = event.keyCode
-                    eventQueue.offer(Event.newBuilder().setKeyEvent(b).build())
-                    true
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    it.focusable = android.view.View.FOCUSABLE
+                } else {
+                    it.isFocusable = true
                 }
+                it.setOnKeyListener(ProtoUtils.keyListener(eventQueue, View.newBuilder().setAid(m.data.aid).setId(it.id).build()))
             }
         } else {
             create.createView<ImageView>(m) {}
@@ -287,7 +280,10 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
                     eventQueue.offer(Event.newBuilder().setFrameComplete(SurfaceViewFrameCompleteEvent.newBuilder().setV(View.newBuilder().setAid(m.data.aid).setId(it.id)).setTimestamp(timestamp)).build())
                 }
             }
-            it.keyboard = m.keyboard
+            if (m.keyboard) {
+                it.focusable = android.view.View.FOCUSABLE
+                it.setOnKeyListener(ProtoUtils.keyListener(eventQueue, View.newBuilder().setAid(m.data.aid).setId(it.id).build()))
+            }
             it.setSecure(m.secure)
         }
     }

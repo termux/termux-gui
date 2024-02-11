@@ -722,7 +722,6 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
     
     
     fun setSurfaceBuffer(m: SurfaceViewSetBufferRequest) {
-        //println("setbuffer")
         // setBuffer is synchronized with the rendering and so can be called from the connection thread
         handler.handleViewConnectionThread(m.v, SurfaceViewSetBufferResponse.newBuilder(), { ret, v: HardwareBufferSurfaceView, _, _ ->
             val b = hardwareBuffers[m.buffer]

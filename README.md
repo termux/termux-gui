@@ -16,7 +16,7 @@ Releases on f-droid will be provided as soon as possible. ~~When there is a rele
 [See this comment for links to install Termux and its plugins from Github](https://github.com/tareksander/termux-gui-python-bindings/issues/1#issuecomment-983797979).  
 
 [Protocol.md](Protocol.md) describes the Protocol used and the available functions you can use.  
-[GUIProt0.proto](app/src/main/proto/GUIProt0.proto) contains teh documentation of the newer Protobuf-based protocol with more features.  
+[GUIProt0.proto](app/src/main/proto/GUIProt0.proto) contains the documentation of the newer Protobuf-based protocol with more features.  
 If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  
 
 ### Features

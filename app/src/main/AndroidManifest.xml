@@ -66,7 +66,9 @@
             android:name=".GUIActivity"
             android:configChanges="uiMode|locale|screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
-            android:supportsPictureInPicture="true" />
+            android:supportsPictureInPicture="true"
+            android:alwaysRetainTaskState="true"
+            android:persistableMode="persistNever"/>
         <activity
             android:name=".GUIActivityLockscreen"
             android:configChanges="uiMode|locale|screenSize|smallestScreenSize|screenLayout|orientation"
@@ -75,6 +77,8 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true"
             android:supportsPictureInPicture="true"
+            android:alwaysRetainTaskState="true"
+            android:persistableMode="persistNever"
             tools:targetApi="o_mr1" />
         <activity
             android:name=".GUIActivityDialog"
