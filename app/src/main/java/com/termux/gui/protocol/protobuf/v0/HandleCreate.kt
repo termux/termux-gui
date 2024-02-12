@@ -110,6 +110,7 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
                 } else {
                     it.isFocusable = true
                 }
+                it.isFocusableInTouchMode = true
                 it.setOnKeyListener(ProtoUtils.keyListener(eventQueue, View.newBuilder().setAid(m.data.aid).setId(it.id).build()))
             }
         } else {
@@ -282,6 +283,7 @@ class HandleCreate(val v: V0Proto, val main: OutputStream, val activities: Mutab
             }
             if (m.keyboard) {
                 it.focusable = android.view.View.FOCUSABLE
+                it.isFocusableInTouchMode = true
                 it.setOnKeyListener(ProtoUtils.keyListener(eventQueue, View.newBuilder().setAid(m.data.aid).setId(it.id).build()))
             }
             it.setSecure(m.secure)
