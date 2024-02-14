@@ -1,3 +1,7 @@
+import java.nio.file.Paths
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
@@ -17,6 +21,53 @@ protobuf {
             }
         }
     }
+}
+
+class UpdateProtoAction implements Action {
+    String projectDir
+    String sdkDirectory
+
+    UpdateProtoAction(String projectDir, String sdkDirectory) {
+        this.projectDir = projectDir
+        this.sdkDirectory = sdkDirectory
+    }
+    
+    
+    @Override
+    void execute(Object o) {
+        File protoFile = Paths.get(projectDir, "src", "main", "proto", "GUIProt0.proto").toFile()
+        File keyEventFile = Paths.get(sdkDirectory, "sources", "android-33", "android", "view", "KeyEvent.java").toFile()
+        String[] lines = keyEventFile.readLines()
+        String codes = lines.findAll {
+            it.stripLeading().startsWith("public static final int KEYCODE_")
+        }.collect {
+            String middle = it.split("int")[1].stripLeading().split(";")[0]
+            middle.split("=").join(" = ") + ";"
+        }.join("\n")
+        String proto = protoFile.getText("UTF-8")
+        Pattern keyEnum = Pattern.compile("enum KeyCode \\{([^{)]*)}")
+        Matcher m = keyEnum.matcher(proto)
+        if (m.find()) {
+            if (m.group(1).strip() == codes) {
+                println("KeyCode enum up-to-date")
+            } else {
+                protoFile.write(m.replaceFirst("enum KeyCode {\n" + codes + "\n}"))
+                println("KeyCode enum updated")
+            }
+        } else {
+            throw RuntimeException("Could not find KeyCode enum in GUIProt0.proto")
+        }
+    }
+}
+
+tasks.register("gen-proto-keycodes") {
+    actions.push(new UpdateProtoAction(projectDir.path, android.sdkDirectory.path))
+}
+
+
+
+tasks.preBuild {
+    dependsOn("gen-proto-keycodes")
 }
 
 android {
