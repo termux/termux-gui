@@ -26,17 +26,19 @@ protobuf {
 class UpdateProtoAction implements Action {
     String projectDir
     String sdkDirectory
+    String compileSdk;
 
-    UpdateProtoAction(String projectDir, String sdkDirectory) {
+    UpdateProtoAction(String projectDir, String sdkDirectory, String compileSdk) {
         this.projectDir = projectDir
         this.sdkDirectory = sdkDirectory
+        this.compileSdk = compileSdk
     }
     
     
     @Override
     void execute(Object o) {
         File protoFile = Paths.get(projectDir, "src", "main", "proto", "GUIProt0.proto").toFile()
-        File keyEventFile = Paths.get(sdkDirectory, "sources", "android-33", "android", "view", "KeyEvent.java").toFile()
+        File keyEventFile = Paths.get(sdkDirectory, "sources", "android-"+ compileSdk, "android", "view", "KeyEvent.java").toFile()
         String[] lines = keyEventFile.readLines()
         String codes = lines.findAll {
             it.stripLeading().startsWith("public static final int KEYCODE_")
@@ -61,13 +63,15 @@ class UpdateProtoAction implements Action {
 }
 
 tasks.register("gen-proto-keycodes") {
-    actions.push(new UpdateProtoAction(projectDir.path, android.sdkDirectory.path))
+    actions.push(new UpdateProtoAction(projectDir.path, android.sdkDirectory.path, android.compileSdk.toString()))
 }
 
-
+tasks.register("ensure-sources", Exec.class) {
+    it.commandLine(Paths.get(android.sdkDirectory.path, "cmdline-tools", "latest", "bin", "sdkmanager").toString(), "sources;android-" + android.compileSdk.toString())
+}
 
 tasks.preBuild {
-    dependsOn("gen-proto-keycodes")
+    dependsOn("gen-proto-keycodes", "ensure-sources")
 }
 
 android {
