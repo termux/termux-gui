@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.TypedValue
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnKeyListener
@@ -218,6 +219,11 @@ class ProtoUtils {
         fun keyListener(eventQueue: LinkedBlockingQueue<GUIProt0.Event>, v: GUIProt0.View): OnKeyListener {
             return OnKeyListener { _, _, event ->
                 val b = GUIProt0.KeyEvent.newBuilder()
+                b.flags = event.flags
+                when (event.action) {
+                    KeyEvent.ACTION_DOWN -> b.action = GUIProt0.KeyAction.ACTION_DOWN
+                    KeyEvent.ACTION_UP -> b.action = GUIProt0.KeyAction.ACTION_UP
+                }
                 b.v = v
                 b.codePoint = event.unicodeChar
                 var mod = 0
