@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.hardware.HardwareBuffer
+import android.net.LocalSocket;
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -721,12 +722,21 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
     }
     
     
-    fun setSurfaceBuffer(m: SurfaceViewSetBufferRequest) {
+    fun setSurfaceBuffer(m: SurfaceViewSetBufferRequest, sock: LocalSocket) {
         // setBuffer is synchronized with the rendering and so can be called from the connection thread
         handler.handleViewConnectionThread(m.v, SurfaceViewSetBufferResponse.newBuilder(), { ret, v: HardwareBufferSurfaceView, _, _ ->
             val b = hardwareBuffers[m.buffer]
             if (b != null) {
-                v.setBuffer(b)
+                v.setBuffer(b, if (m.sync) {
+                    ProtoUtils.recvFDs(sock).run {
+                        assert(size == 1) {
+                            Log.e(this.javaClass.name, "fence fd should exactly be 1");
+                        }
+                        first()
+                    }
+                } else {
+                    null
+                })
                 ret.success = true
             } else {
                 ret.success = false

@@ -48,6 +48,13 @@ class ProtoUtils {
             w.flush()
         }
 
+        fun recvFDs(s: LocalSocket): Array<FileDescriptor> {
+            return s.run {
+                inputStream.read()
+                getAncillaryFileDescriptors()
+            }
+        }
+
         fun unitToTypedValue(u: GUIProt0.Size.Unit): Int {
             return when (u) {
                 GUIProt0.Size.Unit.dp -> TypedValue.COMPLEX_UNIT_DIP

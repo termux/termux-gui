@@ -24,6 +24,7 @@ import java.lang.RuntimeException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.Charset
+import java.io.FileDescriptor
 
 /**
  * A SurfaceView that can draw a shared HardwareBuffer to the Surface.
@@ -97,6 +98,30 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
         }
 
     }
+
+    class EGLSyncKHR(handle: Long) : EGLObjectHandle(handle) {
+        companion object {
+            private external fun nativeSync(fence: FileDescriptor): Int
+
+            fun sync(fence: FileDescriptor) {
+                assert(fence.valid()) {
+                    println("invalid fence")
+                }
+                nativeSync(fence).also {
+                    assert(it == 0) {
+                        println("nativeSync error: ${it.toString(16)}")
+                    }
+                }
+            }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other is EGLSyncKHR && other.nativeHandle == nativeHandle) {
+                return true
+            }
+            return false
+        }
+    }
     
     
     companion object {
@@ -148,7 +173,7 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
     
     
     
-    fun setBuffer(b: HardwareBuffer) {
+    fun setBuffer(b: HardwareBuffer, fence: FileDescriptor?) {
         synchronized(RENDER_LOCK) {
             buffer = b
             if (disp != EGL14.EGL_NO_DISPLAY) {
@@ -156,7 +181,11 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
                     EGLImageKHR.eglDestroyImageKHR(disp, bufferImage)
                     bufferImage = EGLImageKHR.EGL_NO_IMAGE_KHR
                 }
-                render()
+                render {
+                    fence?.let {
+                        EGLSyncKHR.sync(it)
+                    }
+                }
             }
         }
     }
@@ -182,7 +211,7 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
     
     
     
-    private fun render() {
+    private fun render(sync: (() -> Unit)? = null) {
         synchronized(RENDER_LOCK) {
             initEGL()
             if (buffer != null && surface != null) {
@@ -282,6 +311,7 @@ class HardwareBufferSurfaceView(c: Context) : SurfaceView(c), Choreographer.Fram
                     }
                 }
                 
+                sync?.invoke()
                 
                 val fPos = posBuffer.asFloatBuffer()
                 val fTex = tposBuffer.asFloatBuffer()

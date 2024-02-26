@@ -2531,6 +2531,7 @@ gets centered horizontally in the SurfaceView, while the upper edge of the buffe
 message SurfaceViewSetBufferRequest {
   View v = 1;
   int32 buffer = 2;
+  bool sync = 3;
 }
 
 message SurfaceViewSetBufferResponse {
