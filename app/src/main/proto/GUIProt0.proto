@@ -1858,7 +1858,8 @@ message SelectItemResponse {
 }
 
 /*
-Set whether a View should be clickable.
+Set whether a View should be clickable. Click events have to be enabled separately.
+Conversely, setting a View to emit click events automatically marks it a clickable.
  */
 message SetClickableRequest {
   View v = 1;
