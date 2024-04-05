@@ -523,6 +523,11 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         ConfigureInsetsRequest.Bars.NO_BAR -> c.hide(WindowInsetsCompat.Type.systemBars())
                         else -> {}
                     }
+                    if (m.underCutout) {
+                        c.hide(WindowInsetsCompat.Type.displayCutout())
+                    } else {
+                        c.show(WindowInsetsCompat.Type.displayCutout())
+                    }
                     ret.success = true
                 }) {
                 ret.success = false

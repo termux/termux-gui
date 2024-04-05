@@ -847,6 +847,10 @@ message ConfigureInsetsRequest {
   How the bars should behave to user input.
    */
   BarBehaviour behaviour = 3;
+  /*
+  Whether the Activity will be shown under display cutouts. This is a no-op before API level 30.
+   */
+  bool underCutout = 4;
   
 }
 
