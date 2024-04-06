@@ -11,9 +11,9 @@ import android.os.Build
 import android.util.Log
 import android.util.Rational
 import android.view.View
-import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.termux.gui.App
@@ -524,9 +524,24 @@ class HandleActivity(val v: V0Proto, val main: OutputStream, val activities: Mut
                         else -> {}
                     }
                     if (m.underCutout) {
-                        c.hide(WindowInsetsCompat.Type.displayCutout())
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            it.window.addFlags(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            it.window.addFlags(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS)
+                        }
                     } else {
-                        c.show(WindowInsetsCompat.Type.displayCutout())
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            it.window.clearFlags(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            it.window.clearFlags(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS)
+                        }
+                    }
+                    if (m.shown == ConfigureInsetsRequest.Bars.BOTH_BARS && ! m.underCutout) {
+                        WindowCompat.setDecorFitsSystemWindows(it.window, true)
+                    } else {
+                        WindowCompat.setDecorFitsSystemWindows(it.window, false)
                     }
                     ret.success = true
                 }) {
