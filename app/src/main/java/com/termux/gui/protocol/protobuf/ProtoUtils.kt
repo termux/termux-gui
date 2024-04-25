@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.TypedValue
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -215,6 +216,17 @@ class ProtoUtils {
             map[MotionEvent.ACTION_MOVE] = GUIProt0.TouchEvent.Action.move
             TOUCH_EVENT_MAP = Collections.unmodifiableMap(map)
         }
+
+        private val MOUSE_EVENT_MAP: Map<Int, GUIProt0.MouseEvent.Action>
+        init {
+            val map = HashMap<Int, GUIProt0.MouseEvent.Action>()
+            map[MotionEvent.ACTION_HOVER_ENTER] = GUIProt0.MouseEvent.Action.hoverEnter
+            map[MotionEvent.ACTION_HOVER_EXIT] = GUIProt0.MouseEvent.Action.hoverExit
+            map[MotionEvent.ACTION_HOVER_MOVE] = GUIProt0.MouseEvent.Action.hoverMove
+            map[MotionEvent.ACTION_BUTTON_PRESS] = GUIProt0.MouseEvent.Action.buttonPress
+            map[MotionEvent.ACTION_BUTTON_RELEASE] = GUIProt0.MouseEvent.Action.buttonRelease
+            MOUSE_EVENT_MAP = Collections.unmodifiableMap(map)
+        }
         
         fun keyListener(eventQueue: LinkedBlockingQueue<GUIProt0.Event>, v: GUIProt0.View): OnKeyListener {
             return OnKeyListener { _, _, event ->
@@ -309,8 +321,24 @@ class ProtoUtils {
                     }
                     true
                 }
+                v.setOnGenericMotionListener { _, event ->
+                    if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+                        val mapped = MOUSE_EVENT_MAP[event.actionMasked]
+                        if (mapped != null) {
+                            val c = GUIProt0.MouseEvent.newBuilder()
+                            c.setV(GUIProt0.View.newBuilder().setAid(aid).setId(v.id))
+                            c.action = mapped
+                            c.button = event.actionButton
+                            c.pointer = GUIProt0.MouseEvent.Pointer.newBuilder().setX(event.x.roundToInt()).setY(event.y.roundToInt()).build()
+                            c.time = event.eventTime
+                            eventQueue.offer(GUIProt0.Event.newBuilder().setMouse(c).build())
+                        }
+                    }
+                    true
+                }
             } else {
                 v.setOnTouchListener(null)
+                v.setOnGenericMotionListener(null)
             }
         }
         
