@@ -34,8 +34,8 @@ This integer is send big-endian.
 ## Protocol negotiation
 
 The first byte send specifies the desired protocol type and version:  
-- The 4 most significant bits specify the protocol type: 0 indicates the binary protocol, 1 indicates JSON.
-- The 4 least significant bits specify the protocol version. Currently unused, should be set to 0 for compatibility with future versions.
+- The 4 least significant bits specify the protocol type: 0 indicates the binary protocol, 1 indicates JSON.
+- The 4 most significant bits specify the protocol version. Currently unused, should be set to 0 for compatibility with future versions.
 
 The plugin then responds with a single byte unsigned integer. A response of 0 means the plugin supports the desired protocol type and version. Any other value denotes an error and the plugin will close the connection.
 
