@@ -82,11 +82,6 @@ android {
         targetSdk 33
         versionCode 8
         versionName "1.0.0"
-        externalNativeBuild {
-            cmake {
-                arguments ''
-            }
-        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
