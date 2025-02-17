@@ -10,6 +10,7 @@
 
     <!-- Used to keep the app from getting killed even when no clients how Activities in the foreground. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <!-- Used for overlay Activities. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- Used to turn on the display. -->
@@ -93,6 +94,7 @@
 
         <service
             android:name=".GUIService"
+            android:foregroundServiceType="specialUse"
             android:enabled="true"
             android:exported="false" />
 
