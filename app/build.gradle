@@ -10,7 +10,7 @@ plugins {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.19.4'
+        artifact = 'com.google.protobuf:protoc:4.29.3'
     }
     generateProtoTasks {
         all().forEach {
@@ -120,6 +120,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
     buildFeatures {
         viewBinding true
