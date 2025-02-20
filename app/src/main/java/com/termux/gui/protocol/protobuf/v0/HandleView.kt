@@ -283,6 +283,7 @@ class HandleView(val v: V0Proto, val main: OutputStream, val activities: Mutable
     fun backgroundColor(m: SetBackgroundColorRequest) {
         handler.handleView(m.v, SetBackgroundColorResponse.newBuilder(), { ret, v: android.view.View, _, _ ->
             v.backgroundTintList = ColorStateList.valueOf(m.color)
+            // TODO doesn't work for FrameLayout, and check others, too
             ret.success = true
         }, {
             it.success = false

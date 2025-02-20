@@ -39,7 +39,15 @@ class SnappingNestedScrollView(c: Context) : NestedScrollView(c) {
     }
 
     internal inner class MyGestureDetector : SimpleOnGestureListener() {
-        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        override fun onFling(
+            e1: MotionEvent?,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            if (e1 == null) {
+                return false
+            }
             try {
                 val layout = getChildAt(0) as? ViewGroup ?: return false
                 if (e1.y - e2.y > SWIPE_MIN_DISTANCE && abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
