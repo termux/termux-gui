@@ -14,8 +14,7 @@ See the [installation notes](https://github.com/termux/termux-app#installation) 
 
 If you want to use overlay windows or be able to open windows from the background, go into the app settings for Termux:GUI, open the advanced section and enable "Display over other apps".  
 
-[Protocol.md](Protocol.md) describes the Protocol used and the available functions you can use.  
-[GUIProt0.proto](app/src/main/proto/GUIProt0.proto) contains the documentation of the newer Protobuf-based protocol with more features.  
+For developing applications using the plugin, see [Developing.md](./Developing.md).
 
 ### Features
 
