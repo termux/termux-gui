@@ -61,17 +61,18 @@ class UpdateProtoAction implements Action {
         }
     }
 }
+if (System.getenv("GITHUB_ACTIONS") == null) {
+    tasks.register("gen-proto-keycodes") {
+        actions.push(new UpdateProtoAction(projectDir.path, android.sdkDirectory.path, android.compileSdk.toString()))
+    }
 
-tasks.register("gen-proto-keycodes") {
-    actions.push(new UpdateProtoAction(projectDir.path, android.sdkDirectory.path, android.compileSdk.toString()))
-}
+    tasks.register("ensure-sources", Exec.class) {
+        it.commandLine(Paths.get(android.sdkDirectory.path, "cmdline-tools", "latest", "bin", "sdkmanager").toString(), "sources;android-" + android.compileSdk.toString())
+    }
 
-tasks.register("ensure-sources", Exec.class) {
-    it.commandLine(Paths.get(android.sdkDirectory.path, "cmdline-tools", "latest", "bin", "sdkmanager").toString(), "sources;android-" + android.compileSdk.toString())
-}
-
-tasks.preBuild {
-    dependsOn("gen-proto-keycodes", "ensure-sources")
+    tasks.preBuild {
+        dependsOn("gen-proto-keycodes", "ensure-sources")
+    }
 }
 
 android {
