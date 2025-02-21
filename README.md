@@ -1,7 +1,7 @@
 # Termux:GUI
 
-<img src="https://img.shields.io/github/v/release/termux/termux-gui?include_prereleases"/>
-<img src="https://img.shields.io/f-droid/v/com.termux.gui"/>
+[<img src="https://img.shields.io/github/v/release/termux/termux-gui?include_prereleases"/>](https://github.com/termux/termux-gui/releases)
+[<img src="https://img.shields.io/f-droid/v/com.termux.gui"/>](https://f-droid.org/de/packages/com.termux.gui/)
 
 
 This is a plugin for [Termux](https://github.com/termux/termux-app) that enables command line programs to use the native android GUI.  
@@ -10,10 +10,7 @@ In the examples directory you can find demo videos, sample code is provided in t
 
 [There are also prepackaged programs you can use](https://github.com/tareksander/termux-gui-package).
 
-[Installation notes](https://github.com/termux/termux-app#installation)  
-There is currently no release on f-droid, so the only method to install this plugin is to use the apk from the [releases](https://github.com/termux/termux-gui/releases) and the [Termux apk from Github Actions](https://github.com/termux/termux-app/actions).  
-Releases on f-droid will be provided as soon as possible. ~~When there is a release, the f-droid badge at the top will show a version number.~~ The f-droid builds currently don't work, Github builds are the only option for now.  
-[See this comment for links to install Termux and its plugins from Github](https://github.com/tareksander/termux-gui-python-bindings/issues/1#issuecomment-983797979).  
+See the [installation notes](https://github.com/termux/termux-app#installation) on general instructions to install Termux plugins.
 
 [Protocol.md](Protocol.md) describes the Protocol used and the available functions you can use.  
 [GUIProt0.proto](app/src/main/proto/GUIProt0.proto) contains the documentation of the newer Protobuf-based protocol with more features.  
