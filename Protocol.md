@@ -5,11 +5,8 @@ If you don't want to implement a custom library for using the protocol, you can 
 
 Due to Android limitations, methods that return a value fail when the Activity isn't visible and up to 100 methods that don't return a value will be queued up to run when the Activity is visible again.  
 For the binary protocol no methods will be queued, since they all return a value.  
-If onCreate gets called again for an Activity (because it was destroyed and re-created by the system (this shouldn't happen often because the Activities ignore all configuration changes), all state in that Activity like registered listeners, and views is lost.  
-You should always store state you care about yourself, because Android reserves the right to terminate an Activity or a process at any time, and rebuild the layout when you see that a second onCreate is triggered for one of your activities.  
 
 ## Connection
-
 
 The program has to open 2 AF_UNIX SO_STREAM server sockets in the abstract linux namespace and listen to new connections.  
 One of these Sockets is used as the main communication socket with the plugin, the other one is used to send asynchronous event data to the program, eg. click events.  

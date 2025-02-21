@@ -6,7 +6,6 @@
 
 Roadmap:
     - 1.0.0: !!! start semantic versioning from here !!!
-        [ ] switch to the new plugin system, deprecate shared uid
         [ ] add more logging
         [ ] Option for notifications to stay after the connection is closed
             [ ] but ongoing notifications will be set to not ongoing, to allow dismissal
@@ -29,8 +28,14 @@ Roadmap:
         [ ] button in settings to save a logcat dump to a file
         [?] RelativeLayout
             good ConstraintLayout support accomplishes the same
-        [ ] ConstraintLayout
+        [ ? ConstraintLayout
         [ ] scroll events
+        [ ] add methods for android 12 widget api
+            [ ] settable margins and paddings
+            [ ] better dynamic RemoteViews
+            [ ] Stateful widgets
+            [ ] prepopulated collections views
+            [ ] material you theming
         [ ] make overlay Activities better
             [ ] Option to specify a margin on the sides where grabbing & moving is handled by the plugin
             [ ] Option to handle pinch scaling in the plugin
@@ -47,12 +52,6 @@ Roadmap:
             [ ] update description and readme
     - 1.1.0
         [ ] JSON protocol version 2 based on Protocol Buffers JSON encoding
-        [ ] add methods for android 12 widget api
-            [ ] settable margins and paddings
-            [ ] better dynamic RemoteViews
-            [ ] Stateful widgets
-            [ ] prepopulated collections views
-            [ ] material you theming
         [ ] Quick settings tiles?
             [ ] Have to be defined as services in the manifest, icon can probably be changed by a content provider or otherwise dynamically
             [ ] Programs could set quick settings tiles and then listen for events on them
@@ -70,7 +69,6 @@ Roadmap:
             [ ] more screenshots
             [ ] update description and readme
     - 2.0.0:
-        [ ] remove shared uid
         [ ] additional argument to methods that require a View: subtree: id of a ViewGroup that contains the View as a child, grandchild, ... .
             The id gets looked up once and cached in a Hashmap (delete when view is removed).
             Future methods with the same subtree argument can then use the cached value and don't have to traverse the whole View tree.
