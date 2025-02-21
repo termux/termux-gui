@@ -37,4 +37,6 @@
 
 # for protocol buffers
 -keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+-dontwarn javax.annotation.concurrent.GuardedBy
+-dontwarn com.google.errorprone.annotations.Immutable
 
