@@ -175,8 +175,19 @@ class HandleRemote {
                 }
                 return true
             }
-            
-            
+
+            if ("setRemoteViewRunCommand" == m.method) {
+                val rid = m.params?.get("rid")?.asInt
+                val rv  = remoteviews[rid]
+                val path = m.params?.get("path")?.asString
+                val args = m.params?.get("args")?.asString?.split(",")?.map { it.trim() }?.toTypedArray()
+                val background = m.params?.get("background")?.asBoolean
+                if (rid != null && rv != null && path != null && args != null && background != null) {
+                    rv.runCommand = DataClasses.RemoteLayoutRepresentation.RunCommand(path, args, background)
+                }
+                return true
+            }
+
             if ("setWidgetLayout" == m.method) {
                 val rid = m.params?.get("rid")?.asInt
                 val wid = m.params?.get("wid")?.asString
@@ -200,6 +211,15 @@ class HandleRemote {
                         if (id != null) {
                             val rvReal = RemoteViews(app.packageName, id)
                             rvReal.addView(R.id.root_real, rv.root)
+                            rv.runCommand?.let {
+                                val i = Intent()
+                                i.setClassName("com.termux", "com.termux.app.RunCommandService")
+                                i.setAction("com.termux.RUN_COMMAND")
+                                i.putExtra("com.termux.RUN_COMMAND_PATH", it.path)
+                                i.putExtra("com.termux.RUN_COMMAND_ARGUMENTS", it.args)
+                                i.putExtra("com.termux.RUN_COMMAND_BACKGROUND", it.background)
+                                rvReal.setOnClickPendingIntent(R.id.root_real, PendingIntent.getService(app, 0, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+                            }
                             Util.runOnUIThreadBlocking {
                                 AppWidgetManager.getInstance(app).updateAppWidget(w, rvReal)
                             }

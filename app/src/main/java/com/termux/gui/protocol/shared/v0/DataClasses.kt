@@ -45,7 +45,15 @@ class DataClasses {
      */
     data class RemoteLayoutRepresentation(
         var root: RemoteViews?,
-        val viewCount: HashMap<KClass<*>, Int> = HashMap())
+        val viewCount: HashMap<KClass<*>, Int> = HashMap(),
+        var runCommand: RunCommand? = null
+    ) {
+        data class RunCommand(
+            val path: String,
+            val args: Array<String>,
+            val background: Boolean,
+        )
+    }
 
     /**
      * State of an Activity
