@@ -2879,6 +2879,34 @@ message TouchEvent {
   uint64 time = 5;
 }
 
+message MouseEvent {
+  View v = 1;
+  /*
+  See the Android documentation for MotionEvent for info.
+   */
+  enum Action {
+    hoverEnter = 0;
+    hoverExit = 1;
+    hoverMove = 2;
+    buttonPress = 3;
+    buttonRelease = 4;
+  }
+  Action action = 2;
+  int32 button = 3;
+  message Pointer {
+    /*
+    Coordinates inside the View.
+     */
+    int32 x = 1;
+    int32 y = 2;
+  }
+  Pointer pointer = 4;
+  /*
+  A timestamp for when the event happened, use for gestures and the like.
+   */
+  uint64 time = 5;
+}
+
 /*
 Send when a SwipeRefreshLayout is refreshed. Automatically enabled.
  */
@@ -3172,7 +3200,8 @@ message Event {
     ClickEvent click = 1;
     TouchEvent touch = 2;
     TextEvent text = 3;
-    
+    MouseEvent mouse = 4;
+
     
     CreateEvent create = 16;
     StartEvent start = 17;
